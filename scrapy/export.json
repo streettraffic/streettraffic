@@ -1,0 +1,200 @@
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Atholl-Oaklands Rd. (M31) to Corlett Dr. (M30)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Corlett Dr. (M30) to Grayston Dr. (M40)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Grayston Dr. (M40) to Marlboro Rylaan (M60)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Marlboro Rylaan (M60) to Woodmead Dr. (R55)", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Woodmead Dr. (R55) to Buccleuch I/C (N1 & N3)", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Buccleuch I/C (N1 & N3) to Woodmead Dr. (R55)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Woodmead Dr. (R55) to Marlboro Rylaan (M60)", "Length": "3.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Marlboro Rylaan (M60) to Grayston Dr. (M40)", "Length": "2.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Grayston Dr. (M40) to Corlett Dr. (M30)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Corlett Dr. (M30) to Atholl-Oaklands Rd. (M31)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Atholl-Oaklands Rd. (M31) to Glenhove Rd. (M20)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Glenhove Rd. (M20) to 11th Ave. (R25)", "Length": "1.0 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From 11th Ave. (R25) to Riviera Rd. (M16)", "Length": "1.1 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Riviera Rd. (M16) to Houghton Dr. (M31) & 1st Ave.", "Length": "0.3 km", "Travel Time": "1 min", "Avg Speed": "73 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Houghton Dr. (M31) & 1st Ave. to Oxford Rd. (M9)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "78 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Oxford Rd. (M9) to St. Andrews Rd. & Jan Smuts Ave. (M27)", "Length": "1.1 km", "Travel Time": "1 min", "Avg Speed": "75 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From St. Andrews Rd. & Jan Smuts Ave. (M27) to Empire Rd. (R55)", "Length": "0.5 km", "Travel Time": "1 min", "Avg Speed": "67 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Empire Rd. (R55) to Smit St. (M10)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "67 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Smit St. (M10) to Carr St.", "Length": "0.5 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Carr St. to M2", "Length": "1.0 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From M1 to Sauer St.", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "54 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Sauer St. to Rissik St. & Eloff St. (M9)", "Length": "0.6 km", "Travel Time": "1 min", "Avg Speed": "60 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Rissik St. & Eloff St. (M9) to Heidelberg Rd. (M31)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "62 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Heidelberg Rd. (M31) to Maritzburg St.", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "68 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Maritzburg St. to Vickers Rd. (M19)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Vickers Rd. (M19) to Chilvers St.", "Length": "1.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Chilvers St. to Cleveland Rd. (M33)", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "78 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Cleveland Rd. (M33) to Geldenhuys I/C (N12 & N3)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "78 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Geldenhuys I/C (N12 & N3) to Refinery Rd. ", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "71 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Refinery Rd. to Geldenhuys I/C (N12 & N3)", "Length": "2.3 km", "Travel Time": "3 min", "Avg Speed": "57 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Geldenhuys I/C (N12 & N3) to Cleveland Rd. (M33)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Cleveland Rd. (M33) to Chilvers St.", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Chilvers St. to Vickers Rd. (M19)", "Length": "1.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Vickers Rd. (M19) to Maritzburg St.", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Maritzburg St. to Heidelberg Rd. (M31)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "73 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Heidelberg Rd. (M31) to Rissik St. & Eloff St. (M9)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "61 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Rissik St. & Eloff St. (M9) to Sauer St.", "Length": "0.6 km", "Travel Time": "1 min", "Avg Speed": "56 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Sauer St. to M1", "Length": "0.9 km", "Travel Time": "1 min", "Avg Speed": "60 km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N12 to Rand Show Rd. (M79)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rand Show Rd. (M79) to Soweto Hwy. (M70)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "71 km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Soweto Hwy. (M70) to N17", "Length": "1.5 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N17 to Maraisburg Rd. (R24)", "Length": "3.8 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Maraisburg Rd. (R24) to Gordon Rd.", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Gordon Rd. to 14th Ave. (M8)", "Length": "2.2 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From 14th Ave. (M8) to Beyers Naude Dr. (M5)", "Length": "4.9 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Beyers Naude Dr. (M5) to Malibongwe Dr. (R512)", "Length": "5.2 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Malibongwe Dr. (R512) to William Nicol Dr. (R511)", "Length": "5.5 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From William Nicol Dr. (R511) to Rivonia Rd. (M9)", "Length": "4.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rivonia Rd. (M9) to Buccleuch I/C (M1 & N3)", "Length": "3.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Buccleuch I/C (M1 & N3) to Allandale Rd. (M39)", "Length": "4.5 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Allandale Rd. (M39) to New Road (M71)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From New Road (M71) to Olifantsfontein Rd. (R562)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Olifantsfontein Rd. (R562) to Samrand Ave. (M36)", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Samrand Ave. (M36) to Old Johannesburg Rd. (R101)", "Length": "2.8 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Old Johannesburg Rd. (R101) to N14", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N14 to John Vorster Dr. (M19)", "Length": "3.7 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From John Vorster Dr. (M19) to Botha Ave. (M18)", "Length": "2.9 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Botha Ave. (M18) to R21", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From R21 to Rigel Ave. (R50)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rigel Ave. (R50) to Garsfontein Rd (M30)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Garsfontein Rd (M30) to Atterbury Rd. (M11)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Atterbury Rd. (M11) to Lynnwood Rd. (M6)", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Lynnwood Rd. (M6) to N4", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N4 to Lynnwood Rd. (M6)", "Length": "3.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Lynnwood Rd. (M6) to Atterbury Rd. (M11)", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Atterbury Rd. (M11) to Garsfontein Rd. (M30)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Garsfontein Rd (M30) to Rigel Ave. (R50)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rigel Ave. (R50) to R21", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From R21 to Botha Ave. (M18)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Botha Ave. (M18) to John Vorster Dr. (M19)", "Length": "2.9 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From John Vorster Dr. (M19) to N14", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N14 to Old Johannesburg Rd. (R101)", "Length": "3.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Old Johannesburg Rd. (R101) to Samrand Ave. (M36)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Samrand Ave. (M36) to Olifantsfontein Rd. (R562)", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Olifantsfontein Rd. (R562) to New Road (M71)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From New Road (M71) to Allandale Rd. (M39)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Allandale Rd. (M39) to Buccleuch I/C (M1 & N3)", "Length": "3.4 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Buccleuch I/C (M1 & N3) to Rivonia Rd. (M9)", "Length": "4.7 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rivonia Rd. (M9) to William Nicol Dr. (R511)", "Length": "4.9 km", "Travel Time": "4 min", "Avg Speed": "78 km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From William Nicol Dr. (R511) to Malibongwe Dr. (R512)", "Length": "5.5 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Malibongwe Dr. (R512) to Beyers Naude Dr. (M5)", "Length": "5.2 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Beyers Naude Dr. (M5) to 14th Ave. (M8)", "Length": "4.9 km", "Travel Time": "4 min", "Avg Speed": "78 km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From 14th Ave. (M8) to Gordon Rd.", "Length": "2.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Gordon Rd. to Maraisburg Rd. (R24)", "Length": "2.4 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Maraisburg Rd. (R24) to N17", "Length": "3.8 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N17 to Soweto Hwy. (M70)", "Length": "1.5 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Soweto Hwy. (M70) to Rand Show Rd. (M79)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "73 km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rand Show Rd. (M79) to N12", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Northbound", "Segment": "From N12 (Moroka Bypass) to Golden Hwy", "Length": "3.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Northbound", "Segment": "From Golden Hwy. (R553) to N12", "Length": "2.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Southbound", "Segment": "From N12 to Golden Hwy (R553)", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Southbound", "Segment": "From Golden Hwy (R553) to N12 (Moroka Bypass)", "Length": "3.3 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From N1 to M1 ", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From M1 to Xavier St. (M17)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Xavier St. (M17) to Kliprivier Rd. (M7)", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "79 km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Kliprivier Rd. (M7) to Comaro St. (M11)", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "71 km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Comaro St. (M11) to R59 ", "Length": "3.6 km", "Travel Time": "3 min", "Avg Speed": "76 km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From R59 to Voortrekker Rd. (M31)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Voortrekker Rd. (M31) to N17 & N3 ", "Length": "1.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From R24 to Edenvale Rd. (M37)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "74 km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Atholl-Oaklands Rd. (M31) to Corlett Dr. (M30)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Corlett Dr. (M30) to Grayston Dr. (M40)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Grayston Dr. (M40) to Marlboro Rylaan (M60)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Marlboro Rylaan (M60) to Woodmead Dr. (R55)", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Northbound", "Segment": "From Woodmead Dr. (R55) to Buccleuch I/C (N1 & N3)", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Buccleuch I/C (N1 & N3) to Woodmead Dr. (R55)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Woodmead Dr. (R55) to Marlboro Rylaan (M60)", "Length": "3.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Marlboro Rylaan (M60) to Grayston Dr. (M40)", "Length": "2.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Grayston Dr. (M40) to Corlett Dr. (M30)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Corlett Dr. (M30) to Atholl-Oaklands Rd. (M31)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Atholl-Oaklands Rd. (M31) to Glenhove Rd. (M20)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Glenhove Rd. (M20) to 11th Ave. (R25)", "Length": "1.0 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From 11th Ave. (R25) to Riviera Rd. (M16)", "Length": "1.1 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Riviera Rd. (M16) to Houghton Dr. (M31) & 1st Ave.", "Length": "0.3 km", "Travel Time": "1 min", "Avg Speed": "73 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Houghton Dr. (M31) & 1st Ave. to Oxford Rd. (M9)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Oxford Rd. (M9) to St. Andrews Rd. & Jan Smuts Ave. (M27)", "Length": "1.1 km", "Travel Time": "1 min", "Avg Speed": "73 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From St. Andrews Rd. & Jan Smuts Ave. (M27) to Empire Rd. (R55)", "Length": "0.5 km", "Travel Time": "1 min", "Avg Speed": "67 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Empire Rd. (R55) to Smit St. (M10)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "67 km/h"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Smit St. (M10) to Carr St.", "Length": "0.5 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "M1", "Direction": "Southbound", "Segment": "From Carr St. to M2", "Length": "1.0 km", "Travel Time": "No Data", "Avg Speed": "No Data"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From M1 to Sauer St.", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "67 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Sauer St. to Rissik St. & Eloff St. (M9)", "Length": "0.6 km", "Travel Time": "1 min", "Avg Speed": "71 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Rissik St. & Eloff St. (M9) to Heidelberg Rd. (M31)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "66 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Heidelberg Rd. (M31) to Maritzburg St.", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "68 km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Maritzburg St. to Vickers Rd. (M19)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Vickers Rd. (M19) to Chilvers St.", "Length": "1.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Chilvers St. to Cleveland Rd. (M33)", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Cleveland Rd. (M33) to Geldenhuys I/C (N12 & N3)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Eastbound", "Segment": "From Geldenhuys I/C (N12 & N3) to Refinery Rd. ", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "74 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Refinery Rd. to Geldenhuys I/C (N12 & N3)", "Length": "2.3 km", "Travel Time": "3 min", "Avg Speed": "64 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Geldenhuys I/C (N12 & N3) to Cleveland Rd. (M33)", "Length": "1.8 km", "Travel Time": "2 min", "Avg Speed": "66 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Cleveland Rd. (M33) to Chilvers St.", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Chilvers St. to Vickers Rd. (M19)", "Length": "1.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Vickers Rd. (M19) to Maritzburg St.", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Maritzburg St. to Heidelberg Rd. (M31)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "73 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Heidelberg Rd. (M31) to Rissik St. & Eloff St. (M9)", "Length": "1.2 km", "Travel Time": "2 min", "Avg Speed": "66 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Rissik St. & Eloff St. (M9) to Sauer St.", "Length": "0.6 km", "Travel Time": "1 min", "Avg Speed": "68 km/h"}
+{"Roadway": "M2", "Direction": "Westbound", "Segment": "From Sauer St. to M1", "Length": "0.9 km", "Travel Time": "1 min", "Avg Speed": "65 km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N12 to Rand Show Rd. (M79)", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rand Show Rd. (M79) to Soweto Hwy. (M70)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Soweto Hwy. (M70) to N17", "Length": "1.5 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N17 to Maraisburg Rd. (R24)", "Length": "3.8 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Maraisburg Rd. (R24) to Gordon Rd.", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Gordon Rd. to 14th Ave. (M8)", "Length": "2.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From 14th Ave. (M8) to Beyers Naude Dr. (M5)", "Length": "4.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Beyers Naude Dr. (M5) to Malibongwe Dr. (R512)", "Length": "5.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Malibongwe Dr. (R512) to William Nicol Dr. (R511)", "Length": "5.5 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From William Nicol Dr. (R511) to Rivonia Rd. (M9)", "Length": "4.9 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rivonia Rd. (M9) to Buccleuch I/C (M1 & N3)", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Buccleuch I/C (M1 & N3) to Allandale Rd. (M39)", "Length": "4.5 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Allandale Rd. (M39) to New Road (M71)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From New Road (M71) to Olifantsfontein Rd. (R562)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Olifantsfontein Rd. (R562) to Samrand Ave. (M36)", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Samrand Ave. (M36) to Old Johannesburg Rd. (R101)", "Length": "2.8 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Old Johannesburg Rd. (R101) to N14", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From N14 to John Vorster Dr. (M19)", "Length": "3.7 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From John Vorster Dr. (M19) to Botha Ave. (M18)", "Length": "2.9 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Botha Ave. (M18) to R21", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From R21 to Rigel Ave. (R50)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Rigel Ave. (R50) to Garsfontein Rd (M30)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Garsfontein Rd (M30) to Atterbury Rd. (M11)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Atterbury Rd. (M11) to Lynnwood Rd. (M6)", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Northbound", "Segment": "From Lynnwood Rd. (M6) to N4", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N4 to Lynnwood Rd. (M6)", "Length": "3.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Lynnwood Rd. (M6) to Atterbury Rd. (M11)", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Atterbury Rd. (M11) to Garsfontein Rd. (M30)", "Length": "0.7 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Garsfontein Rd (M30) to Rigel Ave. (R50)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rigel Ave. (R50) to R21", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From R21 to Botha Ave. (M18)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Botha Ave. (M18) to John Vorster Dr. (M19)", "Length": "2.9 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From John Vorster Dr. (M19) to N14", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N14 to Old Johannesburg Rd. (R101)", "Length": "3.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Old Johannesburg Rd. (R101) to Samrand Ave. (M36)", "Length": "2.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Samrand Ave. (M36) to Olifantsfontein Rd. (R562)", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Olifantsfontein Rd. (R562) to New Road (M71)", "Length": "3.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From New Road (M71) to Allandale Rd. (M39)", "Length": "4.1 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Allandale Rd. (M39) to Buccleuch I/C (M1 & N3)", "Length": "3.4 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Buccleuch I/C (M1 & N3) to Rivonia Rd. (M9)", "Length": "4.7 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rivonia Rd. (M9) to William Nicol Dr. (R511)", "Length": "4.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From William Nicol Dr. (R511) to Malibongwe Dr. (R512)", "Length": "5.5 km", "Travel Time": "4 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Malibongwe Dr. (R512) to Beyers Naude Dr. (M5)", "Length": "5.2 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Beyers Naude Dr. (M5) to 14th Ave. (M8)", "Length": "4.9 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From 14th Ave. (M8) to Gordon Rd.", "Length": "2.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Gordon Rd. to Maraisburg Rd. (R24)", "Length": "2.4 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Maraisburg Rd. (R24) to N17", "Length": "3.8 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From N17 to Soweto Hwy. (M70)", "Length": "1.5 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Soweto Hwy. (M70) to Rand Show Rd. (M79)", "Length": "2.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1", "Direction": "Southbound", "Segment": "From Rand Show Rd. (M79) to N12", "Length": "1.4 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Northbound", "Segment": "From N12 (Moroka Bypass) to Golden Hwy", "Length": "3.1 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Northbound", "Segment": "From Golden Hwy. (R553) to N12", "Length": "2.5 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Southbound", "Segment": "From N12 to Golden Hwy (R553)", "Length": "2.0 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N1/N12", "Direction": "Southbound", "Segment": "From Golden Hwy (R553) to N12 (Moroka Bypass)", "Length": "3.3 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From N1 to M1 ", "Length": "1.3 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From M1 to Xavier St. (M17)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "77 km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Xavier St. (M17) to Kliprivier Rd. (M7)", "Length": "2.6 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Kliprivier Rd. (M7) to Comaro St. (M11)", "Length": "3.2 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Comaro St. (M11) to R59 ", "Length": "3.6 km", "Travel Time": "3 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From R59 to Voortrekker Rd. (M31)", "Length": "2.3 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From Voortrekker Rd. (M31) to N17 & N3 ", "Length": "1.7 km", "Travel Time": "2 min", "Avg Speed": "80+ km/h"}
+{"Roadway": "N12", "Direction": "Eastbound", "Segment": "From R24 to Edenvale Rd. (M37)", "Length": "1.2 km", "Travel Time": "1 min", "Avg Speed": "80+ km/h"}
