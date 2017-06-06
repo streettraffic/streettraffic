@@ -1,7 +1,7 @@
 import math
 
 
-def getTile(lat: float, lon: float, zoom: float) -> tuple:
+def get_tile(lat: float, lon: float, zoom: float) -> tuple:
     """
     inputs: lat:float(latitue), lon:float(longitude), and zoom:float(zoom level)
 
@@ -30,13 +30,19 @@ def get_quadkeys(col: float, row: float, zoom: float) -> str:
     return: :str(quadkey)
     """
     quadkey = ""
-    for i in range(3):
-        digit = "0"
+    for i in range(zoom, 0, -1):
+        digit = 0
         mask = 1 << (i - 1)
-        if (col and mask) != 0:
+        print(mask)
+        if (col & mask) != 0:  # notice this is a bitwise operator!! different from && or and
             digit += 1
-        if (row and mask) != 0:
+        if (row & mask) != 0:
             digit += 2
-        quadkey += digit
+        quadkey += str(digit)
+
+        print(digit, quadkey)
 
     return quadkey
+
+# todo: convert quadkeys to tile
+# todo: convert tile to coordinates

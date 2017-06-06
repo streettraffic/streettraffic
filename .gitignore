@@ -4,3 +4,5 @@ main_program/__init__\.py
 main_program/HERE_map/__init__\.py
 
 main_program/tests/__init__\.py
+
+*.pyc
