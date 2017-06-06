@@ -33,14 +33,11 @@ def get_quadkeys(col: float, row: float, zoom: float) -> str:
     for i in range(zoom, 0, -1):
         digit = 0
         mask = 1 << (i - 1)
-        print(mask)
         if (col & mask) != 0:  # notice this is a bitwise operator!! different from && or and
             digit += 1
         if (row & mask) != 0:
             digit += 2
         quadkey += str(digit)
-
-        print(digit, quadkey)
 
     return quadkey
 
