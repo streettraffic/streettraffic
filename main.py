@@ -39,3 +39,4 @@ quadkey = ultil.get_quadkeys(4440, 6493, zoom)
 ## get the traffic info (json) by using same quadkey/location
 #
 # https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&depth=8bit
+
