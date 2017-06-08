@@ -1,0 +1,401 @@
+// https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&depth=8bit
+
+{
+  "RWS": [    // A list of Roadway (RW) items.
+    {
+      "RW": [   //This is the composite item for flow across an entire roadway. A roadway item will be present for each roadway with traffic flow information available.
+        {
+          "FIS": [    // A list of Flow Item (FI) elements 
+            {
+              "FI": [     //A single flow item.
+                {
+                  "TMC": {    //An ordered collection of TMC locations.
+                    "PC": 8596,                                   //Point TMC Location Code
+                    "DE": "Old Buncombe Rd/New Roe Ford Rd",      //Text description of the road.
+                    "QD": "+",    //Queuing direction. '+' or '-'. Note this is the opposite of the travel direction in the fully qualified ID, For example for location 107+03021 the QD would be '-'.
+                    "LE": 0.66198                                 //Length of item (based on UNITS)
+                  },
+                  "CF": [     // Current Flow. This element contains details about speed and Jam Factor information for the given flow item.
+                    {
+                      "LN": [],       
+                      "TY": "TR",     //Used when it is needed to differentiate between different kinds of location types.
+                      "SP": 46.75,    //Speed (based on UNITS) capped by speed limit MPH
+                      "SU": 46.75,    //Speed (based on UNITS) not capped by speed limit
+                      "FF": 49.71,    //The free flow speed on this stretch of road.
+                      "JF": 0.49573,  //The number between 0.0 and 10.0 indicating the expected quality of travel. When there is a road closure, the Jam Factor will be 10. As the number approaches 10.0 the quality of travel is getting worse. -1.0 indicates that a Jam Factor could not be calculated.
+                      "CN": 0.81      //Confidence, an indication of how the speed was determined. -1.0 road closed. 1.0=100% 0.7-100% Historical Usually a value between .7 and 1.0.
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 8595,
+                    "DE": "Old Buncombe Rd",
+                    "QD": "+",
+                    "LE": 1.95182
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 50.11,
+                      "SU": 50.11,
+                      "FF": 54.06,
+                      "JF": 0.60823,
+                      "CN": 0.76
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "11686813-a6b2-43e1-961b-81df423cedbe|",
+          "LI": "125-00466",
+          "DE": "US-276",
+          "PBT": "2017-06-06T20:47:25Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 8596,
+                    "DE": "Old Buncombe Rd/New Roe Ford Rd",
+                    "QD": "-",
+                    "LE": 1.53034
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 55.0,
+                      "SU": 55.0,
+                      "FF": 54.68,
+                      "JF": 0.0,
+                      "CN": 0.89
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 8597,
+                    "DE": "US-25/N US-25-BYP",
+                    "QD": "-",
+                    "LE": 0.9638
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 47.98,
+                      "SU": 47.98,
+                      "FF": 54.06,
+                      "JF": 0.93771,
+                      "CN": 0.84
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "54c320dd-6628-4a02-8edc-a63ef0a9431f|",
+          "LI": "125+00466",
+          "DE": "US-276",
+          "PBT": "2017-06-06T20:47:30Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 6055,
+                    "DE": "US-25-BR/US-276/Poinsett Hwy",
+                    "QD": "-",
+                    "LE": 1.17855
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 49.71,
+                      "SU": 50.09,
+                      "FF": 49.09,
+                      "JF": 0.0,
+                      "CN": 0.89
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "79c93483-ad6e-47d8-9dc6-5dbb75c4d09d|",
+          "LI": "125+00614",
+          "DE": "US-25",
+          "PBT": "2017-06-06T20:47:21Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 6054,
+                    "DE": "Roe Ford Rd",
+                    "QD": "+",
+                    "LE": 0.72386
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 49.71,
+                      "SU": 51.75,
+                      "FF": 49.71,
+                      "JF": 0.0,
+                      "CN": 0.93
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "73a7deb3-dd02-496e-a1f0-e1d2117fbcab|",
+          "LI": "125-00614",
+          "DE": "US-25",
+          "PBT": "2017-06-06T20:46:48Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 10935,
+                    "DE": "Altamont Rd",
+                    "QD": "+",
+                    "LE": 0.50395
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 24.85,
+                      "SU": 24.85,
+                      "FF": 24.85,
+                      "JF": 0.0,
+                      "CN": 0.7
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 10934,
+                    "DE": "Old Buncombe Rd",
+                    "QD": "+",
+                    "LE": 0.27297
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 24.85,
+                      "SU": 24.85,
+                      "FF": 24.85,
+                      "JF": 0.0,
+                      "CN": 0.7
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 10933,
+                    "DE": "US-25-BR/US-276/Poinsett Hwy",
+                    "QD": "+",
+                    "LE": 1.87469
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 30.94,
+                      "SU": 30.94,
+                      "FF": 41.01,
+                      "JF": 2.04619,
+                      "CN": 0.71
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "77dc969b-a86c-4cac-b519-6619142dee5a|",
+          "LI": "125-00912",
+          "DE": "Old Buncombe Rd",
+          "PBT": "2017-06-06T20:47:34Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 10934,
+                    "DE": "Old Buncombe Rd",
+                    "QD": "-",
+                    "LE": 1.67396
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 36.04,
+                      "SU": 36.04,
+                      "FF": 42.25,
+                      "JF": 1.22549,
+                      "CN": 0.7
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 10935,
+                    "DE": "Altamont Rd",
+                    "QD": "-",
+                    "LE": 0.27297
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 24.85,
+                      "SU": 24.85,
+                      "FF": 24.85,
+                      "JF": 0.0,
+                      "CN": 0.7
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 10936,
+                    "DE": "Pineforest Dr",
+                    "QD": "-",
+                    "LE": 0.52688
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 24.85,
+                      "SU": 25.96,
+                      "FF": 24.85,
+                      "JF": 0.0,
+                      "CN": 0.72
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "a0d59ebb-4b99-4536-afcc-1e52f1ce94a8|",
+          "LI": "125+00912",
+          "DE": "Old Buncombe Rd",
+          "PBT": "2017-06-06T20:47:34Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 11093,
+                    "DE": "Marchbanks Dr/Old Buncombe Rd",
+                    "QD": "+",
+                    "LE": 0.68409
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 31.46,
+                      "SU": 31.46,
+                      "FF": 37.28,
+                      "JF": 1.30048,
+                      "CN": 0.73
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "16ee5ca9-b8c3-47f2-86c6-fd5d1ba26bbf|",
+          "LI": "125-00941",
+          "DE": "Roe Ford Rd",
+          "PBT": "2017-06-06T20:47:34Z"
+        },
+        {
+          "FIS": [
+            {
+              "FI": [
+                {
+                  "TMC": {
+                    "PC": 11093,
+                    "DE": "Marchbanks Dr/Old Buncombe Rd",
+                    "QD": "-",
+                    "LE": 0.0149
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 25.48,
+                      "SU": 25.48,
+                      "FF": 34.18,
+                      "JF": 1.66666,
+                      "CN": 0.7
+                    }
+                  ]
+                },
+                {
+                  "TMC": {
+                    "PC": 11094,
+                    "DE": "US-25/Beattie E Huff Hwy/US-25-BYP",
+                    "QD": "-",
+                    "LE": 0.66919
+                  },
+                  "CF": [
+                    {
+                      "LN": [],
+                      "TY": "TR",
+                      "SP": 31.07,
+                      "SU": 31.07,
+                      "FF": 37.9,
+                      "JF": 1.50273,
+                      "CN": 0.7
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "mid": "74fb1d56-d254-4f5c-861b-07d61101bfa2|",
+          "LI": "125+00941",
+          "DE": "Roe Ford Rd",
+          "PBT": "2017-06-06T20:47:34Z"
+        }
+      ],
+      "TY": "TMC",
+      "MAP_VERSION": "201702",
+      "EBU_COUNTRY_CODE": "1",
+      "EXTENDED_COUNTRY_CODE": "A0",
+      "TABLE_ID": "25",
+      "UNITS": "imperial"
+    }
+  ],
+  "MAP_VERSION": "",
+  "CREATED_TIMESTAMP": "2017-06-06T20:47:33.000+0000",
+  "VERSION": "3.2",
+  "UNITS": "imperial"
+}
