@@ -77,6 +77,6 @@ def get_traffic_json_resource(lat: float, lon: float, zoom: float) -> str:
     (col, row) = get_tile(lat, lon, zoom)
     quadkey = get_quadkeys(col, row, zoom)
     total_url = app_settings.JSON_TILE_BASE_URL + 'app_id=' + app_settings.APP_ID + \
-        '&app_code=' + app_settings.APP_CODE + '&quadkey=' + quadkey
+        '&app_code=' + app_settings.APP_CODE + '&quadkey=' + quadkey + '&responseattributes=sh,fc'
 
     return total_url

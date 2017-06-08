@@ -23,4 +23,4 @@ def test_get_map_tile_resource():
 
 def test_get_traffic_json_resource():
     assert ultil.get_traffic_json_resource(34.9237, -82.4383, 14) == \
-    'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202'
+    'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc'
