@@ -63,13 +63,14 @@ def get_map_tile_resource(lat: float, lon: float, zoom: float, img_size: int) ->
 
     return total_url
 
+
 def get_traffic_json_resource(lat: float, lon: float, zoom: float) -> str:
     """
     inputs: lat:float(latitue), lon:float(longitude), zoom:float(zoom level)
 
-    This function is uses get_tile() function to get (col, row) and use further use them to 
-    generate a url to get map_tile. For map_tile resource details, refer to
-    https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/quick-start.html
+    This function is uses get_tile() function to get (col, row) and use further use get_quadkeys to 
+    get a quad key, then generate a url to get traffic_json resource. For traffic_json resource details, refer to
+    https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html
 
     return: :str(url for map_tile)
     """

@@ -74,7 +74,8 @@ def measure_estimated_request():
 #get_traffic_tile_of_different_zoom()
 #measure_estimated_request()
 
-def atlanta_worst_traffic():
-    return ultil.get_tile(33.670156, -84.325984, 14)
+# atlanta worst traffic point:
+altanta_worst = (33.670156, -84.325984)
+
     
     
