@@ -1,4 +1,6 @@
-from main_program.HERE_map import ultil
+from main_program.map_resource import ultil
+from main_program.database import TrafficData
+import json
 
 ## Furman's coordinates is 34.9237° N, 82.4383° W
 ## which translate to 34.9237°, -82.4383° according to 
@@ -74,7 +76,31 @@ def measure_estimated_request():
 #get_traffic_tile_of_different_zoom()
 #measure_estimated_request()
 
-def atlanta_worst_traffic():
-    return ultil.get_tile(33.670156, -84.325984, 14)
-    
-    
+## atlanta worst traffic point:
+#altanta_worst = (33.670156, -84.325984)
+#altanta_worst_map_tile = ultil.get_map_tile_resource(*altanta_worst, 14, 512)
+#atlanta_worst_json_tile = ultil.get_traffic_json_resource(*altanta_worst, 14)
+
+## atlanta tile
+#cor1 = (33.766764, -84.409533)
+#cor2 = (33.740003, -84.368978)
+#info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+#matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+#img_matrix = ultil.assemble_matrix_images(matrix)
+
+
+## Dr'allen house
+#cor1 = (34.939348, -82.456024)
+#cor2 = (34.910812, -82.420834)
+#matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+#img_matrix = ultil.assemble_matrix_images(matrix)
+
+# Miami
+#cor1 = (25.803018, -80.267741)
+#cor2 = (25.726957, -80.192897)
+#matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+
+with open('test.json') as f:
+	data = json.load(f)
+
+traffic_data = TrafficData()
