@@ -1,4 +1,4 @@
-from ..HERE_map import ultil
+from ..map_resource import ultil
 
 
 def test_get_tile():

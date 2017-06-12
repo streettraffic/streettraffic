@@ -6,9 +6,9 @@ from . import app_settings
 # todo:
 
 
-def get_tile(lat: float, lon: float, zoom: float) -> tuple:
+def get_tile(lat: float, lon: float, zoom: int) -> tuple:
     """
-    inputs: lat:float(latitue), lon:float(longitude), and zoom:float(zoom level)
+    inputs: lat:float(latitue), lon:float(longitude), and zoom:int(zoom level)
 
     The function is used to generate column and row information for HERE API usage. For details, please
     visit https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/key-concepts.html
@@ -25,9 +25,9 @@ def get_tile(lat: float, lon: float, zoom: float) -> tuple:
     return (int(col), int(row))
 
 
-def get_quadkeys(col: float, row: float, zoom: float) -> str:
+def get_quadkeys(col: float, row: float, zoom: int) -> str:
     """
-    inputs: col:float(column), row:float, zoom:float
+    inputs: col:float(column), row:float, zoom:int
 
     This function is used to encode (col, row, zoom) as quadkey. For details, refer to 
     https://developer.here.com/rest-apis/documentation/traffic/common/map_tile/topics/quadkeys.html
@@ -47,9 +47,9 @@ def get_quadkeys(col: float, row: float, zoom: float) -> str:
     return quadkey
 
 
-def get_map_tile_resource(lat: float, lon: float, zoom: float, img_size: int) -> str:
+def get_map_tile_resource(lat: float, lon: float, zoom: int, img_size: int) -> str:
     """
-    inputs: lat:float(latitue), lon:float(longitude), zoom:float(zoom level), img_size:int(256 or 512)
+    inputs: lat:float(latitue), lon:float(longitude), zoom:int(zoom level), img_size:int(256 or 512)
 
     This function is uses get_tile() function to get (col, row) and further use them to 
     generate a url to get map_tile. For map_tile resource details, refer to
@@ -64,9 +64,9 @@ def get_map_tile_resource(lat: float, lon: float, zoom: float, img_size: int) ->
     return total_url
 
 
-def get_traffic_json_resource(lat: float, lon: float, zoom: float) -> str:
+def get_traffic_json_resource(lat: float, lon: float, zoom: int) -> str:
     """
-    inputs: lat:float(latitue), lon:float(longitude), zoom:float(zoom level)
+    inputs: lat:float(latitue), lon:float(longitude), zoom:int(zoom level)
 
     This function is uses get_tile() function to get (col, row) and use further use get_quadkeys to 
     get a quad key, then generate a url to get traffic_json resource. For traffic_json resource details, refer to
@@ -80,3 +80,14 @@ def get_traffic_json_resource(lat: float, lon: float, zoom: float) -> str:
         '&app_code=' + app_settings.APP_CODE + '&quadkey=' + quadkey + '&responseattributes=sh,fc'
 
     return total_url
+
+
+def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int):
+    """
+    inputs: cor1:tuple(coordinates: (latitue, longitude)) cor2: same as cor1
+            zoom: int(zoom level)
+
+    This function ...
+    """
+    tile1 = get_tile(*cor1, zoom)
+    tile2 = get_tile(*cor2, zoom)
