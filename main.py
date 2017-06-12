@@ -82,7 +82,9 @@ def measure_estimated_request():
 ## atlanta tile
 cor1 = (33.766764, -84.409533)
 cor2 = (33.740003, -84.368978)
-ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+img_matrix = ultil.assemble_matrix_images(matrix)
 
     
     
