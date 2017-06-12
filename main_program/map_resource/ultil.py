@@ -1,5 +1,7 @@
 import math
 from . import app_settings
+import numpy as np
+import pandas as pd
 
 # todo: convert quadkeys to tile
 # todo: convert tile to coordinates
@@ -47,34 +49,57 @@ def get_quadkeys(col: float, row: float, zoom: int) -> str:
     return quadkey
 
 
-def get_map_tile_resource(lat: float, lon: float, zoom: int, img_size: int) -> str:
+def get_map_tile_resource(location_data: tuple, location_type: str, zoom: int, img_size: int) -> str:
     """
-    inputs: lat:float(latitue), lon:float(longitude), zoom:int(zoom level), img_size:int(256 or 512)
+    inputs: location_data: tuple, zoom:int(zoom level), img_size:int(256 or 512), location_type: str
 
-    This function is uses get_tile() function to get (col, row) and further use them to 
-    generate a url to get map_tile. For map_tile resource details, refer to
+    The location_type and corresponding location data is as follow
+    location_type = "latlon"; location_data = (latitude, longitude)
+    location_type = "colrow"; location_data = (column, row)
+
+    This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
+    (col, row) and further use them to generate a url to get map_tile. 
+
+    For map_tile resource details, refer to
     https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/quick-start.html
 
     return: :str(url for map_tile)
     """
-    (col, row) = get_tile(lat, lon, zoom)
+    # if user did not provide a col, row, we use get_tile()
+    if location_type == "latlon":
+        (col, row) = get_tile(*location_data, zoom)
+    elif location_type == "colrow":
+        (col, row) = location_data
+
     total_url = app_settings.MAP_TILE_BASE_URL + str(zoom) + '/' + str(int(col)) + '/' + str(int(
         row)) + '/' + str(img_size) + '/png8?app_id=' + app_settings.APP_ID + '&app_code=' + app_settings.APP_CODE
 
     return total_url
 
 
-def get_traffic_json_resource(lat: float, lon: float, zoom: int) -> str:
+def get_traffic_json_resource(location_data: tuple, location_type: str, zoom: int) -> str:
     """
-    inputs: lat:float(latitue), lon:float(longitude), zoom:int(zoom level)
+    inputs: location_data: tuple, zoom:int(zoom level)
+    default inputs: col:int = 0, row: int = 0, location_type: str
 
-    This function is uses get_tile() function to get (col, row) and use further use get_quadkeys to 
-    get a quad key, then generate a url to get traffic_json resource. For traffic_json resource details, refer to
+    The location_type and corresponding location data is as follow
+    location_type = "latlon"; location_data = (latitude, longitude)
+    location_type = "colrow"; location_data = (column, row)
+
+    This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
+    (col, row). Then we use (col, row) to further utilize get_quadkeys() to 
+    get a quad key, then generate a url to get traffic_json resource. 
+
+    For traffic_json resource details, refer to
     https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html
 
-    return: :str(url for map_tile)
+    return: :str(url for traffic_tile_json)
     """
-    (col, row) = get_tile(lat, lon, zoom)
+    if location_type == "latlon":
+        (col, row) = get_tile(*location_data, zoom)
+    elif location_type == "colrow":
+        (col, row) = location_data
+
     quadkey = get_quadkeys(col, row, zoom)
     total_url = app_settings.JSON_TILE_BASE_URL + 'app_id=' + app_settings.APP_ID + \
         '&app_code=' + app_settings.APP_CODE + '&quadkey=' + quadkey + '&responseattributes=sh,fc'
@@ -89,5 +114,25 @@ def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int):
 
     This function ...
     """
-    tile1 = get_tile(*cor1, zoom)
-    tile2 = get_tile(*cor2, zoom)
+    tile1 = get_tile(*cor1, zoom)  #(col, row)
+    tile2 = get_tile(*cor2, zoom)  #(col, row)
+    print(tile1)
+    print(tile2)
+    left_col = min(tile1[0], tile2[0])
+    right_col = max(tile1[0], tile2[0])
+    botom_row = min(tile1[1], tile2[1])
+    top_row = max(tile1[1], tile2[1])
+    matrix = pd.DataFrame(index = range(top_row - botom_row), columns = range(right_col - left_col))
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            matrix[i][j] = [zoom, left_col + i, botom_row + j]
+
+    return matrix
+
+# def get_area_tile_matrix_url(cor1: tuple, cor2: tuple, zoom: int):
+#     """
+#     """
+#     matrix = get_area_tile_matrix(cor1, cor2, zoom)
+#     for i in range(len(matrix)):
+#         for j in range(len(matrix[0])):
+#             matrix[i][j] = get_map_tile_resource(lat: float, lon: float, zoom: int, img_size: int)
