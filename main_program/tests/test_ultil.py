@@ -1,4 +1,5 @@
 from ..map_resource import ultil
+import pandas as pd
 
 
 def test_get_tile():
@@ -30,3 +31,9 @@ def test_get_traffic_json_resource():
 
     assert ultil.get_traffic_json_resource((4440, 6493), "colrow", 14) == \
     'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc'
+
+def test_get_area_tile_matrix():
+    df = pd.DataFrame([[(4350, 6557),(4351, 6557),(4352, 6557)],
+                       [(4350, 6558),(4351, 6558),(4352, 6558)],
+                       [(4350, 6559),(4351, 6559),(4352, 6559)]])
+    assert df.equals(ultil.get_area_tile_matrix((33.766764, -84.409533), (33.740003, -84.368978), 14))

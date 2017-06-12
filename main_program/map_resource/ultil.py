@@ -2,6 +2,8 @@ import math
 from . import app_settings
 import numpy as np
 import pandas as pd
+from PIL import Image
+
 
 # todo: convert quadkeys to tile
 # todo: convert tile to coordinates
@@ -107,32 +109,54 @@ def get_traffic_json_resource(location_data: tuple, location_type: str, zoom: in
     return total_url
 
 
-def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int):
+def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
     """
     inputs: cor1:tuple(coordinates: (latitue, longitude)) cor2: same as cor1
             zoom: int(zoom level)
 
-    This function ...
+    This function takes two coordinates and calculate their tile (col, row),
+    then it generate a matrix of tiles to cover the square defined by those
+    two coordinates.
+
+    ###^^^^^^*####  (in this example, two coordinates are denoted as *
+    #  ^^^^^^^   #   and this function should generate tile to cover the
+    #  ^^^^^^^   #   area denoted by ^ and *)
+    ###*^^^^^^####
+
+    return: :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
     """
     tile1 = get_tile(*cor1, zoom)  #(col, row)
     tile2 = get_tile(*cor2, zoom)  #(col, row)
-    print(tile1)
-    print(tile2)
     left_col = min(tile1[0], tile2[0])
     right_col = max(tile1[0], tile2[0])
     botom_row = min(tile1[1], tile2[1])
     top_row = max(tile1[1], tile2[1])
-    matrix = pd.DataFrame(index = range(top_row - botom_row), columns = range(right_col - left_col))
+    matrix = pd.DataFrame(index = range(top_row - botom_row + 1), columns = range(right_col - left_col + 1))
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
-            matrix[i][j] = [zoom, left_col + i, botom_row + j]
+            matrix[i][j] = (left_col + i, botom_row + j)
 
     return matrix
 
-# def get_area_tile_matrix_url(cor1: tuple, cor2: tuple, zoom: int):
-#     """
-#     """
-#     matrix = get_area_tile_matrix(cor1, cor2, zoom)
-#     for i in range(len(matrix)):
-#         for j in range(len(matrix[0])):
-#             matrix[i][j] = get_map_tile_resource(lat: float, lon: float, zoom: int, img_size: int)
+def get_area_tile_matrix_url(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
+    """
+    inputs: cor1:tuple(coordinates: (latitue, longitude)) cor2: same as cor1
+            zoom: int(zoom level)
+
+    This function takes two coordinates and calculate their tile (col, row),
+    then it generate a matrix of tiles **URLs** to cover the square defined by those
+    two coordinates.
+
+    ###^^^^^^*####  (in this example, two coordinates are denoted as *
+    #  ^^^^^^^   #   and this function should generate tile to cover the
+    #  ^^^^^^^   #   area denoted by ^ and *)
+    ###*^^^^^^####
+
+    return: :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
+    """
+    matrix = get_area_tile_matrix(cor1, cor2, zoom)
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            matrix[i][j] = get_map_tile_resource(location_data = matrix[i][j], location_type = "colrow", zoom = zoom, img_size = 512)
+
+    return matrix
