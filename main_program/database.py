@@ -103,5 +103,3 @@ class TrafficData:
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run()
         r.db('Traffic').table('road_data').index_create('created_timestamp').run()
         r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run()
-
-
