@@ -20,7 +20,7 @@ def get_tile(lat: float, lon: float, zoom: int) -> tuple:
     visit https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/key-concepts.html
     for reference. 
 
-    return: :tuple(column, row)
+    return :tuple(column, row)
     """
     lat_rad = lat * math.pi / 180
     n = math.pow(2, zoom)
@@ -38,7 +38,7 @@ def get_quadkeys(col: float, row: float, zoom: int) -> str:
     This function is used to encode (col, row, zoom) as quadkey. For details, refer to 
     https://developer.here.com/rest-apis/documentation/traffic/common/map_tile/topics/quadkeys.html
 
-    return: :str(quadkey)
+    return :str(quadkey)
     """
     quadkey = ""
     for i in range(zoom, 0, -1):
@@ -67,7 +67,7 @@ def get_map_tile_resource(location_data: tuple, location_type: str, zoom: int, i
     For map_tile resource details, refer to
     https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/quick-start.html
 
-    return: :str(url for map_tile)
+    return :str(url for map_tile)
     """
     # if user did not provide a col, row, we use get_tile()
     if location_type == "latlon":
@@ -97,7 +97,7 @@ def get_traffic_json_resource(location_data: tuple, location_type: str, zoom: in
     For traffic_json resource details, refer to
     https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html
 
-    return: :str(url for traffic_tile_json)
+    return :str(url for traffic_tile_json)
     """
     if location_type == "latlon":
         (col, row) = get_tile(*location_data, zoom)
@@ -125,7 +125,7 @@ def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
     #  ^^^^^^^   #   area denoted by ^ and *)
     ###*^^^^^^####
 
-    return: :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
+    return :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
     """
     tile1 = get_tile(*cor1, zoom)  #(col, row)
     tile2 = get_tile(*cor2, zoom)  #(col, row)
@@ -154,7 +154,7 @@ def get_area_tile_matrix_url(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFram
     #  ^^^^^^^   #   area denoted by ^ and *)
     ###*^^^^^^####
 
-    return: :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
+    return :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
     """
     matrix = get_area_tile_matrix(cor1, cor2, zoom)
     for i in range(len(matrix)):

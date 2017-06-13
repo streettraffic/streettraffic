@@ -1,11 +1,14 @@
 import rethinkdb as r
 from typing import Dict, List
 import copy
+import requests
+from dateutil import parser
+import datetime
 
 class TrafficData:
 
     def __init__(self):
-        pass
+        r.connect('localhost', 28015).repl()
 
     def insert_json_data(self, data: Dict) -> None:
         """
@@ -22,6 +25,7 @@ class TrafficData:
         result = r.db('Traffic').table('original_data').insert(data).run()
         original_data_id = result['generated_keys'][0]
 
+        created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
         ## start parsing the data
         for RWS_item in data['RWS']:
             for RW_item in RWS_item['RW']:
@@ -32,7 +36,8 @@ class TrafficData:
                         # original_data_id: the original json document that we have downloaded
                         FI_item['CUSTOM'] = {
                             'parent_DE': RW_item['DE'],
-                            'original_data_id': original_data_id
+                            'original_data_id': original_data_id,
+                            'created_timestamp': r.expr(created_timestamp).run()
                         }
                         SHP_list = copy.deepcopy(FI_item['SHP'])
                         FI_item['SHP'] = "See table road_data"
@@ -43,14 +48,11 @@ class TrafficData:
                             SHP_item['flow_data_id'] = flow_data_id
                             try:
                                 SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run()
+                                SHP_item['created_timestamp'] = r.expr(created_timestamp).run()
                                 r.db('Traffic').table('road_data').insert(SHP_item).run()
                             except:
                                 print('exception in parsing SHP values')
                                 raise
-
-
-
-
 
     def parse_SHP_values(self, value: List) -> List:
         """
@@ -78,11 +80,17 @@ class TrafficData:
 
         return result
     
-    def read_traffic_data(url: str) -> Dict:
-        pass
+    def read_traffic_data(self, url: str) -> Dict:
+        """
+        inputs: url: str(a url that has HERE traffic json file)
+        example inputs: https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc 
 
-    def connect(self):
-        r.connect('localhost', 28015).repl()
+        This functios takes the input url and return its json object
+
+        return :Dict(json dict)
+        """
+        r = requests.get(url)
+        return r.json()
 
     def helper_create_tables(self):
         """
@@ -91,6 +99,9 @@ class TrafficData:
         r.db('Traffic').table_create('original_data').run()
         r.db('Traffic').table_create('road_data').run()
         r.db('Traffic').table_create('flow_data').run()
+        # r.db('Traffic').table_create('meta_data').run() might not need it
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run()
+        r.db('Traffic').table('road_data').index_create('created_timestamp').run()
+        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run()
 
 

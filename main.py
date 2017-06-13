@@ -77,9 +77,9 @@ def measure_estimated_request():
 #measure_estimated_request()
 
 ## atlanta worst traffic point:
-#altanta_worst = (33.670156, -84.325984)
-#altanta_worst_map_tile = ultil.get_map_tile_resource(*altanta_worst, 14, 512)
-#atlanta_worst_json_tile = ultil.get_traffic_json_resource(*altanta_worst, 14)
+altanta_worst = (33.670156, -84.325984)
+altanta_worst_map_tile = ultil.get_map_tile_resource(altanta_worst, "latlon", 14, 512)
+atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon", 14)
 
 ## atlanta tile
 #cor1 = (33.766764, -84.409533)
@@ -104,3 +104,8 @@ with open('test.json') as f:
 	data = json.load(f)
 
 traffic_data = TrafficData()
+
+## Nice to know that we have set up datatime object correctly
+#r.db('Traffic').table('flow_data').between(r.expr(yourdate), \
+#                            r.epoch_time(int(time.time())), \
+#                            index='created_timestamp').run()
