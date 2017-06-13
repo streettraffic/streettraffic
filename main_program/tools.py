@@ -1,6 +1,6 @@
 import pickle
 
-def store_data_object(obj: any_serializable_object, path: str) -> None:
+def dump_data_object(obj: 'any serializable object', path: str) -> None:
 	""" 
 	input: obj: any_serializable_object(something like list, dataframe, dict, ...)
 
@@ -12,7 +12,7 @@ def store_data_object(obj: any_serializable_object, path: str) -> None:
 		pickle.dump(obj, handle)
 
 
-def get_data_object(path: str):
+def load_data_object(path: str) -> 'cooresponding object':
 	"""
 	input: path: str(specify a path)
 

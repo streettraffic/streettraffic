@@ -87,7 +87,7 @@ atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon
 cor1 = (33.766764, -84.409533)
 cor2 = (33.740003, -84.368978)
 info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
 
@@ -103,14 +103,12 @@ matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 #matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 
 with open('test.json') as f:
-	data = json.load(f)
+    data = json.load(f)
 
 traffic_data = TrafficData()
 
 ## Nice to know that we have set up datatime object correctly
-#r.db('Traffic').table('flow_data').between(r.expr(yourdate), \
-#                            r.epoch_time(int(time.time())), \
-#                            index='created_timestamp').run()
+# r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
 
 #json_data = traffic_data.read_traffic_data('https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc')
 #
