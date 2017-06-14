@@ -1,6 +1,10 @@
 from main_program.map_resource import ultil
 from main_program.database import TrafficData
+from main_program import tools
 import json
+import rethinkdb as r
+import time
+
 
 ## Furman's coordinates is 34.9237° N, 82.4383° W
 ## which translate to 34.9237°, -82.4383° according to 
@@ -77,15 +81,15 @@ def measure_estimated_request():
 #measure_estimated_request()
 
 ## atlanta worst traffic point:
-#altanta_worst = (33.670156, -84.325984)
-#altanta_worst_map_tile = ultil.get_map_tile_resource(*altanta_worst, 14, 512)
-#atlanta_worst_json_tile = ultil.get_traffic_json_resource(*altanta_worst, 14)
+altanta_worst = (33.670156, -84.325984)
+altanta_worst_map_tile = ultil.get_map_tile_resource(altanta_worst, "latlon", 14, 512)
+atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon", 14)
 
 ## atlanta tile
 #cor1 = (33.766764, -84.409533)
 #cor2 = (33.740003, -84.368978)
 #info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-#matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
+#matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
 
@@ -100,7 +104,34 @@ def measure_estimated_request():
 #cor2 = (25.726957, -80.192897)
 #matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 
-with open('test.json') as f:
-	data = json.load(f)
+#with open('test.json') as f:
+#    data = json.load(f)
 
 traffic_data = TrafficData()
+
+## Nice to know that we have set up datatime object correctly
+# r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
+
+#json_data = traffic_data.read_traffic_data('https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc')
+#
+#traffic_data.insert_json_data(json_data)
+
+## inserting test data into test.geo table
+#current_epoch = 1497446043
+#
+#for i in range(10):
+#    data = []
+#    for i in range(10):
+#        data += [{'timestamp': r.epoch_time(time.time()) }]
+#        
+#    r.table('geo').insert(data).run()
+#    time.sleep(1)
+#        
+#print('finished')
+
+test_geojson1 = traffic_data.fetch_geojson_item('0ccbbac6-12b8-4681-a1a4-9e15e89bd4e1')
+test_geojson2 = traffic_data.fetch_geojson_item('08901fc1-b9d3-4c3a-a48e-6be807df39dc')
+test_data = TrafficData.generate_geojson_collection([test_geojson1,test_geojson2 ])
+
+## display traffic test
+display_traffic = traffic_data.display_json_traffic('974f1914-8179-4518-8f26-6b013b998d72')

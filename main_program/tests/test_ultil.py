@@ -1,4 +1,5 @@
 from ..map_resource import ultil
+from .. import tools
 import pandas as pd
 
 
@@ -37,3 +38,11 @@ def test_get_area_tile_matrix():
                        [(4350, 6558),(4351, 6558),(4352, 6558)],
                        [(4350, 6559),(4351, 6559),(4352, 6559)]])
     assert df.equals(ultil.get_area_tile_matrix((33.766764, -84.409533), (33.740003, -84.368978), 14))
+
+def test_get_area_tile_matrix_url():
+    df = tools.load_data_object("test_data/get_area_tile_matrix_url() for map_tile.pkl")
+    cor1 = (33.766764, -84.409533)
+    cor2 = (33.740003, -84.368978)
+    info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+    matrix = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
+    assert df.equals(matrix)
