@@ -11,3 +11,10 @@ def test_generate_geojson_collection():
     geojson_combined = TrafficData.generate_geojson_collection([geojson_object2, geojson_object1])
 
     assert geojson_combined == geojson_combined_test
+
+
+def test_fetch_geojson_item():
+    """
+    hard to test since our database is still under changing development
+    """
+    pass

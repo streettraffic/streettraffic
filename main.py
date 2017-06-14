@@ -86,10 +86,10 @@ altanta_worst_map_tile = ultil.get_map_tile_resource(altanta_worst, "latlon", 14
 atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon", 14)
 
 ## atlanta tile
-cor1 = (33.766764, -84.409533)
-cor2 = (33.740003, -84.368978)
-info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+#cor1 = (33.766764, -84.409533)
+#cor2 = (33.740003, -84.368978)
+#info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+#matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
 
@@ -104,8 +104,8 @@ matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #cor2 = (25.726957, -80.192897)
 #matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 
-with open('test.json') as f:
-    data = json.load(f)
+#with open('test.json') as f:
+#    data = json.load(f)
 
 traffic_data = TrafficData()
 
@@ -131,3 +131,7 @@ traffic_data = TrafficData()
 
 test_geojson1 = traffic_data.fetch_geojson_item('0ccbbac6-12b8-4681-a1a4-9e15e89bd4e1')
 test_geojson2 = traffic_data.fetch_geojson_item('08901fc1-b9d3-4c3a-a48e-6be807df39dc')
+test_data = TrafficData.generate_geojson_collection([test_geojson1,test_geojson2 ])
+
+## display traffic test
+display_traffic = traffic_data.display_json_traffic('974f1914-8179-4518-8f26-6b013b998d72')
