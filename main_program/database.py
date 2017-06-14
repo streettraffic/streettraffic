@@ -135,11 +135,60 @@ class TrafficData:
         data = r.db('Traffic').table('road_data').get(id).run()
         flow_data_id = data['flow_data_id']
         flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run()
-        print(flow_data)
         geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][0]}
         geojson_geometry = r.db('Traffic').table('road_data').get(id)['geometry'].to_geojson().run()
         geojson_type = "Feature"
 
         return {"type": geojson_type, "geometry": geojson_geometry, "properties": geojson_properties}
+
+    @staticmethod
+    def generate_geojson_collection(geojson_list: List) -> Dict:
+        """
+        inputs: geojson_list: List (a list of geojson objects)
+        example inputs:
+        [ {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [125.6, 10.1]
+          },
+          "properties": {
+            "name": "Dinagat Islands"
+          }
+        }, ....]
+
+        This function takes a list of geojson objects and assemble them in the following way
+        {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [125.6, 10.1]
+              },
+              "properties": {
+                "name": "Dinagat island"
+              }
+            },
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [15,15]
+              },
+              "properties": {
+                "name": "Test Islands"
+              }
+            }
+          ]
+        }
+
+        such that the output is still a geojson_object but it contains all the 
+        geojson_object in geojson_list
+        """
+        output_geojson = {"type": "FeatureCollection"}
+        output_geojson['features'] = geojson_list
+        return output_geojson
 
 

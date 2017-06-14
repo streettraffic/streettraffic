@@ -128,3 +128,6 @@ traffic_data = TrafficData()
 #    time.sleep(1)
 #        
 #print('finished')
+
+test_geojson1 = traffic_data.fetch_geojson_item('0ccbbac6-12b8-4681-a1a4-9e15e89bd4e1')
+test_geojson2 = traffic_data.fetch_geojson_item('08901fc1-b9d3-4c3a-a48e-6be807df39dc')
