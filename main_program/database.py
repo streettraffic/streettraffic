@@ -97,46 +97,106 @@ class TrafficData:
         """
         This is a helper function to create tables in rethinkDB
         """
+        ## creating tables
         r.db('Traffic').table_create('original_data').run()
         r.db('Traffic').table_create('road_data').run()
         r.db('Traffic').table_create('flow_data').run()
-        # r.db('Traffic').table_create('meta_data').run() might not need it
+
+        ## creating index
+        r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run()
+        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run()
+        r.db('Traffic').table('road_data').index_create('flow_data_id').run()
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run()
         r.db('Traffic').table('road_data').index_create('created_timestamp').run()
-        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run()
+
 
 
     def main_matrix_data(matrix: pd.DataFrame):
+        """
+        This function takes in a matrix of json url, and store data into the database
+        """
         pass
 
 
-    def fetch_geojson_item(self, id: str) -> Dict:
+    def fetch_geojson_item(self, road_data_id: str, calculate_traffic_color = True) -> Dict:
         """
-        inputs: id: str(a primary key of road_data table)
+        inputs: road_data_id: str(a primary key of road_data table), calculate_traffic_color = True
 
-        This function uses a id(primary key) to fethe a geojson object from 
-        the road_data database.
+        Notice the road_data table only stores the 'geometry' info of a geojson object.
+        An example data from road_data would be 
 
-        Example output:
         {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [125.6, 10.1]
-          },
-          "properties": {
-            "name": "Dinagat Islands"
-          }
+            "$reql_type$":  "GEOMETRY" ,
+            "coordinates": [
+                [
+                    -82.42968 ,
+                    34.92954
+                ] ,
+                [
+                    -82.43003 ,
+                    34.92729
+                ]
+            ] ,
+            "type":  "LineString"
+        } ,
+
+        This function uses a road_data_id(primary key) to fethe a geojson object from 
+        the road_data database. If calculate_traffic_color == True, then we also use
+        traffic_flow_color_scheme() to calcuroad_data_idlate a color for the road
+
+        Example output with color is :
+        {
+            "type": "Feature",
+            "geometry": {
+                "coordinates": [
+                    [
+                        -82.42907,
+                        34.91623
+                    ],
+                    [
+                        -82.42911,
+                        34.91647
+                    ],
+                    [
+                        -82.42917,
+                        34.91684
+                    ]
+                ],
+                "type": "LineString"
+            },
+            "properties": {
+                "TMC": {
+                    "DE": "Old Buncombe Rd",
+                    "LE": 1.67396,
+                    "PC": 10934,
+                    "QD": "-"
+                },
+                "CF": {
+                    "CN": 0.7,
+                    "FF": 42.25,
+                    "JF": 1.71568,
+                    "LN": [],
+                    "SP": 33.55,
+                    "SU": 33.55,
+                    "TY": "TR"
+                },
+                "color": "green"
+            }
         }
 
         For more infomation about geojson, check out
         http://geojson.org/
         """
-        data = r.db('Traffic').table('road_data').get(id).run()
+        data = r.db('Traffic').table('road_data').get(road_data_id).run()
         flow_data_id = data['flow_data_id']
         flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run()
         geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][0]}
-        geojson_geometry = r.db('Traffic').table('road_data').get(id)['geometry'].to_geojson().run()
+        
+        # possibly we need to calculate traffic color for the road
+        if calculate_traffic_color:
+            geojson_properties['color'] = self.traffic_flow_color_scheme(geojson_properties['CF'])
+
+        geojson_geometry = r.db('Traffic').table('road_data').get(road_data_id)['geometry'].to_geojson().run()
         geojson_type = "Feature"
 
         return {"type": geojson_type, "geometry": geojson_geometry, "properties": geojson_properties}
@@ -158,6 +218,11 @@ class TrafficData:
         }, ....]
 
         This function takes a list of geojson objects and assemble them in the following way
+        The following format allows for multiple geojson object to be stored in the 
+        same geojson object. For more details, refer to 
+        https://macwright.org/2015/03/23/geojson-second-bite.html
+
+        Example outputs:
         {
           "type": "FeatureCollection",
           "features": [
@@ -190,5 +255,53 @@ class TrafficData:
         output_geojson = {"type": "FeatureCollection"}
         output_geojson['features'] = geojson_list
         return output_geojson
+
+    def traffic_flow_color_scheme(self, traffic_flow_data: Dict) -> str: 
+        """
+        inputs: traffic_flow_data: Dict (traffic flow data)
+        example inputs:
+        {
+            "CN": 0.7 ,  // Confidence, an indication of how the speed was determined. -1.0 road closed. 1.0=100% 0.7-100% Historical Usually a value between .7 and 1.0.
+            "FF": 41.01 , // The free flow speed on this stretch of road.
+            "JF": 1.89393 , // The number between 0.0 and 10.0 indicating the expected quality of travel. When there is a road closure, the Jam Factor will be 10. As the number approaches 10.0 the quality of travel is getting worse. -1.0 indicates that a Jam Factor could not be calculated.
+            "LN": [ ],
+            "SP": 31.69 , // Speed (based on UNITS) capped by speed limit MPH
+            "SU": 31.69 , // Speed (based on UNITS) not capped by speed limit
+            "TY":  "TR"   //Used when it is needed to differentiate between different kinds of location types.
+        }
+        for further details on those encoding, refer to 
+        http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
+
+        Given the traffic_flow_data, we calculate a color that indicates the traffic situation of the road
+
+        return :str(a color)
+        """
+        
+        ## right now we just simply write a temporary fix
+        if traffic_flow_data['JF'] < 3:
+            return 'green'  # #55ce37 it also has hash value color support
+        elif traffic_flow_data['JF'] >= 3 and traffic_flow_data['JF'] <= 9:
+            return 'yellow'
+        else:
+            return 'red'
+
+    def display_json_traffic(self, original_data_id: str):
+        """
+        inputs: original_data_id: str(the primary key/id for original_data table)
+        """
+        flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run()
+        geojson_list = []
+        for flow_data in flow_data_collection:
+            flow_data_id = flow_data['id']
+            road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run()
+
+            for road_data in road_data_collection:
+                geojson_list += [self.fetch_geojson_item(road_data['id'])]
+
+        ## Lastly we assemble the geojson_list by using generate_geojson_collection()
+        return TrafficData.generate_geojson_collection(geojson_list)
+
+
+
 
 
