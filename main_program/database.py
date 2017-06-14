@@ -108,3 +108,38 @@ class TrafficData:
 
     def main_matrix_data(matrix: pd.DataFrame):
         pass
+
+
+    def fetch_geojson_item(self, id: str) -> Dict:
+        """
+        inputs: id: str(a primary key of road_data table)
+
+        This function uses a id(primary key) to fethe a geojson object from 
+        the road_data database.
+
+        Example output:
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [125.6, 10.1]
+          },
+          "properties": {
+            "name": "Dinagat Islands"
+          }
+        }
+
+        For more infomation about geojson, check out
+        http://geojson.org/
+        """
+        data = r.db('Traffic').table('road_data').get(id).run()
+        flow_data_id = data['flow_data_id']
+        flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run()
+        print(flow_data)
+        geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][0]}
+        geojson_geometry = r.db('Traffic').table('road_data').get(id)['geometry'].to_geojson().run()
+        geojson_type = "Feature"
+
+        return {"type": geojson_type, "geometry": geojson_geometry, "properties": geojson_properties}
+
+

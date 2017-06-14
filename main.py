@@ -2,6 +2,8 @@ from main_program.map_resource import ultil
 from main_program.database import TrafficData
 from main_program import tools
 import json
+import rethinkdb as r
+import time
 
 
 ## Furman's coordinates is 34.9237° N, 82.4383° W
@@ -113,3 +115,16 @@ traffic_data = TrafficData()
 #json_data = traffic_data.read_traffic_data('https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc')
 #
 #traffic_data.insert_json_data(json_data)
+
+## inserting test data into test.geo table
+#current_epoch = 1497446043
+#
+#for i in range(10):
+#    data = []
+#    for i in range(10):
+#        data += [{'timestamp': r.epoch_time(time.time()) }]
+#        
+#    r.table('geo').insert(data).run()
+#    time.sleep(1)
+#        
+#print('finished')
