@@ -28,7 +28,7 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import RandomTestData from './random_test_data'
+import TestData from './traffic.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -41,15 +41,18 @@ export default {
   name: 'hello',
   data () {
     return {
-      center: {lat: 34.91623, lng: -82.42907},
+      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907} Furman
       markers: [],
+      paths: [
+        [ {lat: 1.380, lng: 103.800}, {lat: 1.380, lng: 103.810}, {lat: 1.390, lng: 103.810}, {lat: 1.390, lng: 103.800} ],
+        [ {lat: 1.382, lng: 103.802}, {lat: 1.382, lng: 103.808}, {lat: 1.388, lng: 103.808}, {lat: 1.388, lng: 103.802} ]
+      ],
       geojson: null
     }
   },
   methods: {
     loadControls() {
-      var value = JSON.parse(RandomTestData)
-      this.$refs.mymap.$mapObject.data.addGeoJson(value)
+      this.$refs.mymap.$mapObject.data.addGeoJson(TestData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
