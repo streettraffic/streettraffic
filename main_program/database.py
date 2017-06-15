@@ -314,6 +314,7 @@ class TrafficData:
         """
         inputs: original_data_id: str(the primary key/id for original_data table)
         ## TODO: apparently a lot more optimization can be done here
+        ## TODO: there might be overlapping documents with the same road_data_id
 
         This function takes a list of original_data_id, get every road related to them
         and lastly output a geojson object containing every road.
@@ -363,8 +364,41 @@ class TrafficData:
             return query_result[0]
 
 
-    def get_historic_traffic(self, route: Dict):
+    def get_historic_traffic(self, routing_info: Dict, historic_collection_quantity: int):
         """
+        ## TODO: inplement historic collection 
+        inputs: route_info: Dict(a json object that contains routing information),
+        historic_collection_quantity: int(how many historic collection do you want)
+        Example input: see google_routing.json
 
         """
-        pass
+        ## there might be multiple **routes**, but we just worry about one for now
+        route = routing_info['routes'][0]
+        ## there might be multiple **legs**, but we just worry about one for now
+        leg = route['legs'][0]
+
+        ## we don't want duplicate road in our collection
+        road_id_collection = {}
+        duplicate_road_id = []
+        geojson_road_list = []
+
+        for step in leg['steps']:
+            for path_item in step['path']:
+                road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000, max_results = 5)
+                road_data_id = road_document['doc']['id']
+
+                ## see if road_data_id already exists in our collection
+                if road_data_id not in road_id_collection:
+                    road_id_collection[road_data_id] = True
+                    geojson_road_list += [self.fetch_geojson_item(road_data_id)]
+                else:
+                    duplicate_road_id += [road_data_id]
+
+        print('there are', len(duplicate_road_id), 'many duplicate road element')
+
+        return TrafficData.generate_geojson_collection(geojson_road_list)
+
+
+
+
+
