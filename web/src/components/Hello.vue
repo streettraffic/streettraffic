@@ -43,8 +43,8 @@ export default {
   data () {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
-      markers: [],
-      geojson: null
+      geojson: null,
+      ws: null
     }
   },
   methods: {
@@ -75,6 +75,7 @@ export default {
       /* eslint-enable */
     },
     calculateAndDisplayRoute(directionsService, directionsDisplay) {
+      var scope = this
       /* eslint-disable */
       directionsService.route({
         origin: {lat: 33.736818, lng: -84.394652},  // Haight.
@@ -85,13 +86,20 @@ export default {
         travelMode: google.maps.TravelMode['DRIVING']
       }, function(response, status) {
         if (status == 'OK') {
-          console.log(response)
+          scope.ws.send(JSON.stringify(response))
           directionsDisplay.setDirections(response)
         } else {
           window.alert('Directions request failed due to ' + status)
         }
       })
       /* eslint-enable */
+    }
+  },
+  created() {
+    this.ws = new WebSocket('ws://127.0.0.1:8765/')
+    console.log('connecting websocket', this.ws)
+    this.ws.onmessage = function (event) {
+      console.log(event.data)
     }
   }
 }

@@ -361,3 +361,10 @@ class TrafficData:
             raise Exception('query_result has no results')
         else:
             return query_result[0]
+
+
+    def get_historic_traffic(self, route: Dict):
+        """
+
+        """
+        pass

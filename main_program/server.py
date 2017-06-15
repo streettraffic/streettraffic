@@ -16,15 +16,23 @@ class TrafficServer:
 
     async def consumer_handler(self, websocket):
         while True:
-            message = await websocket.recv()
-            print("received", message)
+            try:
+                message = await websocket.recv()
+                print("received", message)
+            except websockets.exceptions.ConnectionClosed:
+                print('disconnected')
+                break
 
     async def producer_handler(self, websocket):
         while True:
-            message = await self.msg_queue.get()
-            print('get value')
-            await websocket.send(message)
-            print("sent", message)
+            try:
+                message = await self.msg_queue.get()
+                print('get value')
+                await websocket.send(message)
+                print("sent", message)
+            except websockets.exceptions.ConnectionClosed:
+                print('disconnected')
+                break
 
     async def handler(self, websocket, path):
         consumer_task = asyncio.ensure_future(self.consumer_handler(websocket))
@@ -37,6 +45,8 @@ class TrafficServer:
         for task in pending:
             task.cancel()
 
+        print('finished')
+
     def _loop_in_thread(self, loop):
         start_server = websockets.serve(self.handler, 'localhost', 8765)
         asyncio.set_event_loop(loop)
@@ -47,4 +57,5 @@ class TrafficServer:
     def start(self):
         t = threading.Thread(target=self._loop_in_thread, args=(self.loop,))
         t.start()
+        print('server served at ws://127.0.0.1:8765/')
 
