@@ -3,14 +3,15 @@
     <div class="container">
       <div class="map">
         <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px">
-          <gmap-polygon :paths="paths" :editable="true" @paths_changed="updateEdited($event)">
-          </gmap-polygon>
         </gmap-map>
         <button @click="loadControls">
           Load Drawing Controls
         </button>
         <button @click="displayGeoJson">
           Display GeoJSON Data
+        </button>
+        <button @click="dsiplayRouting">
+          Display Routing
         </button>
       </div>
       <div class="test">
@@ -28,7 +29,7 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import TestData from './traffic.json'
+import TestData from './random_test_data.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -41,12 +42,8 @@ export default {
   name: 'hello',
   data () {
     return {
-      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907} Furman
+      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       markers: [],
-      paths: [
-        [ {lat: 1.380, lng: 103.800}, {lat: 1.380, lng: 103.810}, {lat: 1.390, lng: 103.810}, {lat: 1.390, lng: 103.800} ],
-        [ {lat: 1.382, lng: 103.802}, {lat: 1.382, lng: 103.808}, {lat: 1.388, lng: 103.808}, {lat: 1.388, lng: 103.802} ]
-      ],
       geojson: null
     }
   },
@@ -66,6 +63,35 @@ export default {
         results = JSON.stringify(geojson, null, 2)
       })
       this.geojson = results
+    },
+    dsiplayRouting() {
+      /* eslint-disable */
+      // console.log(google)
+      var directionsDisplay = new google.maps.DirectionsRenderer()
+      var directionsService = new google.maps.DirectionsService()
+      directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.calculateAndDisplayRoute(directionsService, directionsDisplay)
+
+      /* eslint-enable */
+    },
+    calculateAndDisplayRoute(directionsService, directionsDisplay) {
+      /* eslint-disable */
+      directionsService.route({
+        origin: {lat: 33.736818, lng: -84.394652},  // Haight.
+        destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
+        // Note that Javascript allows us to access the constant
+        // using square brackets and a string value as its
+        // "property."
+        travelMode: google.maps.TravelMode['DRIVING']
+      }, function(response, status) {
+        if (status == 'OK') {
+          console.log(response)
+          directionsDisplay.setDirections(response)
+        } else {
+          window.alert('Directions request failed due to ' + status)
+        }
+      })
+      /* eslint-enable */
     }
   }
 }

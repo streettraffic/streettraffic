@@ -9,6 +9,9 @@ import pandas as pd
 class TrafficData:
 
     def __init__(self):
+        """
+        This class establishes a connection towards the database
+        """
         r.connect('localhost', 28015).repl()
 
     def insert_json_data(self, data: Dict) -> None:
@@ -302,15 +305,19 @@ class TrafficData:
         ## right now we just simply write a temporary fix
         if traffic_flow_data['JF'] < 3:
             return 'green'  # #55ce37 it also has hash value color support
-        elif traffic_flow_data['JF'] >= 3 and traffic_flow_data['JF'] <= 9:
+        elif traffic_flow_data['JF'] >= 3 and traffic_flow_data['JF'] <= 6:
             return 'yellow'
         else:
             return 'red'
 
-    def display_json_traffic(self, original_data_id_list: List):
+    def display_json_traffic(self, original_data_id_list: List) -> Dict:
         """
         inputs: original_data_id: str(the primary key/id for original_data table)
-        apparently a lot more optimization can be done here
+        ## TODO: apparently a lot more optimization can be done here
+
+        This function takes a list of original_data_id, get every road related to them
+        and lastly output a geojson object containing every road.
+
         """
         geojson_list = []
         for original_data_id in original_data_id_list:
@@ -326,7 +333,31 @@ class TrafficData:
         ## Lastly we assemble the geojson_list by using generate_geojson_collection()
         return TrafficData.generate_geojson_collection(geojson_list)
 
+    def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int, location_type="latlon") -> Dict:
+        """
+        inputs: location_data: tuple, max_dist: int, max_results: int, location_type: str
 
+        The location_type and corresponding location data is as follow
+        location_type = "latlon"; location_data = (latitude, longitude)  
+        we currently only support latlon
 
+        example outputs:
+        {'dist': 2.5938097681046823,
+         'doc': {'FC': 4,
+          'created_timestamp': datetime.datetime(2017, 6, 14, 20, 11, 40, tzinfo=<rethinkdb.ast.RqlTzinfo object at 0x000001817771C518>),
+          'flow_data_id': '741f5e08-29cc-4a35-a7fa-80e8286a3f21',
+          'geometry': {'$reql_type$': 'GEOMETRY',
+           'coordinates': [[-84.39459, 33.73684], [-84.39548, 33.73686]],
+           'type': 'LineString'},
+          'id': '85179647-1e04-4306-ad5f-5054dadedd0b',
+          'value': ['33.73684,-84.39459 33.73686,-84.39548 ']}
+        }
 
+        """
+        query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), 
+                                                    index = 'geometry', max_dist = max_dist, max_results = max_results).run()
 
+        if len(query_result) == 0:
+            raise Exception('query_result has no results')
+        else:
+            return query_result[0]

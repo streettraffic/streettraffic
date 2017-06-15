@@ -148,3 +148,7 @@ atlanta_traffic_original_doc_ids = [
     '9a136e28-67a8-4d3e-beda-351c82565c7f',
     'a3f3dc2b-eea0-40d0-87c2-7ad7b8cc0fdd',
 ]
+
+
+## given a point, we want to know the closest road to it
+test_point = (33.736818, -84.394652)
