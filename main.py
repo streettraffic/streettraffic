@@ -1,6 +1,7 @@
 from main_program.map_resource import ultil
 from main_program.database import TrafficData
 from main_program import tools
+from main_program.server import TrafficServer
 import json
 import rethinkdb as r
 import time
@@ -107,7 +108,7 @@ matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 with open('test.json') as f:
     data = json.load(f)
 
-traffic_data = TrafficData()
+traffic_server = TrafficServer()
 
 ## Nice to know that we have set up datatime object correctly
 # r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
@@ -151,4 +152,5 @@ atlanta_traffic_original_doc_ids = [
 
 
 ## given a point, we want to know the closest road to it
-test_point = (33.736818, -84.394652)
+test_start_location = (33.736818, -84.394652)
+test_end_location = (33.769922, -84.377616)
