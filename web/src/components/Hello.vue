@@ -3,14 +3,15 @@
     <div class="container">
       <div class="map">
         <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px">
-          <gmap-polygon :paths="paths" :editable="true" @paths_changed="updateEdited($event)">
-          </gmap-polygon>
         </gmap-map>
         <button @click="loadControls">
           Load Drawing Controls
         </button>
         <button @click="displayGeoJson">
           Display GeoJSON Data
+        </button>
+        <button @click="dsiplayRouting">
+          Display Routing
         </button>
       </div>
       <div class="test">
@@ -23,12 +24,14 @@
 </template>
 
 <script>
-// Check out https://github.com/xkjyeah/vue-google-maps/issues/90 about how we use
-// geojson in google maps
+// To see how we use geojson in google maps, check out
+// https://github.com/xkjyeah/vue-google-maps/issues/90 about how we use
+// To see how we use the Direction api, refer to
+// https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import RandomTestData from './random_test_data'
+import TestData from './history_traffic_route.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -41,15 +44,14 @@ export default {
   name: 'hello',
   data () {
     return {
-      center: {lat: 34.91623, lng: -82.42907},
-      markers: [],
-      geojson: null
+      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
+      geojson: null,
+      ws: null
     }
   },
   methods: {
     loadControls() {
-      var value = JSON.parse(RandomTestData)
-      this.$refs.mymap.$mapObject.data.addGeoJson(value)
+      this.$refs.mymap.$mapObject.data.addGeoJson(TestData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
@@ -63,6 +65,43 @@ export default {
         results = JSON.stringify(geojson, null, 2)
       })
       this.geojson = results
+    },
+    dsiplayRouting() {
+      /* eslint-disable */
+      // console.log(google)
+      var directionsDisplay = new google.maps.DirectionsRenderer()
+      var directionsService = new google.maps.DirectionsService()
+      directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.calculateAndDisplayRoute(directionsService, directionsDisplay)
+
+      /* eslint-enable */
+    },
+    calculateAndDisplayRoute(directionsService, directionsDisplay) {
+      var scope = this
+      /* eslint-disable */
+      directionsService.route({
+        origin: {lat: 33.736818, lng: -84.394652},  // Haight.
+        destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
+        // Note that Javascript allows us to access the constant
+        // using square brackets and a string value as its
+        // "property."
+        travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
+      }, function(response, status) {
+        if (status == 'OK') {
+          scope.ws.send(JSON.stringify(response))
+          directionsDisplay.setDirections(response)
+        } else {
+          window.alert('Directions request failed due to ' + status)
+        }
+      })
+      /* eslint-enable */
+    }
+  },
+  created() {
+    this.ws = new WebSocket('ws://127.0.0.1:8765/')
+    console.log('connecting websocket', this.ws)
+    this.ws.onmessage = function (event) {
+      console.log(event.data)
     }
   }
 }

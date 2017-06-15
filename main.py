@@ -1,6 +1,7 @@
 from main_program.map_resource import ultil
 from main_program.database import TrafficData
 from main_program import tools
+from main_program.server import TrafficServer
 import json
 import rethinkdb as r
 import time
@@ -86,10 +87,10 @@ altanta_worst_map_tile = ultil.get_map_tile_resource(altanta_worst, "latlon", 14
 atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon", 14)
 
 ## atlanta tile
-#cor1 = (33.766764, -84.409533)
-#cor2 = (33.740003, -84.368978)
-#info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-#matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+cor1 = (33.766764, -84.409533)
+cor2 = (33.740003, -84.368978)
+info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
 
@@ -107,7 +108,7 @@ atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon
 #with open('test.json') as f:
 #    data = json.load(f)
 
-traffic_data = TrafficData()
+traffic_server = TrafficServer()
 
 ## Nice to know that we have set up datatime object correctly
 # r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
@@ -129,9 +130,30 @@ traffic_data = TrafficData()
 #        
 #print('finished')
 
-test_geojson1 = traffic_data.fetch_geojson_item('0ccbbac6-12b8-4681-a1a4-9e15e89bd4e1')
-test_geojson2 = traffic_data.fetch_geojson_item('08901fc1-b9d3-4c3a-a48e-6be807df39dc')
-test_data = TrafficData.generate_geojson_collection([test_geojson1,test_geojson2 ])
+#test_geojson1 = traffic_data.fetch_geojson_item('0ccbbac6-12b8-4681-a1a4-9e15e89bd4e1')
+#test_geojson2 = traffic_data.fetch_geojson_item('08901fc1-b9d3-4c3a-a48e-6be807df39dc')
+#test_data = TrafficData.generate_geojson_collection([test_geojson1,test_geojson2 ])
 
 ## display traffic test
-display_traffic = traffic_data.display_json_traffic('974f1914-8179-4518-8f26-6b013b998d72')
+#display_traffic = traffic_data.display_json_traffic(['974f1914-8179-4518-8f26-6b013b998d72'])
+
+## atlanta traffic original documents id
+atlanta_traffic_original_doc_ids = [
+    '4f159114-e1d9-4d21-881d-16c3f199b381',
+    '38070cae-aa79-4828-a95f-31df91883846',
+    'ade4f658-8760-449e-8747-3c306588fd47',
+    'a805261f-341d-4790-90d2-8a5d6d88ca37',
+    '1ae29972-6c2d-4145-9226-a9c34a8498c4',
+    'fb39a2cf-d7e7-49bf-a7bd-b0e713539447',
+    '9a136e28-67a8-4d3e-beda-351c82565c7f',
+    '9a136e28-67a8-4d3e-beda-351c82565c7f',
+    'a3f3dc2b-eea0-40d0-87c2-7ad7b8cc0fdd',
+]
+
+
+## given a point, we want to know the closest road to it
+test_start_location = (33.736818, -84.394652)
+test_end_location = (33.769922, -84.377616)
+
+with open('traffic data samples/google_routing.json') as f:
+    data = json.load(f)
