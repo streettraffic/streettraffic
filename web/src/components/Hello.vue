@@ -13,6 +13,9 @@
         <button @click="dsiplayRouting">
           Display Routing
         </button>
+        <button @click="getHistoric">
+          Get Historic Traffic info
+        </button>
       </div>
       <div class="test">
 
@@ -46,11 +49,16 @@ export default {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       geojson: null,
-      ws: null
+      ws: null,
+      route: null,
+      directionsDisplay: null,
+      directionsService: null,
+      scope: this
     }
   },
   methods: {
     loadControls() {
+      console.log(this == this.scope)
       this.$refs.mymap.$mapObject.data.addGeoJson(TestData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
@@ -69,17 +77,31 @@ export default {
     dsiplayRouting() {
       /* eslint-disable */
       // console.log(google)
-      var directionsDisplay = new google.maps.DirectionsRenderer()
-      var directionsService = new google.maps.DirectionsService()
-      directionsDisplay.setMap(this.$refs.mymap.$mapObject)
-      this.calculateAndDisplayRoute(directionsService, directionsDisplay)
+      this.directionsDisplay = new google.maps.DirectionsRenderer()
+      this.directionsService = new google.maps.DirectionsService()
+      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.calculateAndDisplayRoute()
 
       /* eslint-enable */
     },
-    calculateAndDisplayRoute(directionsService, directionsDisplay) {
-      var scope = this
+    getHistoric (){
+      let scope = this
+      this.ws.send('getHistoric')
+      this.ws.send(JSON.stringify(this.route))
+      this.ws.onmessage = function (event) {
+        scope.$refs.mymap.$mapObject.data.addGeoJson(JSON.parse(event.data))
+        scope.$refs.mymap.$mapObject.data.setStyle(function(feature) {
+          return ({
+            strokeColor: feature.getProperty('color'),
+            strokeWeight: 3
+          })
+        })
+      }
+    },
+    calculateAndDisplayRoute() {
+      let scope = this
       /* eslint-disable */
-      directionsService.route({
+      scope.directionsService.route({
         origin: {lat: 33.736818, lng: -84.394652},  // Haight.
         destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
         // Note that Javascript allows us to access the constant
@@ -88,8 +110,8 @@ export default {
         travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
       }, function(response, status) {
         if (status == 'OK') {
-          scope.ws.send(JSON.stringify(response))
-          directionsDisplay.setDirections(response)
+          scope.route = response
+          scope.directionsDisplay.setDirections(response)
         } else {
           window.alert('Directions request failed due to ' + status)
         }
@@ -100,9 +122,6 @@ export default {
   created() {
     this.ws = new WebSocket('ws://127.0.0.1:8765/')
     console.log('connecting websocket', this.ws)
-    this.ws.onmessage = function (event) {
-      console.log(event.data)
-    }
   }
 }
 </script>

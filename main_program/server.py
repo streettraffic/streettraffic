@@ -10,7 +10,10 @@ from .database import TrafficData
 class TrafficServer:
 
     def __init__(self):
-        self.msg_queue = asyncio.Queue()
+        """
+        self.msg_queue is used to communicate with consumer_handler() and producer_handler()
+        """
+        self.msg_queue = asyncio.Queue() 
         self.traffic_data = TrafficData()
         self.loop = asyncio.get_event_loop()
 
@@ -19,19 +22,29 @@ class TrafficServer:
             try:
                 message = await websocket.recv()
                 print("received", message)
+
+                # for each different message, we do different things
+                if message == "getHistoric":
+                    data = await websocket.recv()
+                    geojson_object = self.traffic_data.get_historic_traffic(json.loads(data), 1)
+                    await self.msg_queue.put('getHistoric')
+                    await self.msg_queue.put(geojson_object)
+            
             except websockets.exceptions.ConnectionClosed:
-                print('disconnected')
+                print('a client has disconnected')
                 break
 
     async def producer_handler(self, websocket):
         while True:
             try:
                 message = await self.msg_queue.get()
-                print('get value')
-                await websocket.send(message)
-                print("sent", message)
+                if message == "getHistoric":
+                    data = await self.msg_queue.get()
+                    await websocket.send(json.dumps(data))
+                    print('sent data')
+            
             except websockets.exceptions.ConnectionClosed:
-                print('disconnected')
+                print('a client has disconnected')
                 break
 
     async def handler(self, websocket, path):

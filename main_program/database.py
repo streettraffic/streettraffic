@@ -12,7 +12,7 @@ class TrafficData:
         """
         This class establishes a connection towards the database
         """
-        r.connect('localhost', 28015).repl()
+        self.conn = r.connect('localhost', 28015)
 
     def insert_json_data(self, data: Dict) -> None:
         """
@@ -27,8 +27,8 @@ class TrafficData:
         """
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
-        data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run()
-        result = r.db('Traffic').table('original_data').insert(data).run()
+        data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run(self.conn)
+        result = r.db('Traffic').table('original_data').insert(data).run(self.conn)
         original_data_id = result['generated_keys'][0]
 
         ## start parsing the data
@@ -42,19 +42,19 @@ class TrafficData:
                         FI_item['CUSTOM'] = {
                             'parent_DE': RW_item['DE'],
                             'original_data_id': original_data_id,
-                            'created_timestamp': r.expr(created_timestamp).run()
+                            'created_timestamp': r.expr(created_timestamp).run(self.conn)
                         }
                         SHP_list = copy.deepcopy(FI_item['SHP'])
                         FI_item['SHP'] = "See table road_data"
-                        result = r.db('Traffic').table('flow_data').insert(FI_item).run()
+                        result = r.db('Traffic').table('flow_data').insert(FI_item).run(self.conn)
                         flow_data_id = result['generated_keys'][0]
                         
                         for SHP_item in SHP_list:
                             SHP_item['flow_data_id'] = flow_data_id
                             try:
-                                SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run()
-                                SHP_item['created_timestamp'] = r.expr(created_timestamp).run()
-                                r.db('Traffic').table('road_data').insert(SHP_item).run()
+                                SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
+                                SHP_item['created_timestamp'] = r.expr(created_timestamp).run(self.conn)
+                                r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
                             except:
                                 print('exception in parsing SHP values')
                                 raise
@@ -102,16 +102,16 @@ class TrafficData:
         This is a helper function to create tables in rethinkDB
         """
         ## creating tables
-        r.db('Traffic').table_create('original_data').run()
-        r.db('Traffic').table_create('road_data').run()
-        r.db('Traffic').table_create('flow_data').run()
+        r.db('Traffic').table_create('original_data').run(self.conn)
+        r.db('Traffic').table_create('road_data').run(self.conn)
+        r.db('Traffic').table_create('flow_data').run(self.conn)
 
         ## creating index
-        r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run()
-        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run()
-        r.db('Traffic').table('road_data').index_create('flow_data_id').run()
-        r.db('Traffic').table('road_data').index_create('geometry', geo=True).run()
-        r.db('Traffic').table('road_data').index_create('created_timestamp').run()
+        r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
+        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
+        r.db('Traffic').table('road_data').index_create('flow_data_id').run(self.conn)
+        r.db('Traffic').table('road_data').index_create('geometry', geo=True).run(self.conn)
+        r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
 
 
 
@@ -212,16 +212,16 @@ class TrafficData:
         For more infomation about geojson, check out
         http://geojson.org/
         """
-        data = r.db('Traffic').table('road_data').get(road_data_id).run()
+        data = r.db('Traffic').table('road_data').get(road_data_id).run(self.conn)
         flow_data_id = data['flow_data_id']
-        flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run()
+        flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run(self.conn)
         geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][0]}
         
         # possibly we need to calculate traffic color for the road
         if calculate_traffic_color:
             geojson_properties['color'] = self.traffic_flow_color_scheme(geojson_properties['CF'])
 
-        geojson_geometry = r.db('Traffic').table('road_data').get(road_data_id)['geometry'].to_geojson().run()
+        geojson_geometry = r.db('Traffic').table('road_data').get(road_data_id)['geometry'].to_geojson().run(self.conn)
         geojson_type = "Feature"
 
         return {"type": geojson_type, "geometry": geojson_geometry, "properties": geojson_properties}
@@ -323,10 +323,10 @@ class TrafficData:
         geojson_list = []
         for original_data_id in original_data_id_list:
             ## maybe instead of query the whole document, we just query the index?
-            flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run()  
+            flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run(self.conn)  
             for flow_data in flow_data_collection:
                 flow_data_id = flow_data['id']
-                road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run()
+                road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run(self.conn)
 
                 for road_data in road_data_collection:
                     geojson_list += [self.fetch_geojson_item(road_data['id'])]
@@ -356,7 +356,7 @@ class TrafficData:
 
         """
         query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), 
-                                                    index = 'geometry', max_dist = max_dist, max_results = max_results).run()
+                                                    index = 'geometry', max_dist = max_dist, max_results = max_results).run(self.conn)
 
         if len(query_result) == 0:
             raise Exception('query_result has no results')
@@ -395,6 +395,7 @@ class TrafficData:
                     duplicate_road_id += [road_data_id]
 
         print('there are', len(duplicate_road_id), 'many duplicate road element')
+        print(road_id_collection)
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
 
