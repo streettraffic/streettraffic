@@ -2,27 +2,36 @@
   <div class="hello">
     <div class="container">
       <div class="map">
-        <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px">
+        <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px" 
+            @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
+          <gmap-marker v-if="location" :position="location" />
         </gmap-map>
-        <button @click="loadControls">
-          Load Drawing Controls
+        <button @click="plotGeoJson(testData)">
+          Plot Atlanta Data
         </button>
         <button @click="displayGeoJson">
-          Display GeoJSON Data
+          Display GeoJSON Text 
         </button>
         <button @click="dsiplayRouting">
-          Display Routing
+          Display Routing 21
         </button>
         <button @click="getHistoric">
           Get Historic Traffic info
         </button>
+        <button @click="toManhattan">
+          To Manhattan
+        </button>
+        <button @click = "test">
+          Test
+        </button>
       </div>
       <div class="test">
-
-        <textarea cols="50" rows="50" v-model="geojson"></textarea>
+        <h3>geojson</h3>
+        <textarea cols="50" rows="20" v-model="geojson"></textarea>
+        <h3>other</h3>
+        <textarea cols="50" rows="20" v-model="locationData"></textarea>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -34,7 +43,7 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import TestData from './history_traffic_route.json'
+import TestData from './traffic.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -53,13 +62,34 @@ export default {
       route: null,
       directionsDisplay: null,
       directionsService: null,
-      scope: this
+      location: null,
+      locationData: null,
+      testData: TestData
     }
   },
   methods: {
-    loadControls() {
-      console.log(this == this.scope)
-      this.$refs.mymap.$mapObject.data.addGeoJson(TestData)
+    getLocation() {
+      let scope = this
+      this.locationData = JSON.stringify(this.location)
+      this.ws.send(JSON.stringify(['getRoadData', this.location, 500, 10]))
+      this.ws.onmessage = function (event) {
+        scope.plotGeoJson(JSON.parse(event.data))
+      }
+    },
+    toManhattan() {
+      this.center = {lat: 40.725306, lng: -73.988913}
+    },
+    test(){
+      /* eslint-disable */
+      this.getLocation()
+      /* eslint-enable */
+    },
+    plotGeoJson(geoJsonData) {
+      /* input: geoJsonData(a geojson json object)
+
+         This fucntion add the geoJson data to the google map object
+      */
+      this.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
@@ -76,26 +106,19 @@ export default {
     },
     dsiplayRouting() {
       /* eslint-disable */
-      // console.log(google)
+      console.log(google)
       this.directionsDisplay = new google.maps.DirectionsRenderer()
       this.directionsService = new google.maps.DirectionsService()
       this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
       this.calculateAndDisplayRoute()
-
       /* eslint-enable */
     },
     getHistoric (){
       let scope = this
-      this.ws.send('getHistoric')
-      this.ws.send(JSON.stringify(this.route))
+      this.ws.send(JSON.stringify(['getHistoric', this.route]))
       this.ws.onmessage = function (event) {
-        scope.$refs.mymap.$mapObject.data.addGeoJson(JSON.parse(event.data))
-        scope.$refs.mymap.$mapObject.data.setStyle(function(feature) {
-          return ({
-            strokeColor: feature.getProperty('color'),
-            strokeWeight: 3
-          })
-        })
+        console.log(JSON.parse(event.data))
+        scope.plotGeoJson(JSON.parse(event.data))
       }
     },
     calculateAndDisplayRoute() {
@@ -122,15 +145,21 @@ export default {
   created() {
     this.ws = new WebSocket('ws://127.0.0.1:8765/')
     console.log('connecting websocket', this.ws)
+  },
+  mounted() {
+    // pass
   }
 }
 </script>
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 .container {
   position: relative;
   height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .map {
@@ -138,7 +167,12 @@ export default {
 }
 
 .test {
+  padding: 20px;
   display: inline-block;
+
+  textarea {
+    display: block;
+  }
 }
 
 h1, h2 {
