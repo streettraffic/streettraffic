@@ -22,13 +22,19 @@ class TrafficServer:
             try:
                 message = await websocket.recv()
                 print("received", message)
+                message = json.loads(message)
 
                 # for each different message, we do different things
-                if message == "getHistoric":
-                    data = await websocket.recv()
-                    geojson_object = self.traffic_data.get_historic_traffic(json.loads(data), 1)
-                    await self.msg_queue.put('getHistoric')
-                    await self.msg_queue.put(geojson_object)
+                if message[0] == "getHistoric":
+                    geojson_object = self.traffic_data.get_historic_traffic(message[1], 1)
+                    await self.msg_queue.put(['getHistoric', geojson_object])
+
+                elif message[0] == "getRoadData":
+                    data = self.traffic_data.get_nearest_road(location_data = (message[1]['lat'], message[1]['lng']), max_dist = message[2], max_results = message[3])
+                    distance = data['dist']
+                    road_data_id = data['doc']['id']
+                    road_data_geojson = self.traffic_data.fetch_geojson_item(road_data_id)
+                    await self.msg_queue.put(['getRoadData', road_data_geojson])
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')
@@ -38,9 +44,12 @@ class TrafficServer:
         while True:
             try:
                 message = await self.msg_queue.get()
-                if message == "getHistoric":
-                    data = await self.msg_queue.get()
-                    await websocket.send(json.dumps(data))
+                if message[0] == "getHistoric":
+                    await websocket.send(json.dumps(message[1]))
+                    print('sent data')
+
+                elif message[0] == "getRoadData":
+                    await websocket.send(json.dumps(message[1]))
                     print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
