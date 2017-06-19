@@ -15,6 +15,7 @@ class TrafficData:
         This class establishes a connection towards the database
         """
         self.conn = r.connect('localhost', 28015)
+        self.latest_crawled_batch_id = r.db('Traffic').table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str = None) -> None:
         """
@@ -46,7 +47,8 @@ class TrafficData:
                         FI_item['CUSTOM'] = {
                             'parent_DE': RW_item['DE'],
                             'original_data_id': original_data_id,
-                            'created_timestamp': r.expr(created_timestamp).run(self.conn)
+                            'created_timestamp': r.expr(created_timestamp).run(self.conn),
+                            'crawled_batch_id': crawled_batch_id
                         }
                         SHP_list = copy.deepcopy(FI_item['SHP'])
                         FI_item['SHP'] = "See table road_data"
@@ -113,15 +115,17 @@ class TrafficData:
         r.db('Traffic').table_create('crawled_batch').run(self.conn)
 
         ## creating index
+        r.db('Traffic').table('original_data').index_create('crawled_batch_id').run(self.conn)
+        r.db('Traffic').table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
         r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
-        r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
         r.db('Traffic').table('road_data').index_create('flow_data_id').run(self.conn)
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run(self.conn)
-        #r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
         r.db('Traffic').table('road_data').index_create('crawled_batch_id').run(self.conn)
         r.db('Traffic').table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
 
-
+        ## depreciated index
+        #r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
+        #r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
 
     def store_matrix_json(self, matrix_list: List) -> None:
         """
@@ -167,7 +171,6 @@ class TrafficData:
                 for j in range(len(matrix.loc[0])):
                     traffic_data = self.read_traffic_data(matrix.loc[i, j])
                     self.insert_json_data(traffic_data, crawled_batch_id)
-
 
     def fetch_geojson_item(self, road_data_id: str, calculate_traffic_color = True) -> Dict:
         """
@@ -360,9 +363,10 @@ class TrafficData:
         ## Lastly we assemble the geojson_list by using generate_geojson_collection()
         return TrafficData.generate_geojson_collection(geojson_list)
 
-    def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int, location_type="latlon") -> Dict:
+    def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int = 1, crawled_batch_id: int = None, location_type: str = "latlon") -> Dict:
         """
-        inputs: location_data: tuple, max_dist: int, max_results: int, location_type: str
+        inputs: location_data: tuple, max_dist: int, max_results: int, location_type: str, 
+        crawled_batch_id: int(it indicate which crawled patch you want to query)
 
         The location_type and corresponding location data is as follow
         location_type = "latlon"; location_data = (latitude, longitude)  
@@ -381,8 +385,11 @@ class TrafficData:
         }
 
         """
-        query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), 
-                                                    index = 'geometry', max_dist = max_dist, max_results = max_results).run(self.conn)
+        if not crawled_batch_id:
+            crawled_batch_id = self.latest_crawled_batch_id
+        query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
+                                                                max_dist = max_dist, max_results = max_results).filter(
+                                                                lambda user: user["doc"]["crawled_batch_id"] == crawled_batch_id).run(self.conn)  # Probably not very efficient
 
         if len(query_result) == 0:
             raise Exception('query_result has no results')
@@ -390,14 +397,17 @@ class TrafficData:
             return query_result[0]
 
 
-    def get_historic_traffic(self, routing_info: Dict, historic_collection_quantity: int):
+    def get_historic_traffic(self, routing_info: Dict, crawled_batch_id: int = None):
         """
         ## TODO: inplement historic collection 
         inputs: route_info: Dict(a json object that contains routing information),
         historic_collection_quantity: int(how many historic collection do you want)
+        crawled_batch_id: int(it indicate which crawled patch you want to query)
         Example input: see google_routing.json
 
         """
+        if not crawled_batch_id:
+            crawled_batch_id = self.latest_crawled_batch_id
         ## there might be multiple **routes**, but we just worry about one for now
         route = routing_info['routes'][0]
         ## there might be multiple **legs**, but we just worry about one for now
@@ -410,8 +420,11 @@ class TrafficData:
 
         for step in leg['steps']:
             for path_item in step['path']:
-                road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000, max_results = 5)
-                road_data_id = road_document['doc']['id']
+                try:
+                    road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000, crawled_batch_id = crawled_batch_id)
+                    road_data_id = road_document['doc']['id']
+                except:
+                    continue
 
                 ## see if road_data_id already exists in our collection
                 if road_data_id not in road_id_collection:
@@ -426,6 +439,23 @@ class TrafficData:
         return TrafficData.generate_geojson_collection(geojson_road_list)
 
 
+    def get_historic_batch(self):
+        """
 
+        example output:
+        [{'crawled_timestamp': '2017-06-19T19:29:37.845000+00:00',
+          'id': 'a6f344c6-9941-41b4-aaf7-83e6ecab5ec2'},
+         {'crawled_timestamp': '2017-06-19T17:36:56.453000+00:00',
+          'id': '3872cf48-e40d-4826-86aa-bc8ee1b36631'},
+         {'crawled_timestamp': '2017-06-19T17:20:00.645000+00:00',
+          'id': 'fbbc23d5-5bcb-4c99-af12-6b66022effcd'}]
+        """
+        query_result = r.db('Traffic').table('crawled_batch').order_by(index = r.desc('crawled_timestamp')).limit(10).run(self.conn)
+        batch_list = []
+        for batch_item in query_result:
+            batch_item.pop('crawled_matrix_encoding', None)
+            batch_item['crawled_timestamp'] = batch_item['crawled_timestamp'].isoformat()
+            batch_list += [batch_item]
 
+        return batch_list
 

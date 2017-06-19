@@ -29,11 +29,11 @@ class TrafficServer:
 
                 # for each different message, we do different things
                 if message[0] == "getHistoric":
-                    geojson_object = self.traffic_data.get_historic_traffic(message[1], 1)
+                    geojson_object = self.traffic_data.get_historic_traffic(message[1])
                     await self.msg_queue.put(['getHistoric', geojson_object])
 
                 elif message[0] == "getRoadData":
-                    data = self.traffic_data.get_nearest_road(location_data = (message[1]['lat'], message[1]['lng']), max_dist = message[2], max_results = message[3])
+                    data = self.traffic_data.get_nearest_road(location_data = (message[1]['lat'], message[1]['lng']), max_dist = message[2])
                     distance = data['dist']
                     road_data_id = data['doc']['id']
                     road_data_geojson = self.traffic_data.fetch_geojson_item(road_data_id)

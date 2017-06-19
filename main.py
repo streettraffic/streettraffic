@@ -191,3 +191,4 @@ man_point2 = (40.728209, -73.982583)
 matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2, 14)
 
 #traffic_server.traffic_data.store_matrix_json([matrix1, matrix2])
+# .get_all(crawled_batch_id, index = "crawled_batch_id")
