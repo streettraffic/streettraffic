@@ -16,6 +16,9 @@ class TrafficServer:
         self.msg_queue = asyncio.Queue() 
         self.traffic_data = TrafficData()
         self.loop = asyncio.get_event_loop()
+        self.crawler_running = False
+        self.crawler_frequency_second = 1800
+        self.traffic_matrix_list = []
 
     async def consumer_handler(self, websocket):
         while True:
@@ -69,10 +72,20 @@ class TrafficServer:
 
         print('finished')
 
+    async def main_crawler(self):
+        """
+        """
+        self.crawler_running = True
+        while self.crawler_running:
+            print('start crawling')
+            self.traffic_data.store_matrix_json(self.traffic_matrix_list)
+            await asyncio.sleep(self.crawler_frequency_second)
+
     def _loop_in_thread(self, loop):
         start_server = websockets.serve(self.handler, 'localhost', 8765)
         asyncio.set_event_loop(loop)
         loop.run_until_complete(start_server)
+        loop.create_task(self.main_crawler())
         loop.run_forever()
 
 

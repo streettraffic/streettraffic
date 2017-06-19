@@ -6,6 +6,7 @@ from dateutil import parser
 import datetime
 import pandas as pd
 import time
+import json
 
 class TrafficData:
 
@@ -57,6 +58,7 @@ class TrafficData:
                             try:
                                 SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
                                 SHP_item['created_timestamp'] = r.expr(created_timestamp).run(self.conn)
+                                SHP_item['crawled_batch_id'] = crawled_batch_id
                                 r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
                             except:
                                 print('exception in parsing SHP values')
@@ -115,7 +117,9 @@ class TrafficData:
         r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
         r.db('Traffic').table('road_data').index_create('flow_data_id').run(self.conn)
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run(self.conn)
-        r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
+        #r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
+        r.db('Traffic').table('road_data').index_create('crawled_batch_id').run(self.conn)
+        r.db('Traffic').table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
 
 
 
@@ -142,12 +146,15 @@ class TrafficData:
         the database
         """
         # store info about matrix_list and when do we crawled them
+        if len(matrix_list) == 0:
+            print('matrix_list has no element')
+            return
         crawled_epochtime = time.time()
         storing_dict = {}
         storing_dict['crawled_timestamp'] =  r.epoch_time(time.time()).run(self.conn)
         matrix_list_encoding = []
         for matrix in matrix_list:
-            matrix_list_encoding += [matrix.to_json(orient='table')]
+            matrix_list_encoding += [json.loads(matrix.to_json(orient='table'))]
         storing_dict['crawled_matrix_encoding'] = matrix_list_encoding
         # notice you can reverse the encoding, refer to 
         # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
