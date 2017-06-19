@@ -29,7 +29,10 @@
         <h3>geojson</h3>
         <textarea cols="50" rows="20" v-model="geojson"></textarea>
         <h3>other</h3>
-        <textarea cols="50" rows="20" v-model="locationData"></textarea>
+        <select v-model="selected_batch" @change="getSelectedBatch">
+          <option v-for="item in historic_batch" :value="item.id"> {{item.crawled_timestamp}} </option>
+        </select>
+        <span>Selected: {{ selected_batch }}</span>
       </div>
     </div>
   </div>
@@ -64,7 +67,9 @@ export default {
       directionsService: null,
       location: null,
       locationData: null,
-      testData: TestData
+      testData: TestData,
+      selected_batch: '',
+      historic_batch: ['A', 'B', 'C']
     }
   },
   methods: {
@@ -73,6 +78,14 @@ export default {
       this.locationData = JSON.stringify(this.location)
       this.ws.send(JSON.stringify(['getRoadData', this.location, 500, 10]))
       this.ws.onmessage = function (event) {
+        scope.plotGeoJson(JSON.parse(event.data))
+      }
+    },
+    getSelectedBatch() {
+      let scope = this
+      this.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
+      this.ws.onmessage = function (event) {
+        console.log(JSON.parse(event.data))
         scope.plotGeoJson(JSON.parse(event.data))
       }
     },
@@ -143,8 +156,17 @@ export default {
     }
   },
   created() {
+    let scope = this
     this.ws = new WebSocket('ws://127.0.0.1:8765/')
     console.log('connecting websocket', this.ws)
+    this.ws.onopen = function (){
+      scope.ws.send(JSON.stringify(['getHistoricBatch']))
+    }
+    this.ws.onmessage = function (event) {
+      console.log('received')
+      console.log(JSON.parse(event.data))
+      scope.historic_batch = JSON.parse(event.data)
+    }
   },
   mounted() {
     // pass

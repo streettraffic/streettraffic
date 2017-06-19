@@ -34,10 +34,18 @@ class TrafficServer:
 
                 elif message[0] == "getRoadData":
                     data = self.traffic_data.get_nearest_road(location_data = (message[1]['lat'], message[1]['lng']), max_dist = message[2])
-                    distance = data['dist']
+                    distance = data['dist']  # did not used, maybe used later
                     road_data_id = data['doc']['id']
                     road_data_geojson = self.traffic_data.fetch_geojson_item(road_data_id)
                     await self.msg_queue.put(['getRoadData', road_data_geojson])
+
+                elif message[0] == "getHistoricBatch":
+                    data = self.traffic_data.get_historic_batch()
+                    await self.msg_queue.put(['getHistoricBatch', data])
+
+                elif message[0] == "getSelectedBatch":
+                    geojson_object = self.traffic_data.get_historic_traffic(routing_info = message[1], crawled_batch_id = message[2])
+                    await self.msg_queue.put(['getSelectedBatch', geojson_object])
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')
@@ -52,6 +60,14 @@ class TrafficServer:
                     print('sent data')
 
                 elif message[0] == "getRoadData":
+                    await websocket.send(json.dumps(message[1]))
+                    print('sent data')
+
+                elif message[0] == "getHistoricBatch":
+                    await websocket.send(json.dumps(message[1]))
+                    print('sent data')
+
+                elif message[0] == "getSelectedBatch":
                     await websocket.send(json.dumps(message[1]))
                     print('sent data')
             
