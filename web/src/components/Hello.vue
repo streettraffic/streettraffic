@@ -46,7 +46,7 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import TestData from './traffic.json'
+import TestData from './level17.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -106,7 +106,7 @@ export default {
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
-          strokeWeight: 3
+          strokeWeight: 2
         })
       })
     },
