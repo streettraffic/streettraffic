@@ -215,7 +215,7 @@ class TrafficData:
                     traffic_data = self.read_traffic_data(matrix.loc[i, j])
                     self.insert_json_data(traffic_data, crawled_batch_id)
 
-    def fetch_geojson_item(self, road_data_id: str, calculate_traffic_color = True) -> Dict:
+    def fetch_geojson_item(self, road_data_id: str, crawled_batch_id: str = None, calculate_traffic_color = True) -> Dict:
         """
         inputs: road_data_id: str(a primary key of road_data table), calculate_traffic_color = True
 
@@ -284,10 +284,13 @@ class TrafficData:
         For more infomation about geojson, check out
         http://geojson.org/
         """
+        if not crawled_batch_id:
+            crawled_batch_id = self.latest_crawled_batch_id
         data = r.db('Traffic').table('road_data').get(road_data_id).run(self.conn)
         flow_data_id = data['flow_data_id']
         flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run(self.conn)
-        geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][0]}
+        flow_data['CF'][crawled_batch_id][0]['created_timestamp'] = flow_data['CF'][crawled_batch_id][0]['created_timestamp'].isoformat()
+        geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][crawled_batch_id][0]}
         
         # possibly we need to calculate traffic color for the road
         if calculate_traffic_color:
@@ -370,17 +373,21 @@ class TrafficData:
         http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
 
         Given the traffic_flow_data, we calculate a color that indicates the traffic situation of the road
+        Check out the following link for coloring Map
+        https://developer.here.com/rest-apis/documentation/traffic/topics/tiles.html
 
         return :str(a color)
         """
         
         ## right now we just simply write a temporary fix
-        if traffic_flow_data['JF'] < 3:
+        if traffic_flow_data['JF'] < 4:
             return 'green'  # #55ce37 it also has hash value color support
-        elif traffic_flow_data['JF'] >= 3 and traffic_flow_data['JF'] <= 6:
+        elif traffic_flow_data['JF'] >= 4 and traffic_flow_data['JF'] < 8:
             return 'yellow'
-        else:
+        elif traffic_flow_data['JF'] >= 8 and traffic_flow_data['JF'] < 10:
             return 'red'
+        else:
+            return 'black'
 
     def display_json_traffic(self, original_data_id_list: List) -> Dict:
         """
@@ -406,7 +413,7 @@ class TrafficData:
         ## Lastly we assemble the geojson_list by using generate_geojson_collection()
         return TrafficData.generate_geojson_collection(geojson_list)
 
-    def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int = 1, crawled_batch_id: int = None, location_type: str = "latlon") -> Dict:
+    def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int = 1, location_type: str = "latlon") -> Dict:
         """
         inputs: location_data: tuple, max_dist: int, max_results: int, location_type: str, 
         crawled_batch_id: int(it indicate which crawled patch you want to query)
@@ -416,23 +423,38 @@ class TrafficData:
         we currently only support latlon
 
         example outputs:
-        {'dist': 2.5938097681046823,
-         'doc': {'FC': 4,
-          'created_timestamp': datetime.datetime(2017, 6, 14, 20, 11, 40, tzinfo=<rethinkdb.ast.RqlTzinfo object at 0x000001817771C518>),
-          'flow_data_id': '741f5e08-29cc-4a35-a7fa-80e8286a3f21',
-          'geometry': {'$reql_type$': 'GEOMETRY',
-           'coordinates': [[-84.39459, 33.73684], [-84.39548, 33.73686]],
-           'type': 'LineString'},
-          'id': '85179647-1e04-4306-ad5f-5054dadedd0b',
-          'value': ['33.73684,-84.39459 33.73686,-84.39548 ']}
+        {
+          "dist": 11.523928527983454,
+          "doc": {
+            "FC": 4,
+            "flow_data_id": "{\"DE\": \"US-278/US-29/Ponce De Leon Ave NE\", \"LE\": 0.58406, \"PC\": 12873, \"QD\": \"-\"}",
+            "geometry": {
+              "$reql_type$": "GEOMETRY",
+              "coordinates": [
+                [
+                  -84.37777,
+                  33.76865
+                ],
+                [
+                  -84.37775,
+                  33.76952
+                ],
+                [
+                  -84.37774,
+                  33.76994
+                ]
+              ],
+              "type": "LineString"
+            },
+            "id": "[\"33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 \"]",
+            "value": [
+              "33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 "
+            ]
+          }
         }
-
         """
-        if not crawled_batch_id:
-            crawled_batch_id = self.latest_crawled_batch_id
         query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
-                                                                max_dist = max_dist, max_results = max_results).filter(
-                                                                lambda user: user["doc"]["crawled_batch_id"] == crawled_batch_id).run(self.conn)  # Probably not very efficient
+                                                                max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
 
         if len(query_result) == 0:
             raise Exception('query_result has no results')
@@ -463,20 +485,20 @@ class TrafficData:
         for step in leg['steps']:
             for path_item in step['path']:
                 try:
-                    road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000, crawled_batch_id = crawled_batch_id)
+                    road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
                     road_data_id = road_document['doc']['id']
                 except:
-                    continue
+                    print('cant find nearest road once')
 
                 ## see if road_data_id already exists in our collection
                 if road_data_id not in road_id_collection:
                     road_id_collection[road_data_id] = True
-                    geojson_road_list += [self.fetch_geojson_item(road_data_id)]
+                    geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
                 else:
                     duplicate_road_id += [road_data_id]
 
         print('there are', len(duplicate_road_id), 'many duplicate road element')
-        print(road_id_collection)
+        #print(road_id_collection)
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
 

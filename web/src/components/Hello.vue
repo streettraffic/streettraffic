@@ -32,7 +32,7 @@
         <select v-model="selected_batch" @change="getSelectedBatch">
           <option v-for="item in historic_batch" :value="item.id"> {{item.crawled_timestamp}} </option>
         </select>
-        <span>Selected: {{ selected_batch }}</span>
+        <div>Selected: {{ selected_batch }}</div>
       </div>
     </div>
   </div>
