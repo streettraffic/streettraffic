@@ -15,7 +15,7 @@ class TrafficData:
         This class establishes a connection towards the database
         """
         self.conn = r.connect('localhost', 28015)
-        self.latest_crawled_batch_id = r.db('Traffic').table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        #self.latest_crawled_batch_id = r.db('Traffic').table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str = None) -> None:
         """
@@ -23,11 +23,18 @@ class TrafficData:
 
         The function ...
 
+        We will try to avoid duplicate of flow_data document and road_data document
+
         For documentation of the file format, refer to
         http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
 
         return: None
         """
+        ## Testing purpose
+        testing = True
+        flow_data_duplicate = 0
+        road_data_duplicate = 0
+
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
         data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run(self.conn)
@@ -41,30 +48,55 @@ class TrafficData:
             for RW_item in RWS_item['RW']:
                 for FIS_item in RW_item['FIS']:
                     for FI_item in FIS_item['FI']:
-                        # our CUSTOM attributes, record
-                        # parent_DE: parent location description
-                        # original_data_id: the original json document that we have downloaded
-                        FI_item['CUSTOM'] = {
-                            'parent_DE': RW_item['DE'],
-                            'original_data_id': original_data_id,
-                            'created_timestamp': r.expr(created_timestamp).run(self.conn),
-                            'crawled_batch_id': crawled_batch_id
-                        }
                         SHP_list = copy.deepcopy(FI_item['SHP'])
-                        FI_item['SHP'] = "See table road_data"
-                        insert_result = r.db('Traffic').table('flow_data').insert(FI_item).run(self.conn)
-                        flow_data_id = insert_result['generated_keys'][0]
+                        CF_item = FI_item['CF'][0]
+                        CF_item['original_data_id'] = original_data_id
+                        CF_item['created_timestamp'] = r.expr(created_timestamp).run(self.conn)
+                        CF_item['crawled_batch_id'] = crawled_batch_id
+
+                        ## we check if the flow_data alerady exist
+                        TMC_encoding = json.dumps(FI_item['TMC'], sort_keys = True)  ## sort the key to elimincate different encoding of the same python Dict
+                        flow_data_doc = r.db('Traffic').table('flow_data').get(TMC_encoding).run(self.conn)
+
+                        ## flow_data = None means the flow_data_doc does *not* exists
+                        if not flow_data_doc:
+                            flow_data_insertion = {}
+                            flow_data_insertion["TMC_encoding"]  = TMC_encoding
+                            flow_data_insertion["CF"] = [CF_item]
+                            flow_data_insertion["TMC"] = FI_item['TMC']
+                            flow_data_insertion['SHP'] = "See table road_data"
+                            r.db('Traffic').table('flow_data').insert(flow_data_insertion).run(self.conn)
+                            flow_data_id = TMC_encoding
+
+                        ## if flow_data_doc already exist, we simply update the CF field
+                        else: 
+                            if testing:
+                                flow_data_duplicate += 1  # you can ignore this, not really part of code
+                            flow_data_doc['CF'] = [CF_item] + flow_data_doc['CF']
+                            flow_data_id = flow_data_doc['TMC_encoding'] 
+                            r.db('Traffic').table('flow_data').get(TMC_encoding).update({"CF": flow_data_doc['CF']}).run(self.conn)
                         
                         for SHP_item in SHP_list:
-                            SHP_item['flow_data_id'] = flow_data_id
-                            try:
-                                SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
-                                SHP_item['created_timestamp'] = r.expr(created_timestamp).run(self.conn)
-                                SHP_item['crawled_batch_id'] = crawled_batch_id
-                                r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
-                            except:
-                                print('exception in parsing SHP values')
-                                raise
+                            geometry_encoding = json.dumps(SHP_item['value'], sort_keys = True)[:120]  # primary key's length is at most 127
+                            road_data_doc = r.db('Traffic').table('road_data').get(geometry_encoding).run(self.conn)
+
+                            # if road_data_doc does not exist, we insert the road into db. Notice that if road_data_doc exists, we simply ignore it.
+                            if not road_data_doc:
+                                SHP_item['flow_data_id'] = flow_data_id
+                                try:
+                                    SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
+                                    SHP_item['geometry_encoding'] = geometry_encoding
+                                    r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
+                                except:
+                                    raise Exception('exception in parsing SHP values')
+                            else:
+                                if testing:
+                                    road_data_duplicate += 1
+
+
+        if testing:
+            print('there are ',flow_data_duplicate, 'flow_data duplicate')
+            print('there are ',road_data_duplicate, 'road_data duplicate')
 
     def parse_SHP_values(self, value: List) -> List:
         """
@@ -110,14 +142,14 @@ class TrafficData:
         """
         ## creating tables
         r.db('Traffic').table_create('original_data').run(self.conn)
-        r.db('Traffic').table_create('road_data').run(self.conn)
-        r.db('Traffic').table_create('flow_data').run(self.conn)
+        r.db('Traffic').table_create('road_data', primary_key='geometry_encoding').run(self.conn)
+        r.db('Traffic').table_create('flow_data', primary_key='TMC_encoding').run(self.conn)
         r.db('Traffic').table_create('crawled_batch').run(self.conn)
 
         ## creating index
         r.db('Traffic').table('original_data').index_create('crawled_batch_id').run(self.conn)
-        r.db('Traffic').table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
-        r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
+        #r.db('Traffic').table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
+        #r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
         r.db('Traffic').table('road_data').index_create('flow_data_id').run(self.conn)
         r.db('Traffic').table('road_data').index_create('geometry', geo=True).run(self.conn)
         r.db('Traffic').table('road_data').index_create('crawled_batch_id').run(self.conn)
@@ -396,7 +428,6 @@ class TrafficData:
         else:
             return query_result[0]
 
-
     def get_historic_traffic(self, routing_info: Dict, crawled_batch_id: int = None):
         """
         ## TODO: inplement historic collection 
@@ -437,7 +468,6 @@ class TrafficData:
         print(road_id_collection)
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
-
 
     def get_historic_batch(self):
         """
