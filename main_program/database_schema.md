@@ -69,7 +69,7 @@ flow_data  (table)
         }
         "SHP":
         "TMC":
-        "TMC_encoding":             #(primary key)
+        "id":                   #(primary key)  a TMC_encoding 
     },
 
 road_data (table)
@@ -77,5 +77,6 @@ road_data (table)
         "FC":
         "flow_data_id":
         "geometry":
-        "value":                     #(primary key)
+        "id":                     #(primary key) a geometry_encoding
+        "value":                    
     }

@@ -61,8 +61,8 @@ class TrafficData:
                         ## flow_data = None means the flow_data_doc does *not* exists
                         if not flow_data_doc:
                             flow_data_insertion = {}
-                            flow_data_insertion["TMC_encoding"]  = TMC_encoding
-                            flow_data_insertion["CF"] = [CF_item]
+                            flow_data_insertion["id"]  = TMC_encoding
+                            flow_data_insertion["CF"] = {crawled_batch_id: [CF_item]}
                             flow_data_insertion["TMC"] = FI_item['TMC']
                             flow_data_insertion['SHP'] = "See table road_data"
                             r.db('Traffic').table('flow_data').insert(flow_data_insertion).run(self.conn)
@@ -72,8 +72,11 @@ class TrafficData:
                         else: 
                             if testing:
                                 flow_data_duplicate += 1  # you can ignore this, not really part of code
-                            flow_data_doc['CF'] = [CF_item] + flow_data_doc['CF']
-                            flow_data_id = flow_data_doc['TMC_encoding'] 
+                            if crawled_batch_id in flow_data_doc['CF']:
+                                flow_data_doc['CF'][crawled_batch_id] = [CF_item] + flow_data_doc['CF'][crawled_batch_id]
+                            else:
+                                flow_data_doc['CF'][crawled_batch_id] = [CF_item]
+                            flow_data_id = flow_data_doc['id'] 
                             r.db('Traffic').table('flow_data').get(TMC_encoding).update({"CF": flow_data_doc['CF']}).run(self.conn)
                         
                         for SHP_item in SHP_list:
@@ -85,13 +88,21 @@ class TrafficData:
                                 SHP_item['flow_data_id'] = flow_data_id
                                 try:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
-                                    SHP_item['geometry_encoding'] = geometry_encoding
+                                    SHP_item['id'] = geometry_encoding
                                     r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
+                                # maybe have different flow_data_id????
                                 if testing:
                                     road_data_duplicate += 1
+                                    ## Notice it is possible for a road to point to different flow_data_id
+                                    ## comment out the following code to see what I mean.
+                                    # if road_data_doc['flow_data_id'] != flow_data_id:
+                                    #     print("======================")
+                                    #     print(road_data_doc['flow_data_id'])
+                                    #     print(flow_data_id)
+
 
 
         if testing:
@@ -142,8 +153,8 @@ class TrafficData:
         """
         ## creating tables
         r.db('Traffic').table_create('original_data').run(self.conn)
-        r.db('Traffic').table_create('road_data', primary_key='geometry_encoding').run(self.conn)
-        r.db('Traffic').table_create('flow_data', primary_key='TMC_encoding').run(self.conn)
+        r.db('Traffic').table_create('road_data').run(self.conn)
+        r.db('Traffic').table_create('flow_data').run(self.conn)
         r.db('Traffic').table_create('crawled_batch').run(self.conn)
 
         ## creating index
