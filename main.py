@@ -2,6 +2,7 @@ from main_program.map_resource import ultil
 from main_program.database import TrafficData
 from main_program import tools
 from main_program.server import TrafficServer
+from main_program.datafeed import DataFeed
 import json
 import rethinkdb as r
 import time
@@ -90,7 +91,7 @@ atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon
 cor1 = (33.766764, -84.409533)
 cor2 = (33.740003, -84.368978)
 info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
 
@@ -108,7 +109,11 @@ matrix = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-traffic_server = TrafficServer()
+#traffic_server = TrafficServer()
+#traffic_server.start()
+
+r.set_loop_type("asyncio")
+data_feed = DataFeed('test')
 
 ## Nice to know that we have set up datatime object correctly
 # r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
@@ -152,8 +157,56 @@ atlanta_traffic_original_doc_ids = [
 
 
 ## given a point, we want to know the closest road to it
-test_start_location = (33.736818, -84.394652)
-test_end_location = (33.769922, -84.377616)
+#test_start_location = (33.736818, -84.394652)
+#test_end_location = (33.769922, -84.377616)
 
-with open('traffic data samples/google_routing.json') as f:
-    data = json.load(f)
+#with open('traffic data samples/google_routing.json') as f:
+#    data = json.load(f)
+    
+## testing geospatial query
+#t1 = {"lat":33.74416482021835,"lng":-84.39327120780945}
+#t2 = {"lat":33.74251436232895,"lng":-84.39330339431763}
+#query_point = {"lat":33.743370820116844,"lng":-84.39433336257935}
+#t3 = {"lat":33.74143931727222,"lng":-84.3949556350708}
+#t4 = {"lat":33.74416035956415,"lng":-84.39240217208862}
+
+#r.table('geo_test').insert([
+#  {
+#    id: 1,
+#    name: 't1',
+#    location: r.point(-84.39327120780945,33.74416482021835)
+#  },
+#  {
+#    id: 2,
+#    name: 't2',
+#    location: r.point(-84.39330339431763,33.74251436232895)
+#  },
+#  {
+#    id: 3,
+#    name: 'line',
+#    location: r.line([-84.39327120780945,33.74416482021835], [-84.39330339431763,33.74251436232895])
+#  }
+#])
+    
+    
+## Manhattan island
+man_point1 = (40.710943, -74.017559)
+man_point2 = (40.728209, -73.982583)
+matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2, 14)
+
+#traffic_server.traffic_data.store_matrix_json([matrix1, matrix2])
+# .get_all(crawled_batch_id, index = "crawled_batch_id")
+
+#flow_data_feed = r.db('test').table('flow_data').changes().run(traffic_server.traffic_data.conn)
+#road_data_feed = r.db('test').table('road_data').changes().run(traffic_server.traffic_data.conn)
+#original_data_feed = r.db('test').table('original_data').changes().run(traffic_server.traffic_data.conn)
+#crawled_batch_feed = r.db('test').table('crawled_batch').changes().run(traffic_server.traffic_data.conn)
+
+#for original_data_id in record[0]:
+#    r.db('test').table('original_data').get(original_data_id).delete().run(traffic_server.traffic_data.conn)
+#for flow_data_id in record[1]:
+#    r.db('test').table('flow_data').get(flow_data_id).delete().run(traffic_server.traffic_data.conn)
+#for road_data_id in record[2]:
+#    r.db('test').table('road_data').get(road_data_id).delete().run(traffic_server.traffic_data.conn)
+
+# r.net.connection_type = r.net.DefaultConnection

@@ -2,24 +2,39 @@
   <div class="hello">
     <div class="container">
       <div class="map">
-        <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px">
+        <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px" 
+            @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
+          <gmap-marker v-if="location" :position="location" />
         </gmap-map>
-        <button @click="loadControls">
-          Load Drawing Controls
+        <button @click="plotGeoJson(testData)">
+          Plot Atlanta Data
         </button>
         <button @click="displayGeoJson">
-          Display GeoJSON Data
+          Display GeoJSON Text 
         </button>
         <button @click="dsiplayRouting">
-          Display Routing
+          Display Routing 21
+        </button>
+        <button @click="getHistoric">
+          Get Historic Traffic info
+        </button>
+        <button @click="toManhattan">
+          To Manhattan
+        </button>
+        <button @click = "test">
+          Test
         </button>
       </div>
       <div class="test">
-
-        <textarea cols="50" rows="50" v-model="geojson"></textarea>
+        <h3>geojson</h3>
+        <textarea cols="50" rows="20" v-model="geojson"></textarea>
+        <h3>other</h3>
+        <select v-model="selected_batch" @change="getSelectedBatch">
+          <option v-for="item in historic_batch" :value="item.id"> {{item.crawled_timestamp}} </option>
+        </select>
+        <div>Selected: {{ selected_batch }}</div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -31,7 +46,7 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import TestData from './history_traffic_route.json'
+import TestData from './level17.json'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -46,16 +61,52 @@ export default {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       geojson: null,
-      ws: null
+      ws: null,
+      route: null,
+      directionsDisplay: null,
+      directionsService: null,
+      location: null,
+      locationData: null,
+      testData: TestData,
+      selected_batch: '',
+      historic_batch: ['A', 'B', 'C']
     }
   },
   methods: {
-    loadControls() {
-      this.$refs.mymap.$mapObject.data.addGeoJson(TestData)
+    getLocation() {
+      let scope = this
+      this.locationData = JSON.stringify(this.location)
+      this.ws.send(JSON.stringify(['getRoadData', this.location, 500, 10]))
+      this.ws.onmessage = function (event) {
+        scope.plotGeoJson(JSON.parse(event.data))
+      }
+    },
+    getSelectedBatch() {
+      let scope = this
+      this.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
+      this.ws.onmessage = function (event) {
+        console.log(JSON.parse(event.data))
+        scope.plotGeoJson(JSON.parse(event.data))
+      }
+    },
+    toManhattan() {
+      this.center = {lat: 40.725306, lng: -73.988913}
+    },
+    test(){
+      /* eslint-disable */
+      this.getLocation()
+      /* eslint-enable */
+    },
+    plotGeoJson(geoJsonData) {
+      /* input: geoJsonData(a geojson json object)
+
+         This fucntion add the geoJson data to the google map object
+      */
+      this.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
-          strokeWeight: 3
+          strokeWeight: 2
         })
       })
     },
@@ -68,18 +119,25 @@ export default {
     },
     dsiplayRouting() {
       /* eslint-disable */
-      // console.log(google)
-      var directionsDisplay = new google.maps.DirectionsRenderer()
-      var directionsService = new google.maps.DirectionsService()
-      directionsDisplay.setMap(this.$refs.mymap.$mapObject)
-      this.calculateAndDisplayRoute(directionsService, directionsDisplay)
-
+      console.log(google)
+      this.directionsDisplay = new google.maps.DirectionsRenderer()
+      this.directionsService = new google.maps.DirectionsService()
+      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.calculateAndDisplayRoute()
       /* eslint-enable */
     },
-    calculateAndDisplayRoute(directionsService, directionsDisplay) {
-      var scope = this
+    getHistoric (){
+      let scope = this
+      this.ws.send(JSON.stringify(['getHistoric', this.route]))
+      this.ws.onmessage = function (event) {
+        console.log(JSON.parse(event.data))
+        scope.plotGeoJson(JSON.parse(event.data))
+      }
+    },
+    calculateAndDisplayRoute() {
+      let scope = this
       /* eslint-disable */
-      directionsService.route({
+      scope.directionsService.route({
         origin: {lat: 33.736818, lng: -84.394652},  // Haight.
         destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
         // Note that Javascript allows us to access the constant
@@ -88,8 +146,8 @@ export default {
         travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
       }, function(response, status) {
         if (status == 'OK') {
-          scope.ws.send(JSON.stringify(response))
-          directionsDisplay.setDirections(response)
+          scope.route = response
+          scope.directionsDisplay.setDirections(response)
         } else {
           window.alert('Directions request failed due to ' + status)
         }
@@ -98,20 +156,32 @@ export default {
     }
   },
   created() {
+    let scope = this
     this.ws = new WebSocket('ws://127.0.0.1:8765/')
     console.log('connecting websocket', this.ws)
-    this.ws.onmessage = function (event) {
-      console.log(event.data)
+    this.ws.onopen = function (){
+      scope.ws.send(JSON.stringify(['getHistoricBatch']))
     }
+    this.ws.onmessage = function (event) {
+      console.log('received')
+      console.log(JSON.parse(event.data))
+      scope.historic_batch = JSON.parse(event.data)
+    }
+  },
+  mounted() {
+    // pass
   }
 }
 </script>
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 .container {
   position: relative;
   height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .map {
@@ -119,7 +189,12 @@ export default {
 }
 
 .test {
+  padding: 20px;
   display: inline-block;
+
+  textarea {
+    display: block;
+  }
 }
 
 h1, h2 {
