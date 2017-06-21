@@ -10,12 +10,17 @@ import json
 
 class TrafficData:
 
-    def __init__(self):
+    def __init__(self, database_name: str = "Traffic"):
         """
         This class establishes a connection towards the database
         """
         self.conn = r.connect('localhost', 28015)
-        #self.latest_crawled_batch_id = r.db('Traffic').table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        if database_name in r.db_list().run(self.conn):
+            self.conn.use(database_name)
+        else:
+            self.db_create(database_name).run(self.conn)
+            self.conn.use(database_name)
+        #self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str = None) -> None:
         """
@@ -40,7 +45,7 @@ class TrafficData:
         data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run(self.conn)
         if crawled_batch_id:
             data['crawled_batch_id'] = crawled_batch_id
-        insert_result = r.db('Traffic').table('original_data').insert(data).run(self.conn)
+        insert_result = r.table('original_data').insert(data).run(self.conn)
         original_data_id = insert_result['generated_keys'][0]
 
         ## start parsing the data
@@ -56,7 +61,7 @@ class TrafficData:
 
                         ## we check if the flow_data alerady exist
                         TMC_encoding = json.dumps(FI_item['TMC'], sort_keys = True)  ## sort the key to elimincate different encoding of the same python Dict
-                        flow_data_doc = r.db('Traffic').table('flow_data').get(TMC_encoding).run(self.conn)
+                        flow_data_doc = r.table('flow_data').get(TMC_encoding).run(self.conn)
 
                         ## flow_data = None means the flow_data_doc does *not* exists
                         if not flow_data_doc:
@@ -65,7 +70,7 @@ class TrafficData:
                             flow_data_insertion["CF"] = {crawled_batch_id: [CF_item]}
                             flow_data_insertion["TMC"] = FI_item['TMC']
                             flow_data_insertion['SHP'] = "See table road_data"
-                            r.db('Traffic').table('flow_data').insert(flow_data_insertion).run(self.conn)
+                            r.table('flow_data').insert(flow_data_insertion).run(self.conn)
                             flow_data_id = TMC_encoding
 
                         ## if flow_data_doc already exist, we simply update the CF field
@@ -77,11 +82,11 @@ class TrafficData:
                             else:
                                 flow_data_doc['CF'][crawled_batch_id] = [CF_item]
                             flow_data_id = flow_data_doc['id'] 
-                            r.db('Traffic').table('flow_data').get(TMC_encoding).update({"CF": flow_data_doc['CF']}).run(self.conn)
+                            r.table('flow_data').get(TMC_encoding).update({"CF": flow_data_doc['CF']}).run(self.conn)
                         
                         for SHP_item in SHP_list:
                             geometry_encoding = json.dumps(SHP_item['value'], sort_keys = True)[:120]  # primary key's length is at most 127
-                            road_data_doc = r.db('Traffic').table('road_data').get(geometry_encoding).run(self.conn)
+                            road_data_doc = r.table('road_data').get(geometry_encoding).run(self.conn)
 
                             # if road_data_doc does not exist, we insert the road into db. Notice that if road_data_doc exists, we simply ignore it.
                             if not road_data_doc:
@@ -89,7 +94,7 @@ class TrafficData:
                                 try:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
                                     SHP_item['id'] = geometry_encoding
-                                    r.db('Traffic').table('road_data').insert(SHP_item).run(self.conn)
+                                    r.table('road_data').insert(SHP_item).run(self.conn)
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
@@ -152,23 +157,23 @@ class TrafficData:
         This is a helper function to create tables in rethinkDB
         """
         ## creating tables
-        r.db('Traffic').table_create('original_data').run(self.conn)
-        r.db('Traffic').table_create('road_data').run(self.conn)
-        r.db('Traffic').table_create('flow_data').run(self.conn)
-        r.db('Traffic').table_create('crawled_batch').run(self.conn)
+        r.table_create('original_data').run(self.conn)
+        r.table_create('road_data').run(self.conn)
+        r.table_create('flow_data').run(self.conn)
+        r.table_create('crawled_batch').run(self.conn)
 
         ## creating index
-        r.db('Traffic').table('original_data').index_create('crawled_batch_id').run(self.conn)
-        #r.db('Traffic').table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
-        #r.db('Traffic').table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
-        r.db('Traffic').table('road_data').index_create('flow_data_id').run(self.conn)
-        r.db('Traffic').table('road_data').index_create('geometry', geo=True).run(self.conn)
-        r.db('Traffic').table('road_data').index_create('crawled_batch_id').run(self.conn)
-        r.db('Traffic').table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
+        r.table('original_data').index_create('crawled_batch_id').run(self.conn)
+        #r.table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
+        #r.table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
+        r.table('road_data').index_create('flow_data_id').run(self.conn)
+        r.table('road_data').index_create('geometry', geo=True).run(self.conn)
+        r.table('road_data').index_create('crawled_batch_id').run(self.conn)
+        r.table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
 
         ## depreciated index
-        #r.db('Traffic').table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
-        #r.db('Traffic').table('road_data').index_create('created_timestamp').run(self.conn)
+        #r.table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
+        #r.table('road_data').index_create('created_timestamp').run(self.conn)
 
     def store_matrix_json(self, matrix_list: List) -> None:
         """
@@ -205,7 +210,7 @@ class TrafficData:
         storing_dict['crawled_matrix_encoding'] = matrix_list_encoding
         # notice you can reverse the encoding, refer to 
         # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
-        insert_result = r.db('Traffic').table('crawled_batch').insert(storing_dict).run(self.conn)
+        insert_result = r.table('crawled_batch').insert(storing_dict).run(self.conn)
         crawled_batch_id = insert_result['generated_keys'][0]
 
         # start inserting actual data
@@ -223,19 +228,31 @@ class TrafficData:
         An example data from road_data would be 
 
         {
-            "$reql_type$":  "GEOMETRY" ,
+          "FC": 2,
+          "flow_data_id": "{\"DE\": \"University Ave/Exit 244\", \"LE\": 1.57367, \"PC\": 4117, \"QD\": \"-\"}",
+          "geometry": {
+            "$reql_type$": "GEOMETRY",
             "coordinates": [
-                [
-                    -82.42968 ,
-                    34.92954
-                ] ,
-                [
-                    -82.43003 ,
-                    34.92729
-                ]
-            ] ,
-            "type":  "LineString"
-        } ,
+              [
+                -84.40353,
+                33.70524
+              ],
+              [
+                -84.40347,
+                33.70551
+              ],
+              [
+                -84.40335,
+                33.70597
+              ]
+            ],
+            "type": "LineString"
+          },
+          "id": "[\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \"]",
+          "value": [
+            "33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "
+          ]
+        },
 
         This function uses a road_data_id(primary key) to fethe a geojson object from 
         the road_data database. If calculate_traffic_color == True, then we also use
@@ -243,42 +260,45 @@ class TrafficData:
 
         Example output with color is :
         {
-            "type": "Feature",
-            "geometry": {
-                "coordinates": [
-                    [
-                        -82.42907,
-                        34.91623
-                    ],
-                    [
-                        -82.42911,
-                        34.91647
-                    ],
-                    [
-                        -82.42917,
-                        34.91684
-                    ]
-                ],
-                "type": "LineString"
+          "geometry": {
+            "coordinates": [
+              [
+                -84.40353,
+                33.70524
+              ],
+              [
+                -84.40347,
+                33.70551
+              ],
+              [
+                -84.40335,
+                33.70597
+              ]
+            ],
+            "type": "LineString"
+          },
+          "properties": {
+            "CF": {
+              "CN": 0.99,
+              "FF": 55.3,
+              "JF": 8.73969,
+              "LN": [],
+              "SP": 12.26,
+              "SU": 12.26,
+              "TY": "TR",
+              "crawled_batch_id": "6dcfea39-e0e0-47e5-b8cc-2d20e1acbd46",
+              "created_timestamp": "2017-06-20T19:05:33+00:00",
+              "original_data_id": "8b8c9c9a-afbb-41dd-8e65-9111c38d3cb8"
             },
-            "properties": {
-                "TMC": {
-                    "DE": "Old Buncombe Rd",
-                    "LE": 1.67396,
-                    "PC": 10934,
-                    "QD": "-"
-                },
-                "CF": {
-                    "CN": 0.7,
-                    "FF": 42.25,
-                    "JF": 1.71568,
-                    "LN": [],
-                    "SP": 33.55,
-                    "SU": 33.55,
-                    "TY": "TR"
-                },
-                "color": "green"
-            }
+            "TMC": {
+              "DE": "University Ave/Exit 244",
+              "LE": 1.57367,
+              "PC": 4117,
+              "QD": "-"
+            },
+            "color": "red"
+          },
+          "type": "Feature"
         }
 
         For more infomation about geojson, check out
@@ -286,9 +306,9 @@ class TrafficData:
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
-        data = r.db('Traffic').table('road_data').get(road_data_id).run(self.conn)
+        data = r.table('road_data').get(road_data_id).run(self.conn)
         flow_data_id = data['flow_data_id']
-        flow_data = r.db('Traffic').table('flow_data').get(flow_data_id).run(self.conn)
+        flow_data = r.table('flow_data').get(flow_data_id).run(self.conn)
         flow_data['CF'][crawled_batch_id][0]['created_timestamp'] = flow_data['CF'][crawled_batch_id][0]['created_timestamp'].isoformat()
         geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][crawled_batch_id][0]}
         
@@ -296,7 +316,7 @@ class TrafficData:
         if calculate_traffic_color:
             geojson_properties['color'] = self.traffic_flow_color_scheme(geojson_properties['CF'])
 
-        geojson_geometry = r.db('Traffic').table('road_data').get(road_data_id)['geometry'].to_geojson().run(self.conn)
+        geojson_geometry = r.table('road_data').get(road_data_id)['geometry'].to_geojson().run(self.conn)
         geojson_type = "Feature"
 
         return {"type": geojson_type, "geometry": geojson_geometry, "properties": geojson_properties}
@@ -453,7 +473,7 @@ class TrafficData:
           }
         }
         """
-        query_result = r.db('Traffic').table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
+        query_result = r.table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
                                                                 max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
 
         if len(query_result) == 0:
@@ -513,7 +533,7 @@ class TrafficData:
          {'crawled_timestamp': '2017-06-19T17:20:00.645000+00:00',
           'id': 'fbbc23d5-5bcb-4c99-af12-6b66022effcd'}]
         """
-        query_result = r.db('Traffic').table('crawled_batch').order_by(index = r.desc('crawled_timestamp')).limit(10).run(self.conn)
+        query_result = r.table('crawled_batch').order_by(index = r.desc('crawled_timestamp')).limit(10).run(self.conn)
         batch_list = []
         for batch_item in query_result:
             batch_item.pop('crawled_matrix_encoding', None)
