@@ -7,10 +7,13 @@ import datetime
 import pandas as pd
 import time
 import json
+import asyncio
+import threading
+
 
 class TrafficData:
 
-    def __init__(self, database_name: str = "Traffic"):
+    def __init__(self, database_name: str = "Traffic", connection = None):
         """
         This class establishes a connection towards the database
         """
@@ -22,7 +25,7 @@ class TrafficData:
             self.conn.use(database_name)
         #self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
-    def insert_json_data(self, data: Dict, crawled_batch_id: str = None) -> None:
+    def insert_json_data(self, data: Dict, crawled_batch_id: str = None, testing = False) -> None:
         """
         inputs: data: Dict(json dictionary)
 
@@ -33,12 +36,19 @@ class TrafficData:
         For documentation of the file format, refer to
         http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
 
-        return: None
+        return: None, although if testing = True, we would return a tuple (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
+        to trace what have we inserted
         """
         ## Testing purpose
-        testing = True
-        flow_data_duplicate = 0
-        road_data_duplicate = 0
+        if testing:  
+            # Notice you can ignore every lines under if testing:
+            # codes under that block are for testing purposes
+            # It's not really part of the core code
+            flow_data_duplicate = 0
+            road_data_duplicate = 0
+            original_data_insertion_ids = []
+            flow_data_insertion_ids = []
+            road_data_insertion_ids = []
 
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
@@ -47,6 +57,8 @@ class TrafficData:
             data['crawled_batch_id'] = crawled_batch_id
         insert_result = r.table('original_data').insert(data).run(self.conn)
         original_data_id = insert_result['generated_keys'][0]
+        if testing:
+            original_data_insertion_ids += [original_data_id]
 
         ## start parsing the data
         for RWS_item in data['RWS']:
@@ -72,11 +84,13 @@ class TrafficData:
                             flow_data_insertion['SHP'] = "See table road_data"
                             r.table('flow_data').insert(flow_data_insertion).run(self.conn)
                             flow_data_id = TMC_encoding
+                            if testing:
+                                flow_data_insertion_ids += [TMC_encoding]
 
                         ## if flow_data_doc already exist, we simply update the CF field
                         else: 
-                            if testing:
-                                flow_data_duplicate += 1  # you can ignore this, not really part of code
+                            if testing: 
+                                flow_data_duplicate += 1  
                             if crawled_batch_id in flow_data_doc['CF']:
                                 flow_data_doc['CF'][crawled_batch_id] = [CF_item] + flow_data_doc['CF'][crawled_batch_id]
                             else:
@@ -95,6 +109,8 @@ class TrafficData:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
                                     SHP_item['id'] = geometry_encoding
                                     r.table('road_data').insert(SHP_item).run(self.conn)
+                                    if testing:
+                                        road_data_insertion_ids += [geometry_encoding]
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
@@ -108,11 +124,11 @@ class TrafficData:
                                     #     print(road_data_doc['flow_data_id'])
                                     #     print(flow_data_id)
 
-
-
         if testing:
             print('there are ',flow_data_duplicate, 'flow_data duplicate')
             print('there are ',road_data_duplicate, 'road_data duplicate')
+            return (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
+
 
     def parse_SHP_values(self, value: List) -> List:
         """
@@ -541,4 +557,6 @@ class TrafficData:
             batch_list += [batch_item]
 
         return batch_list
+
+
 
