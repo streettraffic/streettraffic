@@ -9,12 +9,15 @@ from .database import TrafficData
 
 class TrafficServer:
 
-    def __init__(self):
+    def __init__(self, database_name: str = "Traffic", database_ip: str = None):
         """
         self.msg_queue is used to communicate with consumer_handler() and producer_handler()
         """
-        self.msg_queue = asyncio.Queue() 
-        self.traffic_data = TrafficData()
+        self.msg_queue = asyncio.Queue()
+        if not database_ip:
+            self.traffic_data = TrafficData(database_name = database_name)
+        else:
+            self.traffic_data = TrafficData(database_name = database_name, database_ip = database_ip)
         self.loop = asyncio.get_event_loop()
         self.crawler_running = False
         self.crawler_frequency_second = 1800

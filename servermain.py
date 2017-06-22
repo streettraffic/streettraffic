@@ -4,13 +4,13 @@ import rethinkdb as r
 import time
 
 ## import custom module
-from .map_resource import ultil
-from .database import TrafficData
-from . import tools
-from .server import TrafficServer
+from main_program.map_resource import ultil
+from main_program.database import TrafficData
+from main_program import tools
+from main_program.server import TrafficServer
 
 ## initialize traffic server
-traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
+traffic_server = TrafficServer(database_name= "Traffic", database_ip = "localhost")
 
 ## atlanta tile
 p1 = (33.653079, -84.505187)

@@ -13,11 +13,14 @@ import threading
 
 class TrafficData:
 
-    def __init__(self, database_name: str = "Traffic", connection = None):
+    def __init__(self, database_name: str = "Traffic", database_ip: str = None):
         """
         This class establishes a connection towards the database
         """
-        self.conn = r.connect('localhost', 28015)
+        if not database_ip:
+            self.conn = r.connect('localhost', 28015)
+        else:
+            self.conn = r.connect(database_ip, 28015)
         if database_name in r.db_list().run(self.conn):
             self.conn.use(database_name)
         else:
