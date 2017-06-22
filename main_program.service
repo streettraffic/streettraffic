@@ -1,11 +1,11 @@
 [Unit]
-Description= Penspider 
+Description= traffic_server 
 After=multi-user.target
 
 [Service]
-WorkingDirectory=/root/website/penspider/
+WorkingDirectory=/root/server/scTrafficCount/
 Type=idle
-ExecStart=/usr/bin/python3 /root/website/penspider/penspider.py
+ExecStart=/usr/bin/python3 /root/server/scTrafficCount/servermain.py
 Restart=always
 
 [Install]

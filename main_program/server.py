@@ -99,6 +99,7 @@ class TrafficServer:
             print('start crawling')
             self.traffic_data.store_matrix_json(self.traffic_matrix_list)
             await asyncio.sleep(self.crawler_frequency_second)
+            print('crawling finished')
 
     def _loop_in_thread(self, loop):
         start_server = websockets.serve(self.handler, 'localhost', 8765)
