@@ -76,7 +76,9 @@ def test_read_traffic_data():
     """ """
     global traffic_data
     data = traffic_data.read_traffic_data('https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303211003&responseattributes=sh,fc')
+    data2 = traffic_data.read_traffic_data('https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200333211030&responseattributes=sh,fc')
     assert len(data['RWS'][0]['RW'][0]['FIS'][0]['FI'][0]['SHP']) > 0
+    assert data2 == None
 
 
 def test_parse_SHP_values():
