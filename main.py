@@ -109,11 +109,11 @@ matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-#traffic_server = TrafficServer()
-#traffic_server.start()
+traffic_server = TrafficServer()
+traffic_server.start()
 
-r.set_loop_type("asyncio")
-data_feed = DataFeed('test')
+#r.set_loop_type("asyncio")
+#data_feed = DataFeed('test')
 
 ## Nice to know that we have set up datatime object correctly
 # r.db('Traffic').table('flow_data').between(r.expr(yourdate), r.epoch_time(int(time.time())), index='created_timestamp').run()
@@ -208,5 +208,7 @@ matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2,
 #    r.db('test').table('flow_data').get(flow_data_id).delete().run(traffic_server.traffic_data.conn)
 #for road_data_id in record[2]:
 #    r.db('test').table('road_data').get(road_data_id).delete().run(traffic_server.traffic_data.conn)
+
+
 
 # r.net.connection_type = r.net.DefaultConnection

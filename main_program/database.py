@@ -23,7 +23,7 @@ class TrafficData:
         else:
             self.db_create(database_name).run(self.conn)
             self.conn.use(database_name)
-        #self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str = None, testing = False) -> None:
         """
