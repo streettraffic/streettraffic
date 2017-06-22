@@ -102,7 +102,7 @@ class TrafficServer:
             print('crawling finished')
 
     def _loop_in_thread(self, loop):
-        start_server = websockets.serve(self.handler, 'localhost', 8765)
+        start_server = websockets.serve(self.handler, '0.0.0.0', 8765)
         asyncio.set_event_loop(loop)
         loop.run_until_complete(start_server)
         loop.create_task(self.main_crawler())
