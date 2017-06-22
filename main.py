@@ -88,11 +88,12 @@ altanta_worst_map_tile = ultil.get_map_tile_resource(altanta_worst, "latlon", 14
 atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon", 14)
 
 ## atlanta tile
-cor1 = (33.766764, -84.409533)
-cor2 = (33.740003, -84.368978)
+cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
+cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
 info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
-#img_matrix = ultil.assemble_matrix_images(matrix)
+#matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+#matrix1 = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
+#img_matrix = ultil.assemble_matrix_images(matrix1)
 
 
 ## Dr'allen house
@@ -212,3 +213,10 @@ matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2,
 
 
 # r.net.connection_type = r.net.DefaultConnection
+
+
+## Crawl atlanta city
+p1 = (33.653079, -84.505187)
+p2 = (33.873635, -84.343085)
+tile_matrix = ultil.get_area_tile_matrix(p1, p2, 14)
+url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)

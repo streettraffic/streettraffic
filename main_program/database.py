@@ -50,6 +50,10 @@ class TrafficData:
             flow_data_insertion_ids = []
             road_data_insertion_ids = []
 
+        if not data:
+            print('inserted nothing')
+            return None
+
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
         data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run(self.conn)
@@ -166,6 +170,8 @@ class TrafficData:
         return :Dict(json dict)
         """
         r = requests.get(url)
+        if r.status_code == 204:  # no content
+            return None
         return r.json()
 
     def helper_create_tables(self):
@@ -557,6 +563,3 @@ class TrafficData:
             batch_list += [batch_item]
 
         return batch_list
-
-
-
