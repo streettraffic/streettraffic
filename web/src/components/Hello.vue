@@ -76,7 +76,7 @@ export default {
     getLocation() {
       let scope = this
       this.locationData = JSON.stringify(this.location)
-      this.ws.send(JSON.stringify(['getRoadData', this.location, 500, 10]))
+      this.ws.send(JSON.stringify(['getRoadData', this.location, 10000, 10]))
       this.ws.onmessage = function (event) {
         scope.plotGeoJson(JSON.parse(event.data))
       }

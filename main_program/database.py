@@ -23,7 +23,7 @@ class TrafficData:
         else:
             self.db_create(database_name).run(self.conn)
             self.conn.use(database_name)
-        #self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str = None, testing = False) -> None:
         """
@@ -49,6 +49,10 @@ class TrafficData:
             original_data_insertion_ids = []
             flow_data_insertion_ids = []
             road_data_insertion_ids = []
+
+        if not data:
+            print('inserted nothing')
+            return None
 
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
@@ -166,6 +170,8 @@ class TrafficData:
         return :Dict(json dict)
         """
         r = requests.get(url)
+        if r.status_code == 204:  # no content
+            return None
         return r.json()
 
     def helper_create_tables(self):
@@ -557,6 +563,3 @@ class TrafficData:
             batch_list += [batch_item]
 
         return batch_list
-
-
-

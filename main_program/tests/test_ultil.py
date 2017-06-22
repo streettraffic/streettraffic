@@ -34,10 +34,20 @@ def test_get_traffic_json_resource():
     'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc'
 
 def test_get_area_tile_matrix():
-    df = pd.DataFrame([[(4350, 6557),(4351, 6557),(4352, 6557)],
+    df1 = pd.DataFrame([[(4350, 6557),(4351, 6557),(4352, 6557)],
                        [(4350, 6558),(4351, 6558),(4352, 6558)],
                        [(4350, 6559),(4351, 6559),(4352, 6559)]])
-    assert df.equals(ultil.get_area_tile_matrix((33.766764, -84.409533), (33.740003, -84.368978), 14))
+
+    df2 = pd.DataFrame([[(4350, 6558),(4351, 6558),(4352, 6558)],
+                       [(4350, 6559),(4351, 6559),(4352, 6559)]])
+
+    df3 = pd.DataFrame([[(4351, 6557),(4352, 6557)],
+                       [(4351, 6558),(4352, 6558)],
+                       [(4351, 6559),(4352, 6559)]])
+    assert df1.equals(ultil.get_area_tile_matrix((33.766764, -84.409533), (33.740003, -84.368978), 14))
+    assert df2.equals(ultil.get_area_tile_matrix((33.741455, -84.397218), (33.744203, -84.369581), 14))  # asymmetrical case 1
+    assert df3.equals(ultil.get_area_tile_matrix((33.728999, -84.395856), (33.775902, -84.363917), 14))  # asymmetrical case 2
+
 
 def test_get_area_tile_matrix_url():
     df = tools.load_data_object("test_data/get_area_tile_matrix_url() for map_tile.pkl")

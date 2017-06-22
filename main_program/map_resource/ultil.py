@@ -131,12 +131,12 @@ def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
     tile2 = get_tile(*cor2, zoom)  #(col, row)
     left_col = min(tile1[0], tile2[0])
     right_col = max(tile1[0], tile2[0])
-    botom_row = min(tile1[1], tile2[1])
-    top_row = max(tile1[1], tile2[1])
-    matrix = pd.DataFrame(index = range(top_row - botom_row + 1), columns = range(right_col - left_col + 1))
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            matrix[i][j] = (left_col + i, botom_row + j)
+    top_row = min(tile1[1], tile2[1])
+    bottom_row = max(tile1[1], tile2[1])  # notice bottom_row would actually have a higher number
+    matrix = pd.DataFrame(index = range(bottom_row - top_row + 1), columns = range(right_col - left_col + 1))
+    for row in range(len(matrix)):
+        for col in range(len(matrix.iloc[0])):
+            matrix.iloc[row,col] = (left_col + col, top_row + row)
 
     return matrix
 
@@ -162,12 +162,12 @@ def get_area_tile_matrix_url(resource_type: str, cor1: tuple, cor2: tuple, zoom:
     return :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
     """
     matrix = get_area_tile_matrix(cor1, cor2, zoom)
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
+    for row in range(len(matrix)):
+        for col in range(len(matrix.iloc[0])):
             if resource_type == "map_tile":
-                matrix[i][j] = get_map_tile_resource(location_data = matrix[i][j], location_type = "colrow", zoom = zoom, img_size = 512)
+                matrix.iloc[row,col] = get_map_tile_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom, img_size = 512)
             elif resource_type == "traffic_json":
-                matrix[i][j] = get_traffic_json_resource(location_data = matrix[i][j], location_type = "colrow", zoom = zoom)
+                matrix.iloc[row,col] = get_traffic_json_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom)
 
     return matrix
 
@@ -182,15 +182,15 @@ def assemble_matrix_images(matrix: pd.DataFrame) -> pd.DataFrame:
 
     """
     img_matrix = matrix.copy(deep=True)
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            response = requests.get(matrix[i][j])
-            img_matrix[i][j] = Image.open(BytesIO(response.content))
+    for row in range(len(matrix)):
+        for col in range(len(matrix.iloc[0])):
+            response = requests.get(matrix.iloc[row,col])
+            img_matrix.iloc[row,col] = Image.open(BytesIO(response.content))
 
     # producing image
     vertical = []
-    for j in range(len(img_matrix)):
-        horizontal_combs = np.hstack( (np.array(i.convert("RGB"))) for i in img_matrix.loc[j] )
+    for row in range(len(img_matrix)):
+        horizontal_combs = np.hstack( (np.array(i.convert("RGB"))) for i in img_matrix.iloc[row] )
         vertical += [horizontal_combs]
     imgs_comb = np.vstack(vertical)
     imgs_comb = Image.fromarray( imgs_comb)
