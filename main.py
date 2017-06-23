@@ -110,8 +110,8 @@ info = ultil.get_area_tile_matrix(cor1, cor2, 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
-traffic_server.start()
+#traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
+#traffic_server.start()
 
 #r.set_loop_type("asyncio")
 #data_feed = DataFeed('test')

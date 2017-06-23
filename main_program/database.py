@@ -245,6 +245,8 @@ class TrafficData:
                     traffic_data = self.read_traffic_data(matrix.loc[i, j])
                     self.insert_json_data(traffic_data, crawled_batch_id)
 
+        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+
     def fetch_geojson_item(self, road_data_id: str, crawled_batch_id: str = None, calculate_traffic_color = True) -> Dict:
         """
         inputs: road_data_id: str(a primary key of road_data table), calculate_traffic_color = True

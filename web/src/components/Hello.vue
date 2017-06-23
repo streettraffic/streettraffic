@@ -13,7 +13,7 @@
           Display GeoJSON Text 
         </button>
         <button @click="dsiplayRouting">
-          Display Routing 21
+          Display Routing
         </button>
         <button @click="getHistoric">
           Get Historic Traffic info
