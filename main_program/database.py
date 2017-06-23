@@ -24,11 +24,14 @@ class TrafficData:
         if database_name in r.db_list().run(self.conn):
             self.conn.use(database_name)
         else:
-            self.db_create(database_name).run(self.conn)
+            r.db_create(database_name).run(self.conn)
             self.conn.use(database_name)
-        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        try:
+            self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
+        except:
+            pass
 
-    def insert_json_data(self, data: Dict, crawled_batch_id: str = None, testing = False) -> None:
+    def insert_json_data(self, data: Dict, crawled_batch_id: str, testing = False) -> None:
         """
         inputs: data: Dict(json dictionary)
 
@@ -48,7 +51,7 @@ class TrafficData:
             # codes under that block are for testing purposes
             # It's not really part of the core code
             flow_data_duplicate = 0
-            road_data_duplicate = 0
+            roadflow_item_data_duplicate = 0
             original_data_insertion_ids = []
             flow_data_insertion_ids = []
             road_data_insertion_ids = []
@@ -59,10 +62,12 @@ class TrafficData:
 
         ## insert the data into original_data table
         created_timestamp = parser.parse(data['CREATED_TIMESTAMP'])
-        data['CREATED_TIMESTAMP'] = r.expr(created_timestamp).run(self.conn)
-        if crawled_batch_id:
-            data['crawled_batch_id'] = crawled_batch_id
-        insert_result = r.table('original_data').insert(data).run(self.conn)
+        original_data_insertion = {
+            "CREATED_TIMESTAMP": r.expr(created_timestamp).run(self.conn),
+            "crawled_batch_id": crawled_batch_id,
+            "RWS": data['RWS']
+        }
+        insert_result = r.table('original_data').insert(original_data_insertion).run(self.conn)
         original_data_id = insert_result['generated_keys'][0]
         if testing:
             original_data_insertion_ids += [original_data_id]
@@ -75,35 +80,39 @@ class TrafficData:
                         SHP_list = copy.deepcopy(FI_item['SHP'])
                         CF_item = FI_item['CF'][0]
                         CF_item['original_data_id'] = original_data_id
-                        CF_item['created_timestamp'] = r.expr(created_timestamp).run(self.conn)
-                        CF_item['crawled_batch_id'] = crawled_batch_id
 
-                        ## we check if the flow_data alerady exist
+                        ## we check if the flow_item alerady exist
                         TMC_encoding = json.dumps(FI_item['TMC'], sort_keys = True)  ## sort the key to elimincate different encoding of the same python Dict
-                        flow_data_doc = r.table('flow_data').get(TMC_encoding).run(self.conn)
+                        flow_item_doc = r.table('flow_item').get(TMC_encoding).run(self.conn)
 
-                        ## flow_data = None means the flow_data_doc does *not* exists
-                        if not flow_data_doc:
-                            flow_data_insertion = {}
-                            flow_data_insertion["id"]  = TMC_encoding
-                            flow_data_insertion["CF"] = {crawled_batch_id: [CF_item]}
-                            flow_data_insertion["TMC"] = FI_item['TMC']
-                            flow_data_insertion['SHP'] = "See table road_data"
-                            r.table('flow_data').insert(flow_data_insertion).run(self.conn)
-                            flow_data_id = TMC_encoding
+                        ## flow_item = None means the flow_item_doc does *not* exists
+                        if not flow_item_doc:
+                            flow_item_insertion = {
+                                "flow_item_id": TMC_encoding,
+                                "TMC": FI_item['TMC'],
+                                "SHP": "See table road_data",
+                                "CF": "See table flow_data"
+                            }
+                            # flow_item_insertion["CF"] = {crawled_batch_id: [CF_item]}   ## depreciated
+                            r.table('flow_item').insert(flow_item_insertion).run(self.conn)
+                            flow_item_id = TMC_encoding
+
                             if testing:
-                                flow_data_insertion_ids += [TMC_encoding]
+                                flow_item_insertion_ids += [TMC_encoding]
 
-                        ## if flow_data_doc already exist, we simply update the CF field
+                        ## if flow_item_doc already exist, we simply update the CF field
                         else: 
+                            flow_item_id = flow_item_doc['flow_item_id']
                             if testing: 
-                                flow_data_duplicate += 1  
-                            if crawled_batch_id in flow_data_doc['CF']:
-                                flow_data_doc['CF'][crawled_batch_id] = [CF_item] + flow_data_doc['CF'][crawled_batch_id]
-                            else:
-                                flow_data_doc['CF'][crawled_batch_id] = [CF_item]
-                            flow_data_id = flow_data_doc['id'] 
-                            r.table('flow_data').get(TMC_encoding).update({"CF": flow_data_doc['CF']}).run(self.conn)
+                                flow_item_duplicate += 1  
+
+                        flow_data_insertion = {
+                            "crawled_batch_id": crawled_batch_id,
+                            "flow_item_id": flow_item_id,
+                            "created_timestamp": r.expr(created_timestamp).run(self.conn)
+                        }
+                        flow_data_insertion.update(CF_item)  # append CF_item
+                        r.table('flow_data').insert(flow_data_insertion).run(self.conn)
                         
                         for SHP_item in SHP_list:
                             geometry_encoding = json.dumps(SHP_item['value'], sort_keys = True)[:120]  # primary key's length is at most 127
@@ -111,25 +120,25 @@ class TrafficData:
 
                             # if road_data_doc does not exist, we insert the road into db. Notice that if road_data_doc exists, we simply ignore it.
                             if not road_data_doc:
-                                SHP_item['flow_data_id'] = flow_data_id
+                                SHP_item['flow_item_id'] = flow_item_id
                                 try:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
-                                    SHP_item['id'] = geometry_encoding
+                                    SHP_item['road_data_id'] = geometry_encoding
                                     r.table('road_data').insert(SHP_item).run(self.conn)
                                     if testing:
                                         road_data_insertion_ids += [geometry_encoding]
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
-                                # maybe have different flow_data_id????
+                                # maybe have different flow_item_id????
                                 if testing:
                                     road_data_duplicate += 1
-                                    ## Notice it is possible for a road to point to different flow_data_id
+                                    ## Notice it is possible for a road to point to different flow_item_id
                                     ## comment out the following code to see what I mean.
-                                    # if road_data_doc['flow_data_id'] != flow_data_id:
+                                    # if road_data_doc['flow_item_id'] != flow_item_id:
                                     #     print("======================")
-                                    #     print(road_data_doc['flow_data_id'])
-                                    #     print(flow_data_id)
+                                    #     print(road_data_doc['flow_item_id'])
+                                    #     print(flow_item_id)
 
         if testing:
             print('there are ',flow_data_duplicate, 'flow_data duplicate')
@@ -182,23 +191,27 @@ class TrafficData:
         This is a helper function to create tables in rethinkDB
         """
         ## creating tables
-        r.table_create('original_data').run(self.conn)
-        r.table_create('road_data').run(self.conn)
-        r.table_create('flow_data').run(self.conn)
-        r.table_create('crawled_batch').run(self.conn)
+        r.table_create('original_data', primary_key ='original_data_id').run(self.conn)
+        r.table_create('road_data', primary_key = 'road_data_id').run(self.conn)
+        r.table_create('flow_item', primary_key = 'flow_item_id').run(self.conn)
+        r.table_create('crawled_batch', primary_key = 'crawled_batch_id').run(self.conn)
+        r.table_create('flow_data', primary_key = 'flow_data_id').run(self.conn)
 
         ## creating index
-        r.table('original_data').index_create('crawled_batch_id').run(self.conn)
-        #r.table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
-        #r.table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
-        r.table('road_data').index_create('flow_data_id').run(self.conn)
+        #r.table('original_data').index_create('crawled_batch_id').run(self.conn)
+
+        r.table('road_data').index_create('flow_item_id').run(self.conn)
         r.table('road_data').index_create('geometry', geo=True).run(self.conn)
-        r.table('road_data').index_create('crawled_batch_id').run(self.conn)
         r.table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
+        r.table("flow_data").index_create("flow_crawled_batch", [r.row["flow_item_id"], r.row["crawled_batch_id"]]).run(self.conn)
 
         ## depreciated index
-        #r.table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
-        #r.table('road_data').index_create('created_timestamp').run(self.conn)
+        # r.table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
+        # r.table('road_data').index_create('created_timestamp').run(self.conn)
+        # r.table('road_data').index_create('crawled_batch_id').run(self.conn)
+        # r.table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
+        # r.table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
+        # r.table('original_data').index_create('crawled_batch_id').run(self.conn)
 
     def store_matrix_json(self, matrix_list: List) -> None:
         """
@@ -245,7 +258,7 @@ class TrafficData:
                     traffic_data = self.read_traffic_data(matrix.loc[i, j])
                     self.insert_json_data(traffic_data, crawled_batch_id)
 
-        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['id']
+        self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
 
     def fetch_geojson_item(self, road_data_id: str, crawled_batch_id: str = None, calculate_traffic_color = True) -> Dict:
         """
@@ -254,32 +267,33 @@ class TrafficData:
         Notice the road_data table only stores the 'geometry' info of a geojson object.
         An example data from road_data would be 
 
-        {
-          "FC": 2,
-          "flow_data_id": "{\"DE\": \"University Ave/Exit 244\", \"LE\": 1.57367, \"PC\": 4117, \"QD\": \"-\"}",
-          "geometry": {
-            "$reql_type$": "GEOMETRY",
-            "coordinates": [
-              [
-                -84.40353,
-                33.70524
+        
+          {
+            "FC": 2,
+            "flow_item_id": "{\"DE\": \"University Ave/Exit 244\", \"LE\": 1.57367, \"PC\": 4117, \"QD\": \"-\"}",
+            "geometry": {
+              "$reql_type$": "GEOMETRY",
+              "coordinates": [
+                [
+                  -84.40353,
+                  33.70524
+                ],
+                [
+                  -84.40347,
+                  33.70551
+                ],
+                [
+                  -84.40335,
+                  33.70597
+                ]
               ],
-              [
-                -84.40347,
-                33.70551
-              ],
-              [
-                -84.40335,
-                33.70597
-              ]
-            ],
-            "type": "LineString"
-          },
-          "id": "[\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \"]",
-          "value": [
-            "33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "
-          ]
-        },
+              "type": "LineString"
+            },
+            "road_data_id": "[\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \"]",
+            "value": [
+              "33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "
+            ]
+          }
 
         This function uses a road_data_id(primary key) to fethe a geojson object from 
         the road_data database. If calculate_traffic_color == True, then we also use
@@ -334,12 +348,14 @@ class TrafficData:
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
         data = r.table('road_data').get(road_data_id).run(self.conn)
-        flow_data_id = data['flow_data_id']
-        flow_data = r.table('flow_data').get(flow_data_id).run(self.conn)
-        flow_data['CF'][crawled_batch_id][0]['created_timestamp'] = flow_data['CF'][crawled_batch_id][0]['created_timestamp'].isoformat()
-        geojson_properties = {'TMC': flow_data['TMC'], 'CF': flow_data['CF'][crawled_batch_id][0]}
+        flow_item_id = data['flow_item_id']
+        flow_item = r.table('flow_item').get(flow_item_id).run(self.conn)
+        flow_data = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").limit(3).run(self.conn).next()
+
+
+        flow_data['created_timestamp'] = flow_data['created_timestamp'].isoformat()
+        geojson_properties = {'TMC': flow_item['TMC'], 'CF': flow_data}
         
-        # possibly we need to calculate traffic color for the road
         if calculate_traffic_color:
             geojson_properties['color'] = self.traffic_flow_color_scheme(geojson_properties['CF'])
 
@@ -436,29 +452,29 @@ class TrafficData:
         else:
             return 'black'
 
-    def display_json_traffic(self, original_data_id_list: List) -> Dict:
-        """
-        inputs: original_data_id: str(the primary key/id for original_data table)
-        ## TODO: apparently a lot more optimization can be done here
-        ## TODO: there might be overlapping documents with the same road_data_id
+    # def display_json_traffic(self, original_data_id_list: List) -> Dict:
+    #     """
+    #     inputs: original_data_id: str(the primary key/id for original_data table)
+    #     ## TODO: apparently a lot more optimization can be done here
+    #     ## TODO: there might be overlapping documents with the same road_data_id
 
-        This function takes a list of original_data_id, get every road related to them
-        and lastly output a geojson object containing every road.
+    #     This function takes a list of original_data_id, get every road related to them
+    #     and lastly output a geojson object containing every road.
 
-        """
-        geojson_list = []
-        for original_data_id in original_data_id_list:
-            ## maybe instead of query the whole document, we just query the index?
-            flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run(self.conn)  
-            for flow_data in flow_data_collection:
-                flow_data_id = flow_data['id']
-                road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run(self.conn)
+    #     """
+    #     geojson_list = []
+    #     for original_data_id in original_data_id_list:
+    #         ## maybe instead of query the whole document, we just query the index?
+    #         flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run(self.conn)  
+    #         for flow_data in flow_data_collection:
+    #             flow_data_id = flow_data['id']
+    #             road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run(self.conn)
 
-                for road_data in road_data_collection:
-                    geojson_list += [self.fetch_geojson_item(road_data['id'])]
+    #             for road_data in road_data_collection:
+    #                 geojson_list += [self.fetch_geojson_item(road_data['id'])]
 
-        ## Lastly we assemble the geojson_list by using generate_geojson_collection()
-        return TrafficData.generate_geojson_collection(geojson_list)
+    #     ## Lastly we assemble the geojson_list by using generate_geojson_collection()
+    #     return TrafficData.generate_geojson_collection(geojson_list)
 
     def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int = 1, location_type: str = "latlon") -> Dict:
         """
@@ -474,7 +490,7 @@ class TrafficData:
           "dist": 11.523928527983454,
           "doc": {
             "FC": 4,
-            "flow_data_id": "{\"DE\": \"US-278/US-29/Ponce De Leon Ave NE\", \"LE\": 0.58406, \"PC\": 12873, \"QD\": \"-\"}",
+            "flow_item_id": "{\"DE\": \"US-278/US-29/Ponce De Leon Ave NE\", \"LE\": 0.58406, \"PC\": 12873, \"QD\": \"-\"}",
             "geometry": {
               "$reql_type$": "GEOMETRY",
               "coordinates": [
@@ -533,7 +549,7 @@ class TrafficData:
             for path_item in step['path']:
                 try:
                     road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
-                    road_data_id = road_document['doc']['id']
+                    road_data_id = road_document['doc']['road_data_id']
                 except:
                     print('cant find nearest road once')
 
