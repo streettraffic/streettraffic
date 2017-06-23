@@ -25,7 +25,7 @@ r.set_loop_type('asyncio')
 data_feed = DataFeed('test')
 
 @pytest.mark.asyncio
-async def test_insert_json_data():
+async def insert_json_data():
     """ """
     global traffic_data
     global data_feed
@@ -92,7 +92,7 @@ def store_matrix_json():
 
 def test_fetch_geojson_item():
     global traffic_data
-    assert traffic_data.fetch_geojson_item('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]') == json.loads('{"type": "Feature", "geometry": {"coordinates": [[-84.40353, 33.70524], [-84.40347, 33.70551], [-84.40335, 33.70597]], "type": "LineString"}, "properties": {"TMC": {"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}, "CF": {"CN": 0.99, "FF": 55.3, "JF": 9.05158, "LN": [], "SP": 9.65, "SU": 9.65, "TY": "TR", "crawled_batch_id": "c1c9cf8c-e4d5-41e3-977c-aee7b3a7043d", "created_timestamp": "2017-06-20T20:01:34+00:00", "original_data_id": "6b9bdfce-62da-4c5a-9ced-9166771f2dd9"}, "color": "red"}}')
+    assert traffic_data.fetch_geojson_item('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]', '3962491e-8cb0-4685-9884-8cb292240def') == json.loads('{"type": "Feature", "geometry": {"coordinates": [[-84.40353, 33.70524], [-84.40347, 33.70551], [-84.40335, 33.70597]], "type": "LineString"}, "properties": {"TMC": {"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}, "CF": {"CN": 0.99, "FF": 55.3, "JF": 8.83144, "LN": [], "SP": 11.49, "SU": 11.49, "TY": "TR", "crawled_batch_id": "3962491e-8cb0-4685-9884-8cb292240def", "created_timestamp": "2017-06-23T20:15:28+00:00", "flow_data_id": "4f754976-0d66-4a29-81b6-9d40759e6a28", "flow_item_id": "{\\"DE\\": \\"University Ave/Exit 244\\", \\"LE\\": 1.57367, \\"PC\\": 4117, \\"QD\\": \\"-\\"}", "original_data_id": "77b8c809-5edd-462d-a97d-287fadd67f83"}, "color": "red"}}')
 
 def test_generate_geojson_collection():
     geojson_object1 = json.loads('{"type": "Feature", "geometry": {"coordinates": [[-82.42907, 34.91623], [-82.42911, 34.91647], [-82.42917, 34.91684]], "type": "LineString"}, "properties": {"TMC": {"DE": "Old Buncombe Rd", "LE": 1.67396, "PC": 10934, "QD": "-"}, "CF": {"CN": 0.7, "FF": 42.25, "JF": 1.71568, "LN": [], "SP": 33.55, "SU": 33.55, "TY": "TR"}}}')
@@ -104,16 +104,14 @@ def test_generate_geojson_collection():
 
 def test_get_nearest_road():
     global traffic_data
-    assert traffic_data.get_nearest_road((33.70524, -84.40353), max_dist= 10) == json.loads('{"dist": 0, "doc": {"FC": 2, "flow_data_id": "{\\"DE\\": \\"University Ave/Exit 244\\", \\"LE\\": 1.57367, \\"PC\\": 4117, \\"QD\\": \\"-\\"}", "geometry": {"$reql_type$": "GEOMETRY", "coordinates": [[-84.40353, 33.70524], [-84.40347, 33.70551], [-84.40335, 33.70597]], "type": "LineString"}, "id": "[\\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \\"]", "value": ["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]}}')
+    assert traffic_data.get_nearest_road((33.70524, -84.40353), max_dist= 10) == json.loads('{"dist": 0, "doc": {"FC": 2, "flow_item_id": "{\\"DE\\": \\"University Ave/Exit 244\\", \\"LE\\": 1.57367, \\"PC\\": 4117, \\"QD\\": \\"-\\"}", "geometry": {"$reql_type$": "GEOMETRY", "coordinates": [[-84.40353, 33.70524], [-84.40347, 33.70551], [-84.40335, 33.70597]], "type": "LineString"}, "road_data_id": "[\\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \\"]", "value": ["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]}}')
 
 def get_historic_traffic():
     pass
 
 def test_get_historic_batch():
     global traffic_data
-    assert traffic_data.get_historic_batch() == [{'crawled_timestamp': '2017-06-20T20:02:32.491000+00:00',
-                                                'id': 'c1c9cf8c-e4d5-41e3-977c-aee7b3a7043d'},
-                                                {'crawled_timestamp': '2017-06-20T19:48:38.512000+00:00',
-                                                'id': '8b5d54f6-1381-4eef-9080-25075ad19abe'},
-                                                {'crawled_timestamp': '2017-06-20T19:05:13.668000+00:00',
-                                                'id': '6dcfea39-e0e0-47e5-b8cc-2d20e1acbd46'}]
+    assert traffic_data.get_historic_batch() == [{'crawled_batch_id': '3962491e-8cb0-4685-9884-8cb292240def',
+                                                    'crawled_timestamp': '2017-06-23T20:16:02.027000+00:00'},
+                                                {'crawled_batch_id': 'cfebf60f-2624-4001-8284-78598d3662f9',
+                                                    'crawled_timestamp': '2017-06-23T20:01:47.862000+00:00'}]

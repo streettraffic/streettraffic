@@ -91,7 +91,7 @@ atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon
 cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
 cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
 info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-#matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #matrix1 = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix1)
 
@@ -110,7 +110,7 @@ info = ultil.get_area_tile_matrix(cor1, cor2, 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
+traffic_server = TrafficServer(database_name= "Traffic", database_ip = "localhost")
 traffic_server.start()
 
 #r.set_loop_type("asyncio")

@@ -40,7 +40,7 @@ class TrafficServer:
                 elif message[0] == "getRoadData":
                     data = self.traffic_data.get_nearest_road(location_data = (message[1]['lat'], message[1]['lng']), max_dist = message[2])
                     distance = data['dist']  # did not used, maybe used later
-                    road_data_id = data['doc']['id']
+                    road_data_id = data['doc']['road_data_id']
                     road_data_geojson = self.traffic_data.fetch_geojson_item(road_data_id)
                     # await self.msg_queue.put(['getRoadData', road_data_geojson])
                     await websocket.send(json.dumps(road_data_geojson))
