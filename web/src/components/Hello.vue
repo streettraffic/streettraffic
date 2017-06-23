@@ -157,7 +157,7 @@ export default {
   },
   created() {
     let scope = this
-    this.ws = new WebSocket('ws://costahuang.me:8765/')
+    this.ws = new WebSocket('ws://localhost:8765/')
     console.log('connecting websocket', this.ws)
     this.ws.onopen = function (){
       scope.ws.send(JSON.stringify(['getHistoricBatch']))

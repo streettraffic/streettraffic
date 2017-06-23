@@ -560,7 +560,7 @@ class TrafficData:
          {'crawled_timestamp': '2017-06-19T17:20:00.645000+00:00',
           'id': 'fbbc23d5-5bcb-4c99-af12-6b66022effcd'}]
         """
-        query_result = r.table('crawled_batch').order_by(index = r.desc('crawled_timestamp')).limit(10).run(self.conn)
+        query_result = r.table('crawled_batch').order_by(index = r.desc('crawled_timestamp')).run(self.conn)
         batch_list = []
         for batch_item in query_result:
             batch_item.pop('crawled_matrix_encoding', None)

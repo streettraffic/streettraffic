@@ -110,8 +110,8 @@ info = ultil.get_area_tile_matrix(cor1, cor2, 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-#traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
-#traffic_server.start()
+traffic_server = TrafficServer(database_name= "Traffic", database_ip = "costahuang.me")
+traffic_server.start()
 
 #r.set_loop_type("asyncio")
 #data_feed = DataFeed('test')
@@ -220,3 +220,12 @@ p1 = (33.653079, -84.505187)
 p2 = (33.873635, -84.343085)
 tile_matrix = ultil.get_area_tile_matrix(p1, p2, 14)
 url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)
+
+##
+#now = time.time()
+#flow_data = r.table('flow_data').get('{"DE": "10th St/Exit 250", "LE": 0.55387, "PC": 4132, "QD": "+"}').run(traffic_server.traffic_data.conn)
+#print(time.time() - now)
+#
+#now = time.time()
+#flow_data = r.table('flow_data').get('{"DE": "10th St/Exit 250", "LE": 0.55387, "PC": 4132, "QD": "+"}')['CF']['0358a775-569b-464f-abd7-25ab1da6e985'].run(traffic_server.traffic_data.conn)
+#print(time.time() - now)

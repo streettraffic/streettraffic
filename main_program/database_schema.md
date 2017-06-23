@@ -80,3 +80,22 @@ road_data (table)
         "id":                     #(primary key) a geometry_encoding
         "value":                    
     }
+
+
+traffic_data (table)
+{
+    "crawled_batch_id":
+    "flow_data_id":
+    "data": {
+        [
+            {
+                "CN":
+                "JF":
+                ...
+                "crawled_batch_id":
+                "created_timestamp":
+                "original_data_id":
+            },
+        ]
+    }
+}
