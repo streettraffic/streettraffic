@@ -27,7 +27,7 @@ class TrafficServer:
         while True:
             try:
                 message = await websocket.recv()
-                print("received", message)
+                # print("received", message)
                 message = json.loads(message)
 
                 # for each different message, we do different things

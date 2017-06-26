@@ -524,7 +524,7 @@ class TrafficData:
         else:
             return query_result[0]
 
-    def get_historic_traffic(self, routing_info: Dict, crawled_batch_id: int = None):
+    def get_historic_traffic(self, routing_info: Dict, use_overview: bool = True, crawled_batch_id: int = None):
         """
         ## TODO: inplement historic collection 
         inputs: route_info: Dict(a json object that contains routing information),
@@ -537,18 +537,18 @@ class TrafficData:
             crawled_batch_id = self.latest_crawled_batch_id
         ## there might be multiple **routes**, but we just worry about one for now
         route = routing_info['routes'][0]
-        ## there might be multiple **legs**, but we just worry about one for now
-        leg = route['legs'][0]
+
 
         ## we don't want duplicate road in our collection
         road_id_collection = {}
         duplicate_road_id = []
         geojson_road_list = []
 
-        for step in leg['steps']:
-            for path_item in step['path']:
+        if use_overview:
+            ## use overview to optimize query time
+            for overview_path_item in route['overview_path']:
                 try:
-                    road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
+                    road_document = self.get_nearest_road((overview_path_item['lat'], overview_path_item['lng']), max_dist = 1000)
                     road_data_id = road_document['doc']['road_data_id']
                 except:
                     print('cant find nearest road once')
@@ -559,6 +559,26 @@ class TrafficData:
                     geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
                 else:
                     duplicate_road_id += [road_data_id]
+
+
+        else:
+            ## we could also query every point in our path, but the query performance is slow
+            ## there might be multiple **legs**, but we just worry about one for now
+            leg = route['legs'][0]
+            for step in leg['steps']:
+                for path_item in step['path']:
+                    try:
+                        road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
+                        road_data_id = road_document['doc']['road_data_id']
+                    except:
+                        print('cant find nearest road once')
+
+                    ## see if road_data_id already exists in our collection
+                    if road_data_id not in road_id_collection:
+                        road_id_collection[road_data_id] = True
+                        geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
+                    else:
+                        duplicate_road_id += [road_data_id]
 
         print('there are', len(duplicate_road_id), 'many duplicate road element')
         #print(road_id_collection)
