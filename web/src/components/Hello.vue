@@ -69,7 +69,8 @@ export default {
       locationData: null,
       testData: TestData,
       selected_batch: '',
-      historic_batch: ['A', 'B', 'C']
+      historic_batch: ['A', 'B', 'C'],
+      geojson_data: null
     }
   },
   methods: {
@@ -83,6 +84,7 @@ export default {
     },
     getSelectedBatch() {
       let scope = this
+      this.deleteGeoJsonPlot()
       this.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
       this.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
@@ -94,7 +96,7 @@ export default {
     },
     test(){
       /* eslint-disable */
-      this.getLocation()
+      this.deleteGeoJsonPlot()
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -102,6 +104,16 @@ export default {
 
          This fucntion add the geoJson data to the google map object
       */
+      /* eslint-disable */
+      // this.geojson_data = new google.maps.Data()
+      // this.geojson_data.addGeoJson(geoJsonData)
+      // this.geojson_data.setMap(this.$refs.mymap.$mapObject)
+      // this.geojson_data.setStyle(function(feature) {
+      //   return ({
+      //     strokeColor: feature.getProperty('color'),
+      //     strokeWeight: 2
+      //   })
+      // })
       this.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
@@ -109,6 +121,24 @@ export default {
           strokeWeight: 2
         })
       })
+      /* eslint-enable */
+    },
+    deleteGeoJsonPlot() {
+      /*  inputs: None
+          This funciton clears the geojson plotting in the google maps
+          return None
+      */
+      // this.geojson_data.setMap(null)
+      // this.geojson_data = null
+      let scope = this
+      scope.$refs.mymap.$mapObject.data.forEach(function (feature) {
+        scope.$refs.mymap.$mapObject.data.remove(feature)
+      })
+
+      // reset map directionDisplay, otherwise, the direction layer might be on the top of
+      // our traffic geojson layer.
+      this.directionsDisplay.setMap(null)
+      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
     },
     displayGeoJson() {
       let results
