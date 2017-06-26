@@ -1,12 +1,37 @@
 <template>
-  <div class="hello">
-    <div class="container">
-      <div class="map">
-        <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 800px; height: 700px" 
-            @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
-          <gmap-marker v-if="location" :position="location" />
-        </gmap-map>
-        <button @click="plotGeoJson(testData)">
+  <v-layout>
+    <v-flex xs12>
+      <v-card>
+        <v-card-row class="green darken-1">
+          <v-card-title>
+            <span class="white--text">The Map</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card-row>
+        <v-card-text>
+          <v-card-row height="auto" center>
+            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 50%; height: 400px" 
+                @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
+              <gmap-marker v-if="location" :position="location" />
+            </gmap-map>
+            <div class="geojson_output">
+              <p>Click displayGeoJson to see what happens</p>
+              <textarea style="width: 100%; height: 380px" v-model="geojson"></textarea>
+            </div>
+          </v-card-row>
+        </v-card-text>
+      </v-card>
+      
+      <v-divider class="my-4"></v-divider>
+
+      <v-btn dark default @click.native="plotGeoJson(testData)">plotGeoJson(testData)</v-btn>
+      <v-btn dark default @click.native="displayGeoJson">displayGeoJson</v-btn>
+      <v-btn dark default @click.native="dsiplayRouting">dsiplayRouting</v-btn>
+      <v-btn dark default @click.native="getHistoric">getHistoric</v-btn>
+      <v-btn dark default @click.native="toManhattan">toManhattan</v-btn>
+      <v-btn dark default @click.native="test">test</v-btn>
+
+<!--         <button @click="plotGeoJson(testData)">
           Plot Atlanta Data
         </button>
         <button @click="displayGeoJson">
@@ -23,19 +48,44 @@
         </button>
         <button @click = "test">
           Test
-        </button>
-      </div>
+        </button> -->
+
+      <h3>Select your desired dates:</h3>
+      <v-data-table
+        v-bind:headers="headers"
+        v-bind:items="historic_batch"
+        v-bind:search="search"
+        v-model="selected"
+        selected-key="crawled_batch_id"
+        select-all
+      >
+        <template slot="headers" scope="props">
+          <span v-tooltip:bottom="{ 'html': props.item.text }">
+            {{ props.item.text }}
+          </span>
+        </template>
+        <template slot="items" scope="props">
+          <td>
+            <v-checkbox
+              primary
+              hide-details
+              v-model="props.selected"
+            ></v-checkbox>
+          </td>
+          <td>{{ props.item.crawled_batch_id }}</td>
+          <td  class="text-xs-right">{{ props.item.crawled_timestamp }}</td>
+        </template>
+      </v-data-table>
       <div class="test">
-        <h3>geojson</h3>
-        <textarea cols="50" rows="20" v-model="geojson"></textarea>
+        
         <h3>other</h3>
         <select v-model="selected_batch" @change="getSelectedBatch">
           <option v-for="item in historic_batch" :value="item.id"> {{item.crawled_timestamp}} </option>
         </select>
         <div>Selected: {{ selected_batch }}</div>
       </div>
-    </div>
-  </div>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -70,7 +120,34 @@ export default {
       testData: TestData,
       selected_batch: '',
       historic_batch: ['A', 'B', 'C'],
-      geojson_data: null
+      geojson_data: null,
+      ex1: 'haha',
+      ex2: 'xixi',
+      search: '',
+      selected: [],
+      headers: [
+        {
+          text: 'crawled_batch_id',
+          left: true,
+          sortable: false,
+          value: 'name'
+        },
+        { text: 'crawled_timestamp', sortable: false, value: 'calories' }
+      ],
+      items: [
+        {
+          name: 'Frozen Yogurt',
+          calories: 159
+        },
+        {
+          name: 'Ice cream sandwich',
+          calories: 237
+        },
+        {
+          name: 'Eclair',
+          calories: 262
+        }
+      ]
     }
   },
   methods: {
@@ -96,7 +173,8 @@ export default {
     },
     test(){
       /* eslint-disable */
-      this.deleteGeoJsonPlot()
+      console.log(this.selected)
+      console.log(this.historic_batch)
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -206,42 +284,12 @@ export default {
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-.container {
-  position: relative;
-  height: 90vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+.geojson_output {
+  width: 40%;
+  margin-left: 20px;
 }
-
-.map {
-  display: inline-block;
-}
-
-.test {
-  padding: 20px;
-  display: inline-block;
-
   textarea {
-    display: block;
+    border-style: solid;
   }
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
 </style>
