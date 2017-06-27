@@ -9,7 +9,7 @@
           v-for="(item, i) in items"
           :key="i"
         >
-          <v-list-tile value="true">
+          <v-list-tile value="true" router :to="item.routerAddress">
             <v-list-tile-action>
               <v-icon light v-html="item.icon"></v-icon>
             </v-list-tile-action>
@@ -27,7 +27,9 @@
     </v-toolbar>
     <main>
       <v-container fluid>
-        <router-view></router-view>
+        <transition name="slide" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </v-container>
     </main>
     <v-footer>
@@ -43,15 +45,38 @@ export default {
     return {
       drawer: true,
       items: [
-        { icon: 'bubble_chart', title: 'Inspire' }
+        { icon: 'home', title: 'Home', routerAddress: '/' },
+        { icon: 'insert_chart', title: 'Analytics', routerAddress: '/Analytics' }
       ],
       miniVariant: false,
       title: 'Histraffic'
     }
+  },
+  created() {
+    // test
   }
 }
 </script>
 
 <style lang="scss">
-  // @import '../../node_modules/vuetify/dist/vuetify.min.css';
+.slide-enter-active, .slide-enter {
+  transition: all .3s ease
+}
+  
+.slide-enter, .slide-leave-to{
+  opacity: 0
+}
+  
+.slide-enter{
+  transform: translateX(-3rem)
+}
+  
+.slide-leave, .slide-leave-active{
+  transition: all .4s ease
+}
+  
+.slide-leave-to{
+  transform: translateX(3rem)
+}
+
 </style>

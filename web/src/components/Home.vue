@@ -97,7 +97,7 @@ Vue.use(VueGoogleMaps, {
 })
 
 export default {
-  name: 'hello',
+  name: 'Home',
   components: {
     vueSlider
   },

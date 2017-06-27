@@ -682,4 +682,5 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, sampling_points)
+    def set_traffic_patter_monitoring_area(self, sampling_points):
+        pass

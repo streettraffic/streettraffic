@@ -1,15 +1,25 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Hello from '@/components/Hello'
+import Home from '@/components/Home'
 
 Vue.use(Router)
+
+const Analytics = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/Analytics')
+})
 
 export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: Hello
+      name: 'Home',
+      component: Home
+    },
+    {
+      path: '/analytics',
+      name: 'Analytics',
+      component: Analytics
     }
   ]
 })
