@@ -229,3 +229,8 @@ url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)
 #now = time.time()
 #flow_data = r.table('flow_data').get('{"DE": "10th St/Exit 250", "LE": 0.55387, "PC": 4132, "QD": "+"}')['CF']['0358a775-569b-464f-abd7-25ab1da6e985'].run(traffic_server.traffic_data.conn)
 #print(time.time() - now)
+
+
+## Spatial sampling for atlanta area
+sampling_points_atlanta = traffic_server.traffic_data.spatial_sampling_points(top=33.880079, bottom=33.648894, left=-84.485086, right=-84.311365, grid_point_distance = 1000)
+sampling_points_atlanta_plot = traffic_server.traffic_data.format_list_points_for_display(sampling_points_atlanta)

@@ -5,6 +5,7 @@ import pandas as pd
 from PIL import Image
 import requests
 from io import BytesIO
+from geopy.distance import vincenty, great_circle
 
 
 # todo: convert quadkeys to tile
@@ -196,3 +197,22 @@ def assemble_matrix_images(matrix: pd.DataFrame) -> pd.DataFrame:
     imgs_comb = Image.fromarray( imgs_comb)
     imgs_comb.show()
     return img_matrix
+
+def get_distance(point1: tuple, point2: tuple, location_type:str = "latlon", distance_formula:str = "great_circle", unit:str = "meters") -> float:
+    """
+    inputs: point1: tuple, point2: tuple, location_type:str = "latlon", distance_formula:str = "great_circle", unit:str = "meters"
+    the format should be point1 = (latitude, longitude)
+    currently only supporting location_type = "latlon"
+    distance_formula has two option: "great_circle" and "vincenty"
+    the defualt unit is meters
+
+    This function is a quick wraper for geopy.
+
+    return the distance between point1 and point2
+    """
+    if distance_formula == "great_circle":
+        return great_circle(point1, point2).meters
+    elif distance_formula == "vincenty":
+        return vincenty(point1, point2).meters
+    else:
+        raise Exception('undefined distance_formula')

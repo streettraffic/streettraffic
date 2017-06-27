@@ -4,6 +4,7 @@ import json
 import asyncio
 import threading
 import datetime as dt
+from dateutil import parser
 
 ## import our modules
 from .database import TrafficData
@@ -27,7 +28,7 @@ class TrafficServer:
         while True:
             try:
                 message = await websocket.recv()
-                print("received", message)
+                # print("received", message)
                 message = json.loads(message)
 
                 # for each different message, we do different things
@@ -56,6 +57,22 @@ class TrafficServer:
                     geojson_object = self.traffic_data.get_historic_traffic(routing_info = message[1], crawled_batch_id = message[2])
                     # await self.msg_queue.put(['getSelectedBatch', geojson_object])
                     await websocket.send(json.dumps(geojson_object))
+                    print('sent data')
+
+                elif message[0] == "getSelectedBatchList":
+                    multipe_geojson_objects = []
+                    for crawled_batch_item in message[2]:
+                        multipe_geojson_objects += [{
+                            "crawled_batch_id": crawled_batch_item['crawled_batch_id'],
+                            "crawled_batch_id_traffic": self.traffic_data.get_historic_traffic(routing_info = message[1], crawled_batch_id = crawled_batch_item['crawled_batch_id']),
+                            "crawled_timestamp": crawled_batch_item['crawled_timestamp']
+                        }]
+
+                    ## sort based on timestamp
+                    multipe_geojson_objects.sort(key = lambda item: parser.parse(item['crawled_timestamp']))
+                    for item in multipe_geojson_objects:
+                        print(item['crawled_timestamp'])
+                    await websocket.send(json.dumps(multipe_geojson_objects))
                     print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
