@@ -56,3 +56,6 @@ def test_get_area_tile_matrix_url():
     info = ultil.get_area_tile_matrix(cor1, cor2, 14)
     matrix = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
     assert df.equals(matrix)
+
+def test_get_distance():
+    assert ultil.get_distance((33.70524,-84.40353), (33.71337,-84.39347)) == 1297.72758534478 
