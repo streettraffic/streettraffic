@@ -35,10 +35,11 @@
       
       <!-- historic traffic selection slider -->
       <section>
-        <div class="historic_slider" @mouseup="displaySelectedHistoric">
-          <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
+        <div class="historic_slider">
+          <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value" :dataShow ="'crawled_timestamp'" :dataKey="'crawled_batch_id'" 
+            :selectCallBack="displaySelectedHistoric"></vue-slider>
           <br>
-          <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
+          <p>Currently Dsiplayed: {{ historic_slider.value.crawled_timestamp }}</p>
         </div>
       </section>
 
@@ -85,7 +86,8 @@
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
 import TestData from './level17.json'
-import vueSlider from 'vue-slider-component'
+import vueSlider from './vue2-slider'
+import { EventBus } from './Event-bus.js'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -158,21 +160,30 @@ export default {
       this.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
         scope.geojson_historic_collection = JSON.parse(event.data)
+        scope.historic_slider['data'] = scope.geojson_historic_collection
+        scope.historic_slider['value'] = scope.historic_slider['data'][0]
       }
     },
     displaySelectedHistoric() {
-      let slider = this.$refs['historic_slider_ref']
-      let index = slider.getIndex()
-      console.log(index)
-      this.deleteGeoJsonPlot()
-      this.plotGeoJson(this.geojson_historic_collection[index])
+      let scope = this
+      EventBus.$on('sliderMoveFinished', () => {
+        console.log(scope.historic_slider.value.crawled_batch_id)
+        let slider = scope.$refs['historic_slider_ref']
+        let index = slider.getIndex()
+        scope.deleteGeoJsonPlot()
+        if (scope.geojson_historic_collection[index]['crawled_batch_id'] != scope.historic_slider.value.crawled_batch_id) {
+          alert('timestamp and traffic data does not match')
+        } else {
+          scope.plotGeoJson(scope.geojson_historic_collection[index]['crawled_batch_id_traffic'])
+        }
+      })
     },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
     },
     test(){
       /* eslint-disable */
-      this.directionsDisplay.setMap(null)
+      console.log(this.historic_slider)
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -273,7 +284,6 @@ export default {
       console.log('received')
       console.log(JSON.parse(event.data))
       scope.historic_batch = JSON.parse(event.data)
-      scope.historic_slider['data'] = scope.historic_batch.map((item) => { return item.crawled_timestamp })
     }
   },
   mounted() {
