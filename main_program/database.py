@@ -10,6 +10,8 @@ import json
 import asyncio
 import threading
 
+from .map_resource import ultil
+
 
 class TrafficData:
 
@@ -604,3 +606,80 @@ class TrafficData:
             batch_list += [batch_item]
 
         return batch_list
+
+    """
+    Analytics part of the module
+    """
+
+    @staticmethod
+    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 5) -> List:
+        """
+        input: top: float, bottom: float, left: float, right: float,   where top and bottom are latitudes, left and right are longitudes
+        grid_point_distance: int = 5
+
+        NOTICE THIS FUNCTION DOES **NOT** HANDLE any region passes lon90 lat180
+
+        example input: (41.49008, -71.312796, 42.49008, -72.3154396, grid_point_distance = 10)
+        currently only support latlon
+        the default grid_point_distance unit is meters
+
+        This funciton will take two coordinate and create a rectangle area ready for query
+        
+        For example:
+        ###^^^*^^^####  (in this example, top, bottom, left, right are denoted as *
+        #  *^^^^^*   #   and this function should generate tile to cover the
+        #  ^^^^^^^   #   area denoted by ^ and *)
+        ###^^*^^^####
+
+        Then, this function will create a even distribution of query points based on grid_point_distance
+
+        For example:
+        ###^$^$^$*####  (in this example, the query point are denoted as $)
+        #  ^^^^^^^   #   
+        #  ^$^$^$^   #   
+        #  ^^^^^^^   #        
+        ###*$^$^$^####
+
+        Finally, we are going to query the nearst road around $ and return a list of road_data_id related to those points
+        """
+
+        horizontal_distance = ultil.get_distance((top, left), (top, right))  
+        horizontal_divide_factor = int(horizontal_distance / grid_point_distance)
+        horizontal_point_diff = right - left
+        horizontal_increment = horizontal_point_diff / horizontal_divide_factor
+
+        vertical_distance = ultil.get_distance((top, left), (bottom, left))
+        vertical_divide_factor = int(vertical_distance / grid_point_distance)
+        vertical_point_diff = top - bottom
+        vertical_increment = vertical_point_diff / vertical_divide_factor
+        print(horizontal_distance, vertical_distance)
+
+        sample_points = []
+        for i in range(horizontal_divide_factor):
+            for j in range(vertical_divide_factor):
+                sample_points += [(bottom + vertical_increment * j, left + horizontal_increment * i)]
+
+        return sample_points
+
+    @staticmethod
+    def format_list_points_for_display(list_points: List) -> str:
+        """
+        inputs: list_points: List
+
+        example inputs:
+        [(33.732724942, -84.409469),
+        (33.732727471, -84.409469)]
+
+        This function format the example inputs into a string that can be used in https://www.darrinward.com/lat-long/
+        """
+        formatted_string = ""
+        for point in list_points:
+            formatted_string += str(point[0])
+            formatted_string += ","
+            formatted_string += str(point[1])
+            formatted_string += '\n'
+
+        print('use https://www.darrinward.com/lat-long/ for plotting')
+        return formatted_string
+
+    def set_traffic_patter_monitoring_area(self, sampling_points)
