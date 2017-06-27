@@ -24,33 +24,28 @@
       
       <v-divider class="my-4"></v-divider>
 
-      <v-btn dark default @click.native="plotGeoJson(testData)">plotGeoJson(testData)</v-btn>
-      <v-btn dark default @click.native="displayGeoJson">displayGeoJson</v-btn>
-      <v-btn dark default @click.native="dsiplayRouting">dsiplayRouting</v-btn>
-      <v-btn dark default @click.native="getHistoric">getHistoric</v-btn>
-      <v-btn dark default @click.native="toManhattan">toManhattan</v-btn>
-      <v-btn dark default @click.native="test">test</v-btn>
+      <section>
+        <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
+        <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
+        <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
+        <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
+        <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
+        <v-btn dark default @click.native="test">test</v-btn>
+      </section>
+      
+      <!-- historic traffic selection slider -->
+      <section>
+        <div class="historic_slider" @mouseup="displaySelectedHistoric">
+          <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
+          <br>
+          <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
+        </div>
+      </section>
 
-<!--         <button @click="plotGeoJson(testData)">
-          Plot Atlanta Data
-        </button>
-        <button @click="displayGeoJson">
-          Display GeoJSON Text 
-        </button>
-        <button @click="dsiplayRouting">
-          Display Routing
-        </button>
-        <button @click="getHistoric">
-          Get Historic Traffic info
-        </button>
-        <button @click="toManhattan">
-          To Manhattan
-        </button>
-        <button @click = "test">
-          Test
-        </button> -->
+      <v-divider class="my-4"></v-divider>
 
-      <h3>Select your desired dates:</h3>
+
+      <h6>Select your desired historic traffic:</h6>
       <v-data-table
         v-bind:headers="headers"
         v-bind:items="historic_batch"
@@ -76,14 +71,7 @@
           <td  class="text-xs-right">{{ props.item.crawled_timestamp }}</td>
         </template>
       </v-data-table>
-      <div class="test">
-        
-        <h3>other</h3>
-        <select v-model="selected_batch" @change="getSelectedBatch">
-          <option v-for="item in historic_batch" :value="item.id"> {{item.crawled_timestamp}} </option>
-        </select>
-        <div>Selected: {{ selected_batch }}</div>
-      </div>
+      <v-btn dark default @click.native="getSelectedBatchList">Submit</v-btn>
     </v-flex>
   </v-layout>
 </template>
@@ -97,6 +85,7 @@
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
 import TestData from './level17.json'
+import vueSlider from 'vue-slider-component'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -107,6 +96,9 @@ Vue.use(VueGoogleMaps, {
 
 export default {
   name: 'hello',
+  components: {
+    vueSlider
+  },
   data () {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
@@ -118,13 +110,12 @@ export default {
       location: null,
       locationData: null,
       testData: TestData,
-      selected_batch: '',
       historic_batch: ['A', 'B', 'C'],
-      geojson_data: null,
-      ex1: 'haha',
-      ex2: 'xixi',
+      geojson_data: null,   // maybe not needed
+      geojson_historic_collection: null,
       search: '',
       selected: [],
+      value2: 0,
       headers: [
         {
           text: 'crawled_batch_id',
@@ -134,20 +125,14 @@ export default {
         },
         { text: 'crawled_timestamp', sortable: false, value: 'calories' }
       ],
-      items: [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237
-        },
-        {
-          name: 'Eclair',
-          calories: 262
-        }
-      ]
+      historic_slider: {
+        value: '',
+        disabled: false,
+        tooltip: 'hover',
+        piecewise: true,
+        piecewiseLabel: true,
+        data: ['test', 'test']   // This will be initialized in the created() funciton
+      }
     }
   },
   methods: {
@@ -161,20 +146,33 @@ export default {
     },
     getSelectedBatch() {
       let scope = this
-      this.deleteGeoJsonPlot()
       this.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
       this.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
         scope.plotGeoJson(JSON.parse(event.data))
       }
     },
+    getSelectedBatchList() {
+      let scope = this
+      this.ws.send(JSON.stringify(['getSelectedBatchList', this.route, this.selected]))
+      this.ws.onmessage = function (event) {
+        console.log(JSON.parse(event.data))
+        scope.geojson_historic_collection = JSON.parse(event.data)
+      }
+    },
+    displaySelectedHistoric() {
+      let slider = this.$refs['historic_slider_ref']
+      let index = slider.getIndex()
+      console.log(index)
+      this.deleteGeoJsonPlot()
+      this.plotGeoJson(this.geojson_historic_collection[index])
+    },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
     },
     test(){
       /* eslint-disable */
-      console.log(this.selected)
-      console.log(this.historic_batch)
+      this.directionsDisplay.setMap(null)
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -196,7 +194,8 @@ export default {
       this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
-          strokeWeight: 2
+          strokeWeight: 2,
+          zIndex: 5
         })
       })
       /* eslint-enable */
@@ -274,6 +273,7 @@ export default {
       console.log('received')
       console.log(JSON.parse(event.data))
       scope.historic_batch = JSON.parse(event.data)
+      scope.historic_slider['data'] = scope.historic_batch.map((item) => { return item.crawled_timestamp })
     }
   },
   mounted() {
@@ -292,4 +292,9 @@ export default {
   textarea {
     border-style: solid;
   }
+
+.historic_slider {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
 </style>

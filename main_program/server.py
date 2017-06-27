@@ -57,6 +57,14 @@ class TrafficServer:
                     # await self.msg_queue.put(['getSelectedBatch', geojson_object])
                     await websocket.send(json.dumps(geojson_object))
                     print('sent data')
+
+                elif message[0] == "getSelectedBatchList":
+                    multipe_geojson_objects = []
+                    for crawled_batch_item in message[2]:
+                        multipe_geojson_objects += [self.traffic_data.get_historic_traffic(routing_info = message[1], crawled_batch_id = crawled_batch_item['crawled_batch_id'])]
+                    # await self.msg_queue.put(['getSelectedBatch', geojson_object])
+                    await websocket.send(json.dumps(multipe_geojson_objects))
+                    print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')
