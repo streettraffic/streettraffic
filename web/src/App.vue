@@ -3,13 +3,16 @@
     <v-navigation-drawer
       persistent
       v-model="drawer"
+      enable-resize-watcher
+      dark
+      :mini-variant.sync="mini"
     >
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
           :key="i"
         >
-          <v-list-tile value="true" router :to="item.routerAddress">
+          <v-list-tile value="true" router :to="item.routerAddress" ripple>
             <v-list-tile-action>
               <v-icon light v-html="item.icon"></v-icon>
             </v-list-tile-action>
@@ -44,6 +47,7 @@ export default {
   data () {
     return {
       drawer: true,
+      mini: false,
       items: [
         { icon: 'home', title: 'Home', routerAddress: '/' },
         { icon: 'insert_chart', title: 'Analytics', routerAddress: '/Analytics' }
