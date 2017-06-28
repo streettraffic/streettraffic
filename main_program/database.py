@@ -259,6 +259,7 @@ class TrafficData:
                 for j in range(len(matrix.loc[0])):
                     traffic_data = self.read_traffic_data(matrix.loc[i, j])
                     self.insert_json_data(traffic_data, crawled_batch_id)
+                    time.sleep(0.5)
 
         self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
 
