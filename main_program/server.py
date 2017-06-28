@@ -99,6 +99,7 @@ class TrafficServer:
         while self.crawler_running:
             print('start crawling')
             self.traffic_data.store_matrix_json(self.traffic_matrix_list)
+            self.traffic_data.insert_analytics_traffic_pattern('[33.880079, 33.648894, -84.485086, -84.311365]')
 
             # time management, we want to execute script every 30 minutes
             # in order to do that we need to calculate how many seconds we should sleep
@@ -109,6 +110,7 @@ class TrafficServer:
                 wait_seconds = 60*60 - current.minute*60 - current.second
 
             print('crawling finished')
+
             await asyncio.sleep(wait_seconds)
             
 

@@ -6,6 +6,8 @@ from main_program.datafeed import DataFeed
 import json
 import rethinkdb as r
 import time
+import datetime
+from dateutil import parser
 
 
 ## Furman's coordinates is 34.9237° N, 82.4383° W
@@ -112,6 +114,7 @@ matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 
 traffic_server = TrafficServer(database_name= "Traffic", database_ip = "localhost")
 traffic_server.start()
+conn = traffic_server.traffic_data.conn
 
 #r.set_loop_type("asyncio")
 #data_feed = DataFeed('test')
@@ -234,3 +237,12 @@ url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)
 ## Spatial sampling for atlanta area
 sampling_points_atlanta = traffic_server.traffic_data.spatial_sampling_points(top=33.880079, bottom=33.648894, left=-84.485086, right=-84.311365, grid_point_distance = 1000)
 sampling_points_atlanta_plot = traffic_server.traffic_data.format_list_points_for_display(sampling_points_atlanta)
+#x = traffic_server.traffic_data.set_traffic_patter_monitoring_area(top=33.880079, bottom=33.648894, left=-84.485086, right=-84.311365, description='test_atlanta', grid_point_distance=1000, testing=True, force=True)
+
+# analyzing traffic patter
+start = datetime.datetime(2017,6,27,0,0,0, tzinfo = r.make_timezone('00:00'))
+end = datetime.datetime(2017,6,27,23,0,0, tzinfo = r.make_timezone('00:00'))
+analytics_monitored_area_id = '[33.880079, 33.648894, -84.485086, -84.311365]'
+start_time_iso = "2017-06-23T04:00:00.000Z"
+end_time_iso = "2017-06-24T03:59:59.000Z"
+#traffic_server.traffic_data.update_analytics_traffic_pattern("2017-06-23T04:00:00.000Z","2017-06-24T03:59:59.000Z",'[33.880079, 33.648894, -84.485086, -84.311365]')

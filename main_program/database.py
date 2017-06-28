@@ -198,14 +198,22 @@ class TrafficData:
         r.table_create('flow_item', primary_key = 'flow_item_id').run(self.conn)
         r.table_create('crawled_batch', primary_key = 'crawled_batch_id').run(self.conn)
         r.table_create('flow_data', primary_key = 'flow_data_id').run(self.conn)
+        r.table_create('analytics_monitored_area', primary_key = 'analytics_monitored_area_id').run(self.conn)
+        r.table_create('analytics_traffic_pattern', primary_key = 'analytics_traffic_pattern_id').run(self.conn)
+        
 
         ## creating index
-        #r.table('original_data').index_create('crawled_batch_id').run(self.conn)
-
         r.table('road_data').index_create('flow_item_id').run(self.conn)
         r.table('road_data').index_create('geometry', geo=True).run(self.conn)
         r.table('crawled_batch').index_create('crawled_timestamp').run(self.conn)
         r.table("flow_data").index_create("flow_crawled_batch", [r.row["flow_item_id"], r.row["crawled_batch_id"]]).run(self.conn)
+        r.table('analytics_monitored_area').index_create('description').run(self.conn)
+        r.table("analytics_traffic_pattern").index_create("analytics_crawled_batch", [r.row["analytics_monitored_area_id"], r.row["crawled_batch_id"]]).run(self.conn)
+        
+        ## maybe in the long run good for performance,  but currently not used
+        # r.table_create('analytics_traffic_pattern', primary_key = 'analytics_traffic_pattern_id').run(self.conn)
+        # r.table('analytics_traffic_pattern').index_create('date_timestamp').run(self.conn)
+        # r.table('analytics_traffic_pattern').index_create('analytics_monitored_area_id').run(self.conn)
 
         ## depreciated index
         # r.table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
@@ -214,6 +222,7 @@ class TrafficData:
         # r.table('flow_data').index_create('crawled_batch_id', r.row["CUSTOM"]["crawled_batch_id"]).run(self.conn)
         # r.table('flow_data').index_create('original_data_id', r.row["CUSTOM"]["original_data_id"]).run(self.conn)
         # r.table('original_data').index_create('crawled_batch_id').run(self.conn)
+        #r.table('original_data').index_create('crawled_batch_id').run(self.conn)
 
     def store_matrix_json(self, matrix_list: List) -> None:
         """
@@ -613,7 +622,7 @@ class TrafficData:
     """
 
     @staticmethod
-    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 5) -> List:
+    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 1000) -> List:
         """
         input: top: float, bottom: float, left: float, right: float,   where top and bottom are latitudes, left and right are longitudes
         grid_point_distance: int = 5
@@ -658,7 +667,7 @@ class TrafficData:
         sample_points = []
         for i in range(horizontal_divide_factor):
             for j in range(vertical_divide_factor):
-                sample_points += [(bottom + vertical_increment * j, left + horizontal_increment * i)]
+                sample_points += [[bottom + vertical_increment * j, left + horizontal_increment * i]]
 
         return sample_points
 
@@ -683,5 +692,171 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, sampling_points):
-        pass
+    def set_traffic_patter_monitoring_area(self, top: float, bottom: float, left: float, right: float, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
+        """
+        inputs: 
+        top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 1000 (those parameters will be used in Traffic_data.spatial_sampling_points())
+        description: str (a brief description of the monitored area)
+        force: bool (In the case when the table already has a document with the same boudingbox_encoding, if force == True, we replace the existing document; if force == False, we raise an Exception)
+        
+
+        This function will insert documents to table 'analytics_monitored_area'
+        """
+        ## analytics_monitored_area_id is automatically generated 
+        sampling_points = TrafficData.spatial_sampling_points(top=top, bottom=bottom, left=left, right=right, grid_point_distance = grid_point_distance)
+        boudingbox_encoding = json.dumps([top, bottom, left, right])
+        analytics_monitored_area_insertion = {
+            "analytics_monitored_area_id": boudingbox_encoding,
+            "description": description,
+            "list_points": json.dumps(sampling_points),
+            "flow_item_id_collection": []
+        }
+
+        if testing:
+            flow_item_id_duplicate = 0
+
+        for point in sampling_points:
+            try:
+                road_document = self.get_nearest_road(location_data=(point[0], point[1]), max_dist=10000)
+                if road_document['doc']['flow_item_id'] not in analytics_monitored_area_insertion['flow_item_id_collection']:
+                    analytics_monitored_area_insertion['flow_item_id_collection'] += [road_document['doc']['flow_item_id']]
+                else:
+                    if testing:
+                        flow_item_id_duplicate += 1
+            except:
+                print('get_nearest_road fail in set_traffic_patter_monitoring_area')
+
+        ## determine if we are inserting or updating , if it exist, we delete it and insert a new one
+        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(boudingbox_encoding).run(self.conn)
+        if analytics_monitored_area_doc:
+            if force:
+                r.table('analytics_monitored_area').get(boudingbox_encoding).delete().run(self.conn)
+                r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
+            else:
+                raise Exception('monitored_area alerady exist, check your primary key')
+        else:
+            r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
+
+        if testing:
+            print('flow_item_id_duplicate', flow_item_id_duplicate)
+
+
+        return analytics_monitored_area_insertion
+
+    
+    def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
+        """
+        """
+        if not crawled_batch_id:
+            crawled_batch_id = self.latest_crawled_batch_id
+
+        ## 0 step: check if the document already existed, use force to determine whether to overrite 
+        analytics_traffic_pattern = self.get_analytics_traffic_pattern(analytics_monitored_area_id, crawled_batch_id)
+        if analytics_traffic_pattern:
+            if not force:
+                print('duplicate analytics_traffic_pattern_insertion, did not write, use force=True to override')
+                return
+
+
+        ## first step: get all the flow_items from table analytics_monitored_area
+        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(analytics_monitored_area_id).run(self.conn)
+        if not analytics_monitored_area_doc:
+            raise Exception('no monitored_are found in analytics_monitored_area')
+        flow_item_id_collection =  analytics_monitored_area_doc['flow_item_id_collection']
+
+        ## second step: set up the insertion document
+        crawled_batch_doc = r.table('crawled_batch').get(crawled_batch_id).run(self.conn)
+        analytics_traffic_pattern_insertion = {
+            'crawled_batch_id': crawled_batch_id,
+            'crawled_timestamp': crawled_batch_doc['crawled_timestamp'],
+            'analytics_monitored_area_id': analytics_monitored_area_id,
+            'average_JF': 0,
+            'flow_item_count':len(flow_item_id_collection)
+        }
+
+        ## third step: start to calculate the traffic_pattern
+        for flow_item_id in flow_item_id_collection:
+            flow_data_JF = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").get_field('JF').limit(3).run(self.conn).next()
+            analytics_traffic_pattern_insertion['average_JF'] += flow_data_JF
+
+        analytics_traffic_pattern_insertion['average_JF'] = analytics_traffic_pattern_insertion['average_JF'] / analytics_traffic_pattern_insertion['flow_item_count']  # get average
+
+        r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
+
+
+    def insert_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str) -> None:
+        """
+        inputs:
+        year: int, month: int, day: int  
+        analytics_monitored_area_id: str (the primary key of analytics_monitored_area)
+
+        This function update the traffic pattern of a specific day.
+
+        Example output:
+
+        (analytics_traffic_pattern)
+            {
+                "analytics_traffic_pattern_id":            # primary key
+                "date_timestamp"                           # secondary key
+                "analytics_monitored_area_id":                # secondary key
+                "traffic_pattern": [
+                    {
+                    "date_specific_timestamp":             # 1:00
+                    "average_JF":
+                    },
+                    {
+                    "date_specific_timestamp":             # 2:00
+                    "average_JF":
+                    }
+                ]
+            }
+        """
+        ## first step: change the date ISO-formatted datetime to python datetime.datetime object
+        date_start = parser.parse(date_start)
+        date_end = parser.parse(date_end)
+
+        ## second step: get all the crawled_batch_id related to this particular time interval and then insert them
+        ## by using insert_analytics_traffic_pattern()
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        for crawled_batch_id in crawled_batch_id_collection:
+            try:
+                self.insert_analytics_traffic_pattern(analytics_monitored_area_id, crawled_batch_id)
+            except Exception as e:
+                print(e)
+
+
+    def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None):
+        """
+        """
+        if not crawled_batch_id:
+            crawled_batch_id = self.latest_crawled_batch_id
+
+        try:
+            return r.table('analytics_traffic_pattern').get_all([analytics_monitored_area_id, crawled_batch_id], index = "analytics_crawled_batch").limit(1).run(self.conn).next()
+        except Exception as e:
+            print(e)
+            return None
+        
+
+    def get_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str):
+        """
+        """
+        ## First step: get all related crawled_id within the requested range: date_start to date_end
+        date_start = parser.parse(date_start)
+        date_end = parser.parse(date_end)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+
+        ## Second step: get all cooresponding traffic_pattern with respect to crawled_batch_id
+        traffic_pattern_collection = []
+        for crawled_batch_id in crawled_batch_id_collection:
+            traffic_pattern_collection += [self.get_analytics_traffic_pattern(analytics_monitored_area_id = analytics_monitored_area_id, crawled_batch_id = crawled_batch_id)]
+
+        # Third step: sort the result based on timestamp
+        traffic_pattern_collection.sort(key = lambda item: item['crawled_timestamp'])
+        for item in traffic_pattern_collection:
+            item['crawled_timestamp'] = item['crawled_timestamp'].isoformat()
+
+
+        return traffic_pattern_collection
+
+
