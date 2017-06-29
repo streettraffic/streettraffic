@@ -49,7 +49,7 @@
       <h6>Select your desired historic traffic:</h6>
       <v-data-table
         v-bind:headers="headers"
-        v-bind:items="historic_batch"
+        v-bind:items="history_batch"
         v-bind:search="search"
         v-model="selected"
         selected-key="crawled_batch_id"
@@ -88,6 +88,8 @@ import Vue from 'vue'
 import TestData from './level17.json'
 import vueSlider from './vue2-slider'
 import { EventBus } from './Event-bus.js'
+// import DataConn from './TrafficDataConn.js'
+import { mapState } from 'vuex'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -112,7 +114,7 @@ export default {
       location: null,
       locationData: null,
       testData: TestData,
-      historic_batch: ['A', 'B', 'C'],
+      historic_batch: ['A'],
       geojson_data: null,   // maybe not needed
       geojson_historic_collection: null,
       search: '',
@@ -183,7 +185,7 @@ export default {
     },
     test(){
       /* eslint-disable */
-      console.log(this.historic_slider)
+      this.$store.dispatch('getHistoricBatch')
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -274,21 +276,14 @@ export default {
     }
   },
   created() {
-    let scope = this
-    this.ws = new WebSocket('ws://localhost:8765/')
-    console.log('connecting websocket', this.ws)
-    this.ws.onopen = function (){
-      scope.ws.send(JSON.stringify(['getHistoricBatch']))
-    }
-    this.ws.onmessage = function (event) {
-      console.log('received')
-      console.log(JSON.parse(event.data))
-      scope.historic_batch = JSON.parse(event.data)
-    }
+    // pass
   },
   mounted() {
     // pass
-  }
+  },
+  computed: mapState({
+    history_batch: state => state.historic_batch
+  })
 }
 </script>
 

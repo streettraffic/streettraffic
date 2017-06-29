@@ -25,6 +25,7 @@
 <script>
 import Chart from 'chart.js'
 import colors from 'nice-color-palettes'
+import DataConn from './TrafficDataConn.js'
 
 // Load module after Highcharts is loaded
 
