@@ -849,7 +849,9 @@ class TrafficData:
         ## Second step: get all cooresponding traffic_pattern with respect to crawled_batch_id
         traffic_pattern_collection = []
         for crawled_batch_id in crawled_batch_id_collection:
-            traffic_pattern_collection += [self.get_analytics_traffic_pattern(analytics_monitored_area_id = analytics_monitored_area_id, crawled_batch_id = crawled_batch_id)]
+            traffic_pattern = self.get_analytics_traffic_pattern(analytics_monitored_area_id = analytics_monitored_area_id, crawled_batch_id = crawled_batch_id)
+            if traffic_pattern:
+                traffic_pattern_collection += [traffic_pattern]
 
         # Third step: sort the result based on timestamp
         traffic_pattern_collection.sort(key = lambda item: item['crawled_timestamp'])
