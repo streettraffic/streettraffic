@@ -18,6 +18,7 @@
     <v-flex xs12 md5 class="ma-3">
       <h6>Pick a date here to see traffic pattern</h6>
       <v-date-picker v-model="datePicker"></v-date-picker>
+      <div v-show="false">{{datePicked}}</div>
     </v-flex>
   </v-layout>
 </template>
@@ -25,7 +26,6 @@
 <script>
 import Chart from 'chart.js'
 import colors from 'nice-color-palettes'
-import DataConn from './TrafficDataConn.js'
 
 // Load module after Highcharts is loaded
 
@@ -47,42 +47,75 @@ export default {
           right: 40
         }
       },
-      datePicker: null
+      datePicker: null,
+      chart: null   // initiated by mounted, a Chart.js chart
     }
   },
   methods: {
-    getRandomColor() {
-      let letters = '0123456789ABCDEF'.split('')
-      let color = '#'
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)]
+    getTrafficPattern(datePicker) {
+      /*
+        inputs: datePicker: str
+        example inputs:
+        datePicker = '2017-5-23'
+
+        This funciton will request the traffic pattern of this date from '2017-5-23 0:00' to '2017-5-23 23:59'
+        with respect to local time. Then use the traffic pattern data to build a chart
+      */
+      let self = this
+      let day_start = new Date(this.datePicker + ' 00:00')
+      let day_end = new Date(this.datePicker + ' 23:59')
+      console.log(day_start.toISOString())
+      console.log(colors[0].concat(colors[1]).concat(colors[2]))
+      this.$store.state.ws.send(JSON.stringify(['getTrafficPattern', day_start.toISOString(), day_end.toISOString()]))
+      this.$store.state.ws.onmessage = function(event) {
+        let traffic_pattern = JSON.parse(event.data)
+        let time = null
+        console.log(traffic_pattern)
+        self.buildChart(traffic_pattern.map((item) => { time = new Date(item.crawled_timestamp)
+          return time.getHours() }),
+          traffic_pattern.map((item) => item.average_JF))
       }
-      return color
+    },
+    buildChart(labels, data) {
+      let ctx = document.getElementById('myChart').getContext('2d')
+      if (this.chart) {
+        this.chart.destroy()
+      }
+      this.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jamming Factor',
+            data: data,
+            backgroundColor: colors[0].concat(colors[1]).concat(colors[2]).concat(colors[3]).concat(colors[4]).concat(colors[5]).concat(colors[6]).concat(colors[7]),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      })
+    }
+  },
+  computed: {
+    datePicked() {
+      if (!this.datePicker){
+        return null
+      } else {
+        this.getTrafficPattern()
+        return this.datePicker
+      }
     }
   },
   mounted() {
-    var ctx = document.getElementById('myChart').getContext('2d')
-    var myChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-          label: '# of Votes',
-          data: [12, 19, 3, 5, 2, 3],
-          backgroundColor: colors[0].concat(colors[1]),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          yAxes: [{
-            ticks: {
-              beginAtZero: true
-            }
-          }]
-        }
-      }
-    })
+    this.buildChart(['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], [12, 19, 3, 5, 2, 3])
   },
   created() {
     console.log(this)

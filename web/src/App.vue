@@ -57,7 +57,10 @@ export default {
     }
   },
   created() {
-    // test
+    this.$store.dispatch('setWsConnection')
+  },
+  mounted() {
+    // pass
   }
 }
 </script>

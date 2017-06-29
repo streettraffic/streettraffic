@@ -85,10 +85,9 @@
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
-import TestData from './level17.json'
+import TestData from '../assets/level17.json'
 import vueSlider from './vue2-slider'
 import { EventBus } from './Event-bus.js'
-// import DataConn from './TrafficDataConn.js'
 import { mapState } from 'vuex'
 
 Vue.use(VueGoogleMaps, {
@@ -112,7 +111,6 @@ export default {
       directionsDisplay: null,
       directionsService: null,
       location: null,
-      locationData: null,
       testData: TestData,
       historic_batch: ['A'],
       geojson_data: null,   // maybe not needed
@@ -141,42 +139,41 @@ export default {
   },
   methods: {
     getLocation() {
-      let scope = this
-      this.locationData = JSON.stringify(this.location)
-      this.ws.send(JSON.stringify(['getRoadData', this.location, 10000, 10]))
-      this.ws.onmessage = function (event) {
-        scope.plotGeoJson(JSON.parse(event.data))
+      let self = this
+      this.$store.state.ws.send(JSON.stringify(['getRoadData', this.location, 10000, 10]))
+      this.$store.state.ws.onmessage = function (event) {
+        self.plotGeoJson(JSON.parse(event.data))
       }
     },
     getSelectedBatch() {
-      let scope = this
-      this.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
-      this.ws.onmessage = function (event) {
+      let self = this
+      this.$store.state.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
+      this.$store.state.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
-        scope.plotGeoJson(JSON.parse(event.data))
+        self.plotGeoJson(JSON.parse(event.data))
       }
     },
     getSelectedBatchList() {
-      let scope = this
-      this.ws.send(JSON.stringify(['getSelectedBatchList', this.route, this.selected]))
-      this.ws.onmessage = function (event) {
+      let self = this
+      this.$store.state.ws.send(JSON.stringify(['getSelectedBatchList', this.route, this.selected]))
+      this.$store.state.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
-        scope.geojson_historic_collection = JSON.parse(event.data)
-        scope.historic_slider['data'] = scope.geojson_historic_collection
-        scope.historic_slider['value'] = scope.historic_slider['data'][0]
+        self.geojson_historic_collection = JSON.parse(event.data)
+        self.historic_slider['data'] = self.geojson_historic_collection
+        self.historic_slider['value'] = self.historic_slider['data'][0]
       }
     },
     displaySelectedHistoric() {
-      let scope = this
+      let self = this
       EventBus.$on('sliderMoveFinished', () => {
-        console.log(scope.historic_slider.value.crawled_batch_id)
-        let slider = scope.$refs['historic_slider_ref']
+        console.log(self.historic_slider.value.crawled_batch_id)
+        let slider = self.$refs['historic_slider_ref']
         let index = slider.getIndex()
-        scope.deleteGeoJsonPlot()
-        if (scope.geojson_historic_collection[index]['crawled_batch_id'] != scope.historic_slider.value.crawled_batch_id) {
+        self.deleteGeoJsonPlot()
+        if (self.geojson_historic_collection[index]['crawled_batch_id'] != self.historic_slider.value.crawled_batch_id) {
           alert('timestamp and traffic data does not match')
         } else {
-          scope.plotGeoJson(scope.geojson_historic_collection[index]['crawled_batch_id_traffic'])
+          self.plotGeoJson(self.geojson_historic_collection[index]['crawled_batch_id_traffic'])
         }
       })
     },
@@ -185,7 +182,7 @@ export default {
     },
     test(){
       /* eslint-disable */
-      this.$store.dispatch('getHistoricBatch')
+      //
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -220,9 +217,9 @@ export default {
       */
       // this.geojson_data.setMap(null)
       // this.geojson_data = null
-      let scope = this
-      scope.$refs.mymap.$mapObject.data.forEach(function (feature) {
-        scope.$refs.mymap.$mapObject.data.remove(feature)
+      let self = this
+      self.$refs.mymap.$mapObject.data.forEach(function (feature) {
+        self.$refs.mymap.$mapObject.data.remove(feature)
       })
 
       // reset map directionDisplay, otherwise, the direction layer might be on the top of
@@ -247,17 +244,17 @@ export default {
       /* eslint-enable */
     },
     getHistoric (){
-      let scope = this
-      this.ws.send(JSON.stringify(['getHistoric', this.route]))
-      this.ws.onmessage = function (event) {
+      let self = this
+      this.$store.state.ws.send(JSON.stringify(['getHistoric', this.route]))
+      this.$store.state.ws.onmessage = function (event) {
         console.log(JSON.parse(event.data))
-        scope.plotGeoJson(JSON.parse(event.data))
+        self.plotGeoJson(JSON.parse(event.data))
       }
     },
     calculateAndDisplayRoute() {
-      let scope = this
+      let self = this
       /* eslint-disable */
-      scope.directionsService.route({
+      self.directionsService.route({
         origin: {lat: 33.736818, lng: -84.394652},  // Haight.
         destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
         // Note that Javascript allows us to access the constant
@@ -266,8 +263,8 @@ export default {
         travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
       }, function(response, status) {
         if (status == 'OK') {
-          scope.route = response
-          scope.directionsDisplay.setDirections(response)
+          self.route = response
+          self.directionsDisplay.setDirections(response)
         } else {
           window.alert('Directions request failed due to ' + status)
         }

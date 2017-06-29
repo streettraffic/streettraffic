@@ -29,6 +29,7 @@ module.exports = {
     "space-before-blocks": [0],
     "no-useless-escape": [0],
     "eqeqeq": [0],
-    "no-unused-vars": [0]
+    "no-unused-vars": [0],
+    "brace-style": [0]
   }
 }

@@ -74,6 +74,12 @@ class TrafficServer:
                         print(item['crawled_timestamp'])
                     await websocket.send(json.dumps(multipe_geojson_objects))
                     print('sent data')
+
+                elif message[0] == "getTrafficPattern":
+                    print(message)
+                    traffic_pattern = self.traffic_data.get_analytics_traffic_pattern_between(message[1], message[2], '[33.880079, 33.648894, -84.485086, -84.311365]')
+                    await websocket.send(json.dumps(traffic_pattern))
+                    print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')
