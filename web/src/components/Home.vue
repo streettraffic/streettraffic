@@ -45,6 +45,29 @@
       <v-card>
         <v-card-row class="green darken-1">
           <v-card-title>
+            <span class="white--text">Traffic Info Slider</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card-row>
+        <v-card-text>
+          <v-card-row>
+            This will automatically show the geojson data that has been plotted into the map<br> <br>
+          </v-card-row>
+          <v-card-row height="auto" center>
+            <div class="historic_slider">
+              <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value" :dataShow ="'crawled_timestamp'" :dataKey="'crawled_batch_id'" 
+                :selectCallBack="displaySelectedHistoric"></vue-slider>
+              <br>
+              <p>Currently Dsiplayed: {{ historic_slider.value.crawled_timestamp }}</p>
+            </div>
+          </v-card-row>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+    <v-flex xs12 class="my-3">
+      <v-card>
+        <v-card-row class="green darken-1">
+          <v-card-title>
             <span class="white--text">Route Traffic on a Given Day</span>
             <v-spacer></v-spacer>
           </v-card-title>
@@ -87,15 +110,6 @@
         <v-btn dark default @click.native="test">test</v-btn>
       </section>
       
-      <!-- historic traffic selection slider -->
-      <section>
-        <div class="historic_slider">
-          <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value" :dataShow ="'crawled_timestamp'" :dataKey="'crawled_batch_id'" 
-            :selectCallBack="displaySelectedHistoric"></vue-slider>
-          <br>
-          <p>Currently Dsiplayed: {{ historic_slider.value.crawled_timestamp }}</p>
-        </div>
-      </section>
 
       <v-divider class="my-4"></v-divider>
 
@@ -168,7 +182,7 @@ export default {
       geojson_data: null,   // maybe not needed
       geojson_historic_collection: null,
       selected: [],
-      value2: 0,
+      trafficInfoSliderShow: false,
       headers: [
         {
           text: 'crawled_batch_id',
@@ -231,10 +245,19 @@ export default {
       })
     },
     getRouteTraffic() {
+      let self = this
       let startTime = new Date(this.datePicker + 'T' + this.timeStartPicer)
       let endTime = new Date(this.datePicker + 'T' + this.timeEndPicer)
-      console.log(startTime)
-      console.log(endTime)
+      console.log(startTime.toISOString())
+      console.log(endTime.toISOString())
+      this.$store.state.ws.send(JSON.stringify(['getRouteTraffic', this.route, startTime, endTime]))
+      this.$store.state.ws.onmessage = function (event) {
+        console.log(JSON.parse(event.data))
+        self.geojson_historic_collection = JSON.parse(event.data)
+        self.historic_slider['data'] = self.geojson_historic_collection
+        self.historic_slider['value'] = self.historic_slider['data'][0]
+        self.trafficInfoSliderShow = true
+      }
     },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
@@ -359,6 +382,7 @@ export default {
   }
 
 .historic_slider {
+  width: 100%;
   margin-top: 40px;
   margin-bottom: 40px;
 }

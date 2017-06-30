@@ -80,6 +80,12 @@ class TrafficServer:
                     traffic_pattern = self.traffic_data.get_analytics_traffic_pattern_between(message[1], message[2], '[33.880079, 33.648894, -84.485086, -84.311365]')
                     await websocket.send(json.dumps(traffic_pattern))
                     print('sent data')
+
+                elif message[0] == "getRouteTraffic":
+                    print("getRouteTraffic")
+                    route_traffic = self.traffic_data.get_historic_traffic_between(message[1], message[2], message[3])
+                    await websocket.send(json.dumps(route_traffic))
+                    print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')

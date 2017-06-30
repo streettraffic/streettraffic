@@ -164,8 +164,8 @@ atlanta_traffic_original_doc_ids = [
 #test_start_location = (33.736818, -84.394652)
 #test_end_location = (33.769922, -84.377616)
 
-#with open('traffic data samples/google_routing.json') as f:
-#    data = json.load(f)
+with open('traffic data samples/google_routing.json') as f:
+    data = json.load(f)
     
 ## testing geospatial query
 #t1 = {"lat":33.74416482021835,"lng":-84.39327120780945}

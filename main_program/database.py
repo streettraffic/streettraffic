@@ -658,11 +658,26 @@ class TrafficData:
         return crawled_batch_id_collection
 
 
-    def get_historic_traffic_between(self, routing_info: Dict, use_overview: bool = True, date_start: 'str ISO format', date_end: 'str ISO foramt') -> None:
+    def get_historic_traffic_between(self, routing_info: Dict, date_start: 'str ISO format', date_end: 'str ISO foramt', use_overview: bool = True) -> None:
         """
         Given a routing_info, this function will get a historic_traffic for each crawled_batch_id between date_start and date_end.
         """
-        pass
+        crawled_batch_id_collection = self.get_crawled_batch_id_between(date_start = date_start, date_end = date_end)
+        multipe_geojson_collection = []
+        for crawled_batch_id in crawled_batch_id_collection:
+            multipe_geojson_collection += [{
+                "crawled_batch_id": crawled_batch_id,
+                "crawled_batch_id_traffic": self.get_historic_traffic(routing_info = routing_info, crawled_batch_id = crawled_batch_id),
+                "crawled_timestamp": r.table('crawled_batch').get(crawled_batch_id).get_field('crawled_timestamp').run(self.conn)
+            }]
+
+        ## sort based on timestamp
+        multipe_geojson_collection.sort(key = lambda item: item['crawled_timestamp'])
+
+        for item in multipe_geojson_collection:
+            item['crawled_timestamp'] = item['crawled_timestamp'].isoformat()
+
+        return multipe_geojson_collection
 
 
     """
