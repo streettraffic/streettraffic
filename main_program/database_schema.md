@@ -1,4 +1,4 @@
-# change 3
+# change 4
 
 crawled_batch (table)
     {
@@ -42,6 +42,12 @@ flow_data (table)
         "flow_data_id":                    #(primary key)
     }
 
+route_cached (table)
+    {
+        "route_cached_id":
+        "geojson_road_id_collection":
+    }
+
 analytics_monitored_area
     {
         "analytics_monitored_area_id":                # primary key  boudingbox_encoding
@@ -49,28 +55,6 @@ analytics_monitored_area
         "list_points":
         "flow_item_id_collection"      
     }
-
-
-# this will not be implemented because of the timezone issue
-# this particular way of grouping could only keep track/update on a particular timezone
-# since the related function TrafficData.update_analytics_traffic_pattern() runs really fast,
-# we are going to drop this implementation
-#   analytics_traffic_pattern
-#       {
-#           "analytics_traffic_pattern_id":            # primary key
-#           "date_timestamp"                           # secondary key
-#           "analytics_monitored_area_id":                # secondary key
-#           "traffic_pattern": [
-#               {
-#               "date_specific_timestamp":             # 1:00
-#               "average_JF":
-#               },
-#               {
-#               "date_specific_timestamp":             # 2:00
-#               "average_JF":
-#               }
-#           ]
-#       }
 
 analytics_traffic_pattern
     {   

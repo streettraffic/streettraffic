@@ -198,9 +198,9 @@ class TrafficData:
         r.table_create('flow_item', primary_key = 'flow_item_id').run(self.conn)
         r.table_create('crawled_batch', primary_key = 'crawled_batch_id').run(self.conn)
         r.table_create('flow_data', primary_key = 'flow_data_id').run(self.conn)
+        r.table_create('route_cached', primary_key = 'route_cached_id').run(self.conn)
         r.table_create('analytics_monitored_area', primary_key = 'analytics_monitored_area_id').run(self.conn)
         r.table_create('analytics_traffic_pattern', primary_key = 'analytics_traffic_pattern_id').run(self.conn)
-        
 
         ## creating index
         r.table('road_data').index_create('flow_item_id').run(self.conn)
@@ -550,37 +550,22 @@ class TrafficData:
         ## there might be multiple **routes**, but we just worry about one for now
         route = routing_info['routes'][0]
 
+        ## We first check if someone has already used this route before, and we use overview_polyline as an identifier
+        route_cached_id = route['overview_polyline'][:120]  # primary key's length is at most 127
+        route_cached_doc = r.table('route_cached').get(route_cached_id).run(self.conn)
 
-        ## we don't want duplicate road in our collection
-        road_id_collection = {}
-        duplicate_road_id = []
-        geojson_road_list = []
+        if not route_cached_doc:
+            ## if we haven't cache this route before, we need to store it in route_cached
+            ## we don't want duplicate road in our collection
+            road_id_collection = {}
+            duplicate_road_id = []
+            geojson_road_id_collection = []
 
-        if use_overview:
-            ## use overview to optimize query time
-            for overview_path_item in route['overview_path']:
-                try:
-                    road_document = self.get_nearest_road((overview_path_item['lat'], overview_path_item['lng']), max_dist = 1000)
-                    road_data_id = road_document['doc']['road_data_id']
-                except:
-                    print('cant find nearest road once')
-
-                ## see if road_data_id already exists in our collection
-                if road_data_id not in road_id_collection:
-                    road_id_collection[road_data_id] = True
-                    geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
-                else:
-                    duplicate_road_id += [road_data_id]
-
-
-        else:
-            ## we could also query every point in our path, but the query performance is slow
-            ## there might be multiple **legs**, but we just worry about one for now
-            leg = route['legs'][0]
-            for step in leg['steps']:
-                for path_item in step['path']:
+            if use_overview:
+                ## use overview to optimize query time
+                for overview_path_item in route['overview_path']:
                     try:
-                        road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
+                        road_document = self.get_nearest_road((overview_path_item['lat'], overview_path_item['lng']), max_dist = 1000)
                         road_data_id = road_document['doc']['road_data_id']
                     except:
                         print('cant find nearest road once')
@@ -588,12 +573,47 @@ class TrafficData:
                     ## see if road_data_id already exists in our collection
                     if road_data_id not in road_id_collection:
                         road_id_collection[road_data_id] = True
-                        geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
+                        geojson_road_id_collection += [road_data_id]
                     else:
                         duplicate_road_id += [road_data_id]
 
-        print('there are', len(duplicate_road_id), 'many duplicate road element')
-        print(len(road_id_collection))
+
+            else:
+                ## we could also query every point in our path, but the query performance is slow
+                ## there might be multiple **legs**, but we just worry about one for now
+                leg = route['legs'][0]
+                for step in leg['steps']:
+                    for path_item in step['path']:
+                        try:
+                            road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
+                            road_data_id = road_document['doc']['road_data_id']
+                        except:
+                            print('cant find nearest road once')
+
+                        ## see if road_data_id already exists in our collection
+                        if road_data_id not in road_id_collection:
+                            road_id_collection[road_data_id] = True
+                            geojson_road_id_collection += [road_data_id]
+                        else:
+                            duplicate_road_id += [road_data_id]
+
+            route_cached_insertion = {
+                "route_cached_id": route_cached_id,
+                "geojson_road_id_collection": geojson_road_id_collection
+            }
+
+            r.table('route_cached').insert(route_cached_insertion).run(self.conn)
+
+            print('there are', len(duplicate_road_id), 'many duplicate road element')
+            print('unique road element', len(road_id_collection))
+        
+        else:
+            ## this branch means route_cached_doc has already existed 
+            geojson_road_id_collection = route_cached_doc['geojson_road_id_collection']
+
+        geojson_road_list = []
+        for road_data_id in geojson_road_id_collection:
+            geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
 
@@ -616,6 +636,34 @@ class TrafficData:
             batch_list += [batch_item]
 
         return batch_list
+
+    def get_crawled_batch_id_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt') -> List:
+        """
+        inputs: date_start: 'str ISO format', date_end: 'str ISO foramt'
+        Example inputs:
+        date_start = "2017-06-28T14:20:00.000Z"
+        date_end = "2017-06-28T23:20:00.000Z"
+    
+        This function will get all the crawled_batch_id between date_start and date_end    
+
+        return a list of crawled_batch_id
+        """
+        ## first step: change the date ISO-formatted datetime to python datetime.datetime object
+        date_start = parser.parse(date_start)
+        date_end = parser.parse(date_end)
+
+        ## second step: get all the crawled_batch_id related to this particular time interval 
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        
+        return crawled_batch_id_collection
+
+
+    def get_historic_traffic_between(self, routing_info: Dict, use_overview: bool = True, date_start: 'str ISO format', date_end: 'str ISO foramt') -> None:
+        """
+        Given a routing_info, this function will get a historic_traffic for each crawled_batch_id between date_start and date_end.
+        """
+        pass
+
 
     """
     Analytics part of the module
@@ -743,7 +791,7 @@ class TrafficData:
 
         return analytics_monitored_area_insertion
 
-    
+ 
     def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
         """
         """

@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <v-flex xs12 md6>
+    <v-flex xs12 md6 class="my-3">
       <v-card>
         <v-card-row class="green darken-1">
           <v-card-title>
@@ -9,6 +9,9 @@
           </v-card-title>
         </v-card-row>
         <v-card-text>
+          <v-card-row>
+            Randomly click on the map is going to show the traffic of a nearest road <br><br>
+          </v-card-row>
           <v-card-row height="auto" center>
             <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
                 @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
@@ -17,32 +20,68 @@
           </v-card-row>
         </v-card-text>
       </v-card>
-      <v-divider class="my-4"></v-divider>
     </v-flex>
-    <v-flex xs12 md6>
+    <v-flex xs12 md6 class="my-3">
       <v-card>
         <v-card-row class="green darken-1">
           <v-card-title>
-            <span class="white--text">The Map</span>
+            <span class="white--text">Geojson</span>
             <v-spacer></v-spacer>
           </v-card-title>
         </v-card-row>
         <v-card-text>
+          <v-card-row>
+            This will automatically show the geojson data that has been plotted into the map<br> <br>
+          </v-card-row>
           <v-card-row height="auto" center>
             <div class="geojson_output">
-              <p>Click displayGeoJson to see what happens</p>
-              <textarea style="width: 100%; height: 300px" v-model="geojson"></textarea>
+              <textarea style="width: 100%; height: 390px" v-model="map_geojson"></textarea>
             </div>
           </v-card-row>
         </v-card-text>
       </v-card>
-      <v-divider class="my-4"></v-divider>
     </v-flex>
+    <v-flex xs12 class="my-3">
+      <v-card>
+        <v-card-row class="green darken-1">
+          <v-card-title>
+            <span class="white--text">Route Traffic on a Given Day</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card-row>
+        <v-card-text>
+          Display routing. Then pick a date, start time, and end time
+        </v-card-text>
+        <v-card-text>
+          <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
+          <v-layout row wrap>
+            <v-flex xs12 md4 class="my-3">
+              <h6>Pick a date</h6>
+              <v-date-picker v-model="datePicker"></v-date-picker>
+            </v-flex>
+
+            <v-flex xs12 md4 class="my-3">
+              <h6>Pick a start time</h6>
+              <v-time-picker v-model="timeStartPicer" format="24hr"></v-time-picker>
+            </v-flex>
+
+            <v-flex xs12 md4 class="my-3">
+              <h6>Pick an end time</h6>
+              <v-time-picker v-model="timeEndPicer" format="24hr"></v-time-picker>
+            </v-flex>
+          </v-layout>
+          <v-btn dark default @click.native="getRouteTraffic">Get route traffic</v-btn>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+
+
+
     <v-flex xs12>
+      <v-divider class="my-4"></v-divider>
       <section>
         <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
         <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
-        <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
         <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
         <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
         <v-btn dark default @click.native="test">test</v-btn>
@@ -64,8 +103,7 @@
       <h6>Select your desired historic traffic:</h6>
       <v-data-table
         v-bind:headers="headers"
-        v-bind:items="history_batch"
-        v-bind:search="search"
+        v-bind:items="historic_batch"
         v-model="selected"
         selected-key="crawled_batch_id"
         select-all
@@ -120,17 +158,15 @@ export default {
   data () {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
-      geojson: null,
+      map_geojson: null,
       ws: null,
       route: null,
       directionsDisplay: null,
       directionsService: null,
       location: null,
       testData: TestData,
-      historic_batch: ['A'],
       geojson_data: null,   // maybe not needed
       geojson_historic_collection: null,
-      search: '',
       selected: [],
       value2: 0,
       headers: [
@@ -147,9 +183,11 @@ export default {
         disabled: false,
         tooltip: 'hover',
         piecewise: true,
-        piecewiseLabel: true,
-        data: ['test', 'test']   // This will be initialized in the created() funciton
-      }
+        data: ['test1']   // This will be initialized in the created() funciton
+      },
+      datePicker: null,
+      timeStartPicer: null,
+      timeEndPicer: null
     }
   },
   methods: {
@@ -192,12 +230,19 @@ export default {
         }
       })
     },
+    getRouteTraffic() {
+      let startTime = new Date(this.datePicker + 'T' + this.timeStartPicer)
+      let endTime = new Date(this.datePicker + 'T' + this.timeEndPicer)
+      console.log(startTime)
+      console.log(endTime)
+    },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
     },
     test(){
       /* eslint-disable */
-      //
+      console.log(this.datePicker)
+      console.log(this.timeStartPicer)
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
@@ -223,6 +268,7 @@ export default {
           zIndex: 5
         })
       })
+      this.displayGeoJson()
       /* eslint-enable */
     },
     deleteGeoJsonPlot() {
@@ -241,13 +287,14 @@ export default {
       // our traffic geojson layer.
       this.directionsDisplay.setMap(null)
       this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.displayGeoJson()
     },
     displayGeoJson() {
       let results
       this.$refs.mymap.$mapObject.data.toGeoJson((geojson) => {
         results = JSON.stringify(geojson, null, 2)
       })
-      this.geojson = results
+      this.map_geojson = results
     },
     dsiplayRouting() {
       /* eslint-disable */
@@ -293,9 +340,11 @@ export default {
   mounted() {
     // pass
   },
-  computed: mapState({
-    history_batch: state => state.historic_batch
-  })
+  computed: {
+    historic_batch() {
+      return this.$store.state.historic_batch
+    }
+  }
 }
 </script>
 
