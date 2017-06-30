@@ -16,9 +16,9 @@
       </v-card>
     </v-flex>
     <v-flex xs12 md5 class="ma-3">
-      <h6>Pick a date here to see traffic pattern</h6>
+      <h6>Pick a date here to see traffic patterns</h6>
       <v-date-picker v-model="datePicker"></v-date-picker>
-      <div v-show="false">{{datePicked}}</div>
+      <div v-show="true">{{datePicked}}</div>
     </v-flex>
   </v-layout>
 </template>
@@ -62,15 +62,13 @@ export default {
         with respect to local time. Then use the traffic pattern data to build a chart
       */
       let self = this
-      let day_start = new Date(this.datePicker + ' 00:00')
-      let day_end = new Date(this.datePicker + ' 23:59')
-      console.log(day_start.toISOString())
-      console.log(colors[0].concat(colors[1]).concat(colors[2]))
+      let day_start = new Date(this.datePicker + 'T00:00')
+      let day_end = new Date(this.datePicker + 'T23:59')
+      console.log(day_start)
       this.$store.state.ws.send(JSON.stringify(['getTrafficPattern', day_start.toISOString(), day_end.toISOString()]))
       this.$store.state.ws.onmessage = function(event) {
         let traffic_pattern = JSON.parse(event.data)
         let time = null
-        console.log(traffic_pattern)
         self.buildChart(traffic_pattern.map((item) => { time = new Date(item.crawled_timestamp)
           return time.getHours() }),
           traffic_pattern.map((item) => item.average_JF))
@@ -108,7 +106,8 @@ export default {
     datePicked() {
       if (!this.datePicker){
         return null
-      } else {
+      }
+      else {
         this.getTrafficPattern()
         return this.datePicker
       }

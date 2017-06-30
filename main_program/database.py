@@ -593,7 +593,7 @@ class TrafficData:
                         duplicate_road_id += [road_data_id]
 
         print('there are', len(duplicate_road_id), 'many duplicate road element')
-        #print(road_id_collection)
+        print(len(road_id_collection))
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
 

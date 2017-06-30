@@ -1,6 +1,6 @@
 <template>
-  <v-layout>
-    <v-flex xs12>
+  <v-layout row wrap>
+    <v-flex xs12 md6>
       <v-card>
         <v-card-row class="green darken-1">
           <v-card-title>
@@ -10,20 +10,35 @@
         </v-card-row>
         <v-card-text>
           <v-card-row height="auto" center>
-            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 50%; height: 400px" 
+            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
                 @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
-              <gmap-marker v-if="location" :position="location" />
+              <gmap-marker v-if="location" :position="location" /></gmap-marker>
             </gmap-map>
+          </v-card-row>
+        </v-card-text>
+      </v-card>
+      <v-divider class="my-4"></v-divider>
+    </v-flex>
+    <v-flex xs12 md6>
+      <v-card>
+        <v-card-row class="green darken-1">
+          <v-card-title>
+            <span class="white--text">The Map</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card-row>
+        <v-card-text>
+          <v-card-row height="auto" center>
             <div class="geojson_output">
               <p>Click displayGeoJson to see what happens</p>
-              <textarea style="width: 100%; height: 380px" v-model="geojson"></textarea>
+              <textarea style="width: 100%; height: 300px" v-model="geojson"></textarea>
             </div>
           </v-card-row>
         </v-card-text>
       </v-card>
-      
       <v-divider class="my-4"></v-divider>
-
+    </v-flex>
+    <v-flex xs12>
       <section>
         <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
         <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
@@ -288,8 +303,7 @@ export default {
 <style lang="scss" scoped>
 
 .geojson_output {
-  width: 40%;
-  margin-left: 20px;
+  width: 100%;
 }
   textarea {
     border-style: solid;

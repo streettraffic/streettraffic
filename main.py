@@ -244,5 +244,5 @@ start = datetime.datetime(2017,6,27,0,0,0, tzinfo = r.make_timezone('00:00'))
 end = datetime.datetime(2017,6,27,23,0,0, tzinfo = r.make_timezone('00:00'))
 analytics_monitored_area_id = '[33.880079, 33.648894, -84.485086, -84.311365]'
 start_time_iso = "2017-06-23T04:00:00.000Z"
-    end_time_iso = "2017-06-24T03:59:59.000Z"
+end_time_iso = "2017-06-24T03:59:59.000Z"
 #traffic_server.traffic_data.get_analytics_traffic_pattern_between(start_time_iso,end_time_iso, '[33.880079, 33.648894, -84.485086, -84.311365]')
