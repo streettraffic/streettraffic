@@ -72,6 +72,10 @@ async def insert_json_data():
     assert len(data_feed.data['flow_data']) == len(tested_data['flow_data'])
     assert len(data_feed.data['crawled_batch']) == len(tested_data['crawled_batch'])
 
+def test_parse_SHP_values():
+    global traffic_data
+    assert traffic_data.parse_SHP_values(["34.9495,-82.43912 34.94999,-82.4392 34.95139,-82.4394 "]) == [[-82.43912, 34.9495], [-82.4392, 34.94999], [-82.4394, 34.95139]]
+
 def test_read_traffic_data():
     """ """
     global traffic_data
@@ -80,11 +84,9 @@ def test_read_traffic_data():
     assert len(data['RWS'][0]['RW'][0]['FIS'][0]['FI'][0]['SHP']) > 0
     assert data2 == None
 
-
-def test_parse_SHP_values():
-    global traffic_data
-    assert traffic_data.parse_SHP_values(["34.9495,-82.43912 34.94999,-82.4392 34.95139,-82.4394 "]) == [[-82.43912, 34.9495], [-82.4392, 34.94999], [-82.4394, 34.95139]]
-
+def helper_create_tables():
+    """ maybe not needed"""
+    pass
 
 def store_matrix_json():
     """ maybe not needed"""
@@ -101,6 +103,10 @@ def test_generate_geojson_collection():
     geojson_combined = TrafficData.generate_geojson_collection([geojson_object2, geojson_object1])
 
     assert geojson_combined == geojson_combined_test
+
+def traffic_flow_color_scheme():
+    """ maybe not needed """
+    pass
 
 def test_get_nearest_road():
     global traffic_data

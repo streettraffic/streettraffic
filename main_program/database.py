@@ -613,7 +613,10 @@ class TrafficData:
 
         geojson_road_list = []
         for road_data_id in geojson_road_id_collection:
-            geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
+            try:
+                geojson_road_list += [self.fetch_geojson_item(road_data_id, crawled_batch_id = crawled_batch_id)]
+            except Exception as e:
+                print('get_historic_traffic', e)
 
         return TrafficData.generate_geojson_collection(geojson_road_list)
 
