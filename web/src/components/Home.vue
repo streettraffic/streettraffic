@@ -41,7 +41,7 @@
         </v-card-text>
       </v-card>
     </v-flex>
-    <v-flex xs12 class="my-3">
+    <v-flex xs12 class="my-3" v-show="trafficInfoSliderShow">
       <v-card>
         <v-card-row class="green darken-1">
           <v-card-title>
@@ -53,9 +53,9 @@
           <v-card-row>
             This will automatically show the geojson data that has been plotted into the map<br> <br>
           </v-card-row>
-          <v-card-row height="auto" center>
+          <v-card-row height="auto">
             <div class="historic_slider">
-              <vue-slider @callback="displaySelectedHistoric" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
+              <vue-slider @callback="displaySelectedHistoric" :real-time="true" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
               <br>
               <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
             </div>
@@ -233,15 +233,16 @@ export default {
         self.historic_slider['value'] = self.historic_slider['data'][0]
       }
     },
-    displaySelectedHistoric() {
+    displaySelectedHistoric(value) {
       let self = this
-      console.log(self.historic_slider.value)
-      console.log(self.geojson_historic_collection[self.geojson_historic_collection_indices[self.historic_slider.value]])
+      console.log(value)
+      console.log(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]])
       self.deleteGeoJsonPlot()
       self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[self.historic_slider.value]]['crawled_batch_id_traffic'])
     },
     getRouteTraffic() {
       let self = this
+      self.trafficInfoSliderShow = true
       let startTime = new Date(this.datePicker + 'T' + this.timeStartPicer)
       let endTime = new Date(this.datePicker + 'T' + this.timeEndPicer)
       console.log(startTime.toISOString())
@@ -254,7 +255,6 @@ export default {
           item['local_timestamp'] = new Date(item['crawled_timestamp'])
         })
 
-        self.trafficInfoSliderShow = true
         console.log(self.geojson_historic_collection)
         console.log(self.geojson_historic_collection_indices)
         self.historic_slider['data'] = self.geojson_historic_collection.map((item, index) => {
@@ -270,6 +270,9 @@ export default {
           }
         })
         self.historic_slider['value'] = self.historic_slider['data'][0]
+        let slider = self.$refs['historic_slider_ref']
+        slider.refresh()
+        self.displaySelectedHistoric(self.historic_slider['value'])
       }
     },
     toManhattan() {
@@ -277,8 +280,7 @@ export default {
     },
     test(){
       /* eslint-disable */
-      console.log(this.datePicker)
-      console.log(this.timeStartPicer)
+      console.log(this.historic_slider.data)
       /* eslint-enable */
     },
     plotGeoJson(geoJsonData) {
