@@ -55,10 +55,9 @@
           </v-card-row>
           <v-card-row height="auto" center>
             <div class="historic_slider">
-              <vue-slider ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value" :dataShow ="'crawled_timestamp'" :dataKey="'crawled_batch_id'" 
-                :selectCallBack="displaySelectedHistoric"></vue-slider>
+              <vue-slider @callback="displaySelectedHistoric" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
               <br>
-              <p>Currently Dsiplayed: {{ historic_slider.value.crawled_timestamp }}</p>
+              <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
             </div>
           </v-card-row>
         </v-card-text>
@@ -154,7 +153,6 @@ import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
 import TestData from '../assets/level17.json'
 import vueSlider from './vue2-slider'
-import { EventBus } from './Event-bus.js'
 import { mapState } from 'vuex'
 
 Vue.use(VueGoogleMaps, {
@@ -173,7 +171,6 @@ export default {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       map_geojson: null,
-      ws: null,
       route: null,
       directionsDisplay: null,
       directionsService: null,
@@ -181,6 +178,7 @@ export default {
       testData: TestData,
       geojson_data: null,   // maybe not needed
       geojson_historic_collection: null,
+      geojson_historic_collection_indices: {},
       selected: [],
       trafficInfoSliderShow: false,
       headers: [
@@ -194,10 +192,15 @@ export default {
       ],
       historic_slider: {
         value: '',
+        width: '90%',
         disabled: false,
         tooltip: 'hover',
         piecewise: true,
-        data: ['test1']   // This will be initialized in the created() funciton
+        data: [
+          '2016-10-01',
+          '2016-10-02',
+          '2016-10-03'
+        ]   // This will be initialized in the created() funciton
       },
       datePicker: null,
       timeStartPicer: null,
@@ -232,17 +235,10 @@ export default {
     },
     displaySelectedHistoric() {
       let self = this
-      EventBus.$on('sliderMoveFinished', () => {
-        console.log(self.historic_slider.value.crawled_batch_id)
-        let slider = self.$refs['historic_slider_ref']
-        let index = slider.getIndex()
-        self.deleteGeoJsonPlot()
-        if (self.geojson_historic_collection[index]['crawled_batch_id'] != self.historic_slider.value.crawled_batch_id) {
-          alert('timestamp and traffic data does not match')
-        } else {
-          self.plotGeoJson(self.geojson_historic_collection[index]['crawled_batch_id_traffic'])
-        }
-      })
+      console.log(self.historic_slider.value)
+      console.log(self.geojson_historic_collection[self.geojson_historic_collection_indices[self.historic_slider.value]])
+      self.deleteGeoJsonPlot()
+      self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[self.historic_slider.value]]['crawled_batch_id_traffic'])
     },
     getRouteTraffic() {
       let self = this
@@ -252,11 +248,28 @@ export default {
       console.log(endTime.toISOString())
       this.$store.state.ws.send(JSON.stringify(['getRouteTraffic', this.route, startTime, endTime]))
       this.$store.state.ws.onmessage = function (event) {
-        console.log(JSON.parse(event.data))
         self.geojson_historic_collection = JSON.parse(event.data)
-        self.historic_slider['data'] = self.geojson_historic_collection
-        self.historic_slider['value'] = self.historic_slider['data'][0]
+        // initialize local time within geojson_historic_collection
+        self.geojson_historic_collection.forEach((item, index) => {
+          item['local_timestamp'] = new Date(item['crawled_timestamp'])
+        })
+
         self.trafficInfoSliderShow = true
+        console.log(self.geojson_historic_collection)
+        console.log(self.geojson_historic_collection_indices)
+        self.historic_slider['data'] = self.geojson_historic_collection.map((item, index) => {
+          // if hours == 0 and minutes == 0, it must be a whole date
+          if (item.local_timestamp.getHours() == 0 && item.local_timestamp.getMinutes() == 0){
+            self.geojson_historic_collection_indices[item.local_timestamp.toLocaleDateString()] = index
+            return item.local_timestamp.toLocaleDateString()
+          }
+          // else it must be a intraday hours and minutes
+          else {
+            self.geojson_historic_collection_indices[item.local_timestamp.toLocaleTimeString()] = index
+            return item.local_timestamp.toLocaleTimeString()
+          }
+        })
+        self.historic_slider['value'] = self.historic_slider['data'][0]
       }
     },
     toManhattan() {
@@ -383,7 +396,5 @@ export default {
 
 .historic_slider {
   width: 100%;
-  margin-top: 40px;
-  margin-bottom: 40px;
 }
 </style>

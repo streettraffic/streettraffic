@@ -1,16 +1,26 @@
 <template>
   <div ref="wrap" :class="['vue-slider-wrap', flowDirection, disabledClass, { 'vue-slider-has-label': piecewiseLabel }]" v-show="show" :style="wrapStyles" @click="wrapClick">
-    <div ref="elem" class="vue-slider" :style="[elemStyles, bgStyle]">
+    <div ref="elem" aria-hidden="true" class="vue-slider" :style="[elemStyles, bgStyle]">
       <template v-if="isMobile">
         <template v-if="isRange">
-          <div ref="dot0" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles[0], dotStyles]" @touchstart="moveStart(0)">
+          <div
+            ref="dot0"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles[0], dotStyles]"
+            @touchstart="moveStart(0)"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection[0], 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val[0]" :index="0">
                 <span class="vue-slider-tooltip" :style="tooltipStyles[0]">{{ formatter ? formatting(val[0]) : val[0] }}</span>
               </slot>
             </span>
           </div>
-          <div ref="dot1" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles[1], dotStyles]" @touchstart="moveStart(1)">
+          <div
+            ref="dot1"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles[1], dotStyles]"
+            @touchstart="moveStart(1)"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection[1], 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val[1]" :index="1">
                 <span class="vue-slider-tooltip" :style="tooltipStyles[1]">{{ formatter ? formatting(val[1]) : val[1] }}</span>
@@ -19,10 +29,15 @@
           </div>
         </template>
         <template v-else>
-          <div ref="dot" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles, dotStyles]" @touchstart="moveStart">
+          <div
+            ref="dot"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles, dotStyles]"
+            @touchstart="moveStart"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection, 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val" :style="tooltipStyles">
-                {{ formatter ? formatting(val) : val}}
+                {{ formatter ? formatting(val) : val }}
               </slot>
             </span>
           </div>
@@ -30,14 +45,24 @@
       </template>
       <template v-else>
         <template v-if="isRange">
-          <div ref="dot0" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles[0], dotStyles]" @mousedown="moveStart(0)">
+          <div
+            ref="dot0"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles[0], dotStyles]"
+            @mousedown="moveStart(0)"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection[0], 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val[0]" :index="0">
                 <span class="vue-slider-tooltip" :style="tooltipStyles[0]">{{ formatter ? formatting(val[0]) : val[0] }}</span>
               </slot>
             </span>
           </div>
-          <div ref="dot1" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles[1], dotStyles]" @mousedown="moveStart(1)">
+          <div
+            ref="dot1"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles[1], dotStyles]"
+            @mousedown="moveStart(1)"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection[1], 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val[1]" :index="1">
                 <span class="vue-slider-tooltip" :style="tooltipStyles[1]">{{ formatter ? formatting(val[1]) : val[1] }}</span>
@@ -46,7 +71,12 @@
           </div>
         </template>
         <template v-else>
-          <div ref="dot" :class="[tooltipStatus, 'vue-slider-dot']" :style="[sliderStyles, dotStyles]" @mousedown="moveStart">
+          <div
+            ref="dot"
+            :class="[tooltipStatus, 'vue-slider-dot']"
+            :style="[sliderStyles, dotStyles]"
+            @mousedown="moveStart"
+          >
             <span :class="['vue-slider-tooltip-' + tooltipDirection, 'vue-slider-tooltip-wrap']">
               <slot name="tooltip" :value="val">
                 <span class="vue-slider-tooltip" :style="tooltipStyles">{{ formatter ? formatting(val) : val }}</span>
@@ -55,24 +85,50 @@
           </div>
         </template>
       </template>
-      <template v-if="piecewise">
+      <template>
         <ul class="vue-slider-piecewise">
           <li v-for="(piecewiseObj, index) in piecewiseDotWrap" :style="[piecewiseDotStyle, piecewiseObj.style]">
-            <span class="vue-slider-piecewise-dot" :style="[piecewiseStyle, piecewiseObj.inRange ? piecewiseActiveStyle : null]"></span>
-            <span v-if="piecewiseLabel" class="vue-slider-piecewise-label" :style="[labelStyle, piecewiseObj.inRange ? labelActiveStyle : null]">{{ piecewiseObj.label }}</span>
+            <slot
+              name="piecewiseL"
+              :label="piecewiseObj.label"
+              :index="index"
+              :first="index === 0"
+              :last="index === piecewiseDotWrap.length - 1"
+            >
+              <span
+                v-if="piecewise"
+                class="vue-slider-piecewise-dot"
+                :style="[ piecewiseStyle, piecewiseObj.inRange ? piecewiseActiveStyle : null ]"
+              ></span>
+            </slot>
+
+            <slot
+              name="label"
+              :label="piecewiseObj.label"
+              :index="index"
+              :first="index === 0"
+              :last="index === piecewiseDotWrap.length - 1"
+            >
+              <span
+                v-if="piecewiseLabel"
+                class="vue-slider-piecewise-label"
+                :style="[ labelStyle, piecewiseObj.inRange ? labelActiveStyle : null ]"
+              >
+                {{ piecewiseObj.label }}
+              </span>
+            </slot>
           </li>
         </ul>
       </template>
       <div ref="process" class="vue-slider-process" :style="processStyle"></div>
     </div>
+    <input v-if="!isRange && !data" class="vue-slider-sr-only" type="range" v-model="val" :min="min" :max="max" />
   </div>
 </template>
 <script>
-import { EventBus } from './Event-bus.js'
-
 /* eslint-disable */
+
 export default {
-  name: 'vueSlider',
   data() {
     return {
       flag: false,
@@ -82,13 +138,6 @@ export default {
     }
   },
   props: {
-    dataShow: {
-      type: String
-    },
-    dataKey: {
-      type: String
-    },
-    selectCallBack: "",
     width: {
       type: [Number, String],
       default: 'auto'
@@ -162,7 +211,7 @@ export default {
       default: false
     },
     value: {
-      type: [String, Number, Array, Object],
+      type: [String, Number, Array],
       default: 0
     },
     piecewiseLabel: {
@@ -343,7 +392,7 @@ export default {
       }
     },
     piecewiseDotWrap() {
-      if (!this.piecewise) {
+      if (!this.piecewise && !this.piecewiseLabel) {
         return false
       }
 
@@ -352,13 +401,13 @@ export default {
       for (let i = 0; i <= this.total; i++) {
         let style = this.direction === 'vertical' ? {
           bottom: `${this.gap * i - this.width / 2}px`,
-          left: '200px'
+          left: 0
         } : {
           left: `${this.gap * i - this.height / 2}px`,
           top: '0'
         }
         let index = this.reverse ? (this.total - i) : i
-        let label = this.data ? this.data[index][this.dataShow] : (this.spacing * index) + this.min
+        let label = this.data ? this.data[index] : (this.spacing * index) + this.min
         arr.push({
           style,
           label: this.formatter ? this.formatting(label) : label,
@@ -429,8 +478,6 @@ export default {
         this.currentSlider = pos > ((this.position[1] - this.position[0]) / 2 + this.position[0]) ? 1 : 0
       }
       this.setValueOnPos(pos)
-      EventBus.$emit('sliderMoveFinished')
-      console.log('slider move finished')
     },
     moveStart(index) {
       if (this.isDisabled) return false
@@ -459,8 +506,6 @@ export default {
       }
       this.flag = false
       this.setPosition()
-      EventBus.$emit('sliderMoveFinished')
-      console.log('slider move finished')
     },
     setValueOnPos(pos, isDrag) {
       let range = this.isRange ? this.limit[this.currentSlider] : this.limit
@@ -663,7 +708,6 @@ export default {
     this.$nextTick(() => {
       this.getStaticData()
       this.setValue(this.value, true, 0)
-      this.selectCallBack()
       this.bindEvents()
     })
   },
@@ -671,7 +715,6 @@ export default {
     this.unbindEvents()
   }
 }
-/* eslint-enable */
 </script>
 
 <style scoped>
@@ -885,15 +928,33 @@ export default {
 .vue-slider-piecewise li:first-child .vue-slider-piecewise-dot, .vue-slider-piecewise li:last-child .vue-slider-piecewise-dot {
   visibility: hidden;
 }
-.vue-slider-piecewise .vue-slider-piecewise-label {
+.vue-slider-horizontal .vue-slider-piecewise-label, .vue-slider-horizontal-reverse .vue-slider-piecewise-label {
   position: absolute;
   display: inline-block;
-  top: 15px;
+  top: 100%;
   left: 50%;
   white-space: nowrap;
   font-size: 12px;
   color: #333;
-  transform: translateX(-50%);
+  transform: translate(-50%, 8px);
   visibility: visible;
+}
+.vue-slider-vertical .vue-slider-piecewise-label, .vue-slider-vertical-reverse .vue-slider-piecewise-label {
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  left: 100%;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #333;
+  transform: translate(8px, -50%);
+  visibility: visible;
+}
+.vue-slider-sr-only {
+   clip: rect(1px, 1px, 1px, 1px);
+   height: 1px;
+   width: 1px;
+   overflow: hidden;
+   position: absolute !important;
 }
 </style>

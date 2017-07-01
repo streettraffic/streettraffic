@@ -30,6 +30,7 @@ module.exports = {
     "no-useless-escape": [0],
     "eqeqeq": [0],
     "no-unused-vars": [0],
-    "brace-style": [0]
+    "brace-style": [0],
+    "no-trailing-spaces": [0]
   }
 }
