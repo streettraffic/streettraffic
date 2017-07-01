@@ -92,7 +92,17 @@
               <v-time-picker v-model="timeEndPicer" format="24hr"></v-time-picker>
             </v-flex>
           </v-layout>
-          <v-btn dark default @click.native="getRouteTraffic">Get route traffic</v-btn>
+          <v-dialog v-model="trafficInfoSliderDialog" persistent>
+            <v-btn primary light slot="activator" @click.native="getRouteTraffic">Open Dialog</v-btn>
+            <v-card>
+              <v-card-row>
+                <v-card-title>Retrieving data from the server</v-card-title>
+              </v-card-row>
+              <v-card-row>
+                <v-card-text>Please be patient :)</v-card-text>
+              </v-card-row>
+            </v-card>
+          </v-dialog>
         </v-card-text>
       </v-card>
     </v-flex>
@@ -171,6 +181,7 @@ export default {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       map_geojson: null,
+      trafficInfoSliderDialog: false,
       route: null,
       directionsDisplay: null,
       directionsService: null,
@@ -273,6 +284,7 @@ export default {
         let slider = self.$refs['historic_slider_ref']
         slider.refresh()
         self.displaySelectedHistoric(self.historic_slider['value'])
+        self.trafficInfoSliderDialog = false
       }
     },
     toManhattan() {
