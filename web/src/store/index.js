@@ -9,7 +9,7 @@ Vue.use(Vuex)
 
 const state = {
   ws_connection_status: false,
-  ws_address: 'ws://localhost:8765/',
+  ws_address: 'ws://localhost:8766/',
   ws: null,
   historic_batch: ['A', 'B', 'C']
 }
