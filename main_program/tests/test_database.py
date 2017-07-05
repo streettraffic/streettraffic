@@ -31,10 +31,15 @@ class _iter:
 
     def next(self):
         try:
-            return self.data[self.index]
+            data = self.data[self.index]
             self.index += 1
+            return data
         except Exception as e:
             raise Exception('_iter error, no next')
+            
+    def __iter__(self):
+        for item in self.data:
+            yield self.next()
 
 
 r.net.connection_type = r.net.DefaultConnection  # the default connection
@@ -93,6 +98,9 @@ async def insert_json_data():
     assert len(data_feed.data['crawled_batch']) == len(tested_data['crawled_batch'])
 
 def test_parse_SHP_values():
+    """
+    transform the geometry format to proper lat lon format.
+    """
     global traffic_data
     assert traffic_data.parse_SHP_values(["34.9495,-82.43912 34.94999,-82.4392 34.95139,-82.4394 "]) == [[-82.43912, 34.9495], [-82.4392, 34.94999], [-82.4394, 34.95139]]
 
@@ -108,9 +116,32 @@ def helper_create_tables():
     """ maybe not needed"""
     pass
 
-def store_matrix_json():
+@mock.patch.object(database.r.RqlQuery, 'run', autospec = True)
+@mock.patch.object(database.TrafficData, 'insert_json_data', autospec = True)
+def test_store_matrix_json(mocked_insert_json_data, mocked_run):
     """ maybe not needed"""
-    pass
+    def mocked_run_side_effect(self, *args, **kwargs):
+        if self.__str__()[:12] == 'r.epoch_time':
+            return datetime.datetime(2017, 7, 5, 19, 3, 46, 180000, tzinfo=r.ast.RqlTzinfo('00:00'))
+
+        elif self.__str__() == """r.table('crawled_batch').insert(r.expr({'crawled_timestamp': r.iso8601('2017-07-05T19:03:46.180000+00:00'), 'crawled_matrix_encoding': [r.expr({'schema': r.expr({'fields': [r.expr({'name': 'index', 'type': 'integer'}), r.expr({'name': 0, 'type': 'string'}), r.expr({'name': 1, 'type': 'string'})], 'primaryKey': ['index'], 'pandas_version': '0.20.0'}), 'data': [r.expr({'index': 0, '0': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200231133313&responseattributes=sh,fc', '1': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200320022202&responseattributes=sh,fc'}), r.expr({'index': 1, '0': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200231133331&responseattributes=sh,fc', '1': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200320022220&responseattributes=sh,fc'}), r.expr({'index': 2, '0': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200231133333&responseattributes=sh,fc', '1': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200320022222&responseattributes=sh,fc'})]})]}))""":
+            return {
+                'generated_keys': ['a60e97be-a556-46c5-a13c-207145d28728']
+            }
+
+        elif self.__str__() == """r.table('crawled_batch').order_by(index=r.desc('crawled_timestamp')).limit(1)""":
+            return _iter([{'crawled_batch_id': 'a60e97be-a556-46c5-a13c-207145d28728'}])
+
+    global traffic_data
+    mocked_run.side_effect = mocked_run_side_effect # pass the custome mocked_run funtion to mocked_run
+    cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
+    cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
+    info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+    matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+
+    traffic_data.store_matrix_json([matrix1])
+    assert mocked_insert_json_data.call_count == 6 
+
 
 @mock.patch.object(database.r.RqlQuery, 'run', autospec = True)
 def test_fetch_geojson_item(mocked_run):
@@ -120,7 +151,6 @@ def test_fetch_geojson_item(mocked_run):
 
 
     """
-    global traffic_data
     def mocked_run_side_effect(self, *args, **kwargs):
         """
         In this function we are going to mock the return of database
@@ -190,6 +220,7 @@ def test_fetch_geojson_item(mocked_run):
                 'type': 'LineString'
             }
 
+    global traffic_data
     mocked_run.side_effect = mocked_run_side_effect # pass the custome mocked_run funtion to mocked_run
     assert traffic_data.fetch_geojson_item('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]', '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a') == {
         'geometry': {'coordinates': [[-84.40353, 33.70524],
@@ -248,9 +279,18 @@ def test_get_nearest_road():
 def get_historic_traffic():
     pass
 
-def test_get_historic_batch():
-    global traffic_data
-    assert traffic_data.get_historic_batch() == [{'crawled_batch_id': '3962491e-8cb0-4685-9884-8cb292240def',
-                                                    'crawled_timestamp': '2017-06-23T20:16:02.027000+00:00'},
-                                                {'crawled_batch_id': 'cfebf60f-2624-4001-8284-78598d3662f9',
-                                                    'crawled_timestamp': '2017-06-23T20:01:47.862000+00:00'}]
+
+def get_historic_batch():
+    pass
+
+def get_crawled_batch_id_between():
+    pass
+
+def get_historic_traffic_between():
+    pass
+
+def spatial_sampling_points():
+    pass
+
+def set_traffic_patter_monitoring_area():
+    pass

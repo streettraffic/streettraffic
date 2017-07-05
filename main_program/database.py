@@ -210,11 +210,6 @@ class TrafficData:
         r.table("flow_data").index_create("flow_crawled_batch", [r.row["flow_item_id"], r.row["crawled_batch_id"]]).run(self.conn)
         r.table('analytics_monitored_area').index_create('description').run(self.conn)
         r.table("analytics_traffic_pattern").index_create("analytics_crawled_batch", [r.row["analytics_monitored_area_id"], r.row["crawled_batch_id"]]).run(self.conn)
-        
-        ## maybe in the long run good for performance,  but currently not used
-        # r.table_create('analytics_traffic_pattern', primary_key = 'analytics_traffic_pattern_id').run(self.conn)
-        # r.table('analytics_traffic_pattern').index_create('date_timestamp').run(self.conn)
-        # r.table('analytics_traffic_pattern').index_create('analytics_monitored_area_id').run(self.conn)
 
         ## depreciated index
         # r.table('flow_data').index_create('created_timestamp', r.row["CUSTOM"]["created_timestamp"]).run(self.conn)
@@ -816,6 +811,20 @@ class TrafficData:
  
     def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
         """
+        inputs: 
+        analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False
+
+        Given a analytics_monitored_area_id and crawled_batch_id, insert a analytics_traffic_pattern. An example
+        insertion would look like this
+
+        {
+            "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
+            "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
+            "average_JF": 0.09392949526813882 ,
+            "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
+            "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
+            "flow_item_count": 317
+        }
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -857,29 +866,11 @@ class TrafficData:
     def insert_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str) -> None:
         """
         inputs:
-        year: int, month: int, day: int  
-        analytics_monitored_area_id: str (the primary key of analytics_monitored_area)
+        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
 
-        This function update the traffic pattern of a specific day.
+        This function insert the insert_analytics_traffic_pattern for all the crawled_batch data within the time specified by date_start
+        and date_end 
 
-        Example output:
-
-        (analytics_traffic_pattern)
-            {
-                "analytics_traffic_pattern_id":            # primary key
-                "date_timestamp"                           # secondary key
-                "analytics_monitored_area_id":                # secondary key
-                "traffic_pattern": [
-                    {
-                    "date_specific_timestamp":             # 1:00
-                    "average_JF":
-                    },
-                    {
-                    "date_specific_timestamp":             # 2:00
-                    "average_JF":
-                    }
-                ]
-            }
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
         date_start = parser.parse(date_start)
@@ -897,6 +888,10 @@ class TrafficData:
 
     def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None):
         """
+        inputs:
+        analytics_monitored_area_id: str, crawled_batch_id: str = None
+
+        Given a analytics_monitored_area_id and crawled_batch_id, fetch the related analytics_traffic_pattern
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -910,6 +905,10 @@ class TrafficData:
 
     def get_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str):
         """
+        inputs: 
+        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
+
+        This function fetch all the analytics_traffic_pattern within the time range specified by date_start to date_end
         """
         ## First step: get all related crawled_id within the requested range: date_start to date_end
         date_start = parser.parse(date_start)

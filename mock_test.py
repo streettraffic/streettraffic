@@ -31,10 +31,15 @@ class _iter:
 
     def next(self):
         try:
-            return self.data[self.index]
+            data = self.data[self.index]
             self.index += 1
+            return data
         except Exception as e:
             raise Exception('_iter error, no next')
+            
+    def __iter__(self):
+        for item in self.data:
+            yield self.next()
 
 def mocked_run_side_effect(self, *args, **kwargs):
     """
