@@ -10,11 +10,31 @@ import pandas as pd
 import json
 import rethinkdb as r
 import asyncio
+from unittest import mock
+import datetime
 
 from ..map_resource import ultil
 from .. import tools
 from ..database import TrafficData
+from .. import database
 from ..datafeed import DataFeed
+
+
+class _iter:
+
+    def __init__(self, data):
+        """
+        data should be a list
+        """
+        self.data = data
+        self.index = 0
+
+    def next(self):
+        try:
+            return self.data[self.index]
+            self.index += 1
+        except Exception as e:
+            raise Exception('_iter error, no next')
 
 
 r.net.connection_type = r.net.DefaultConnection  # the default connection
@@ -92,9 +112,122 @@ def store_matrix_json():
     """ maybe not needed"""
     pass
 
-def test_fetch_geojson_item():
+@mock.patch.object(database.r.RqlQuery, 'run', autospec = True)
+def test_fetch_geojson_item(mocked_run):
+    """
+    We mocked RqlQuery.run()  An example of RqlQuery is r.db('Traffic').table('test'), RqlQuery doesn't return anything
+    until you do r.db('Traffic').table('test').run()
+
+
+    """
     global traffic_data
-    assert traffic_data.fetch_geojson_item('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]', '3962491e-8cb0-4685-9884-8cb292240def') == json.loads('{"type": "Feature", "geometry": {"coordinates": [[-84.40353, 33.70524], [-84.40347, 33.70551], [-84.40335, 33.70597]], "type": "LineString"}, "properties": {"TMC": {"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}, "CF": {"CN": 0.99, "FF": 55.3, "JF": 8.83144, "LN": [], "SP": 11.49, "SU": 11.49, "TY": "TR", "crawled_batch_id": "3962491e-8cb0-4685-9884-8cb292240def", "created_timestamp": "2017-06-23T20:15:28+00:00", "flow_data_id": "4f754976-0d66-4a29-81b6-9d40759e6a28", "flow_item_id": "{\\"DE\\": \\"University Ave/Exit 244\\", \\"LE\\": 1.57367, \\"PC\\": 4117, \\"QD\\": \\"-\\"}", "original_data_id": "77b8c809-5edd-462d-a97d-287fadd67f83"}, "color": "red"}}')
+    def mocked_run_side_effect(self, *args, **kwargs):
+        """
+        In this function we are going to mock the return of database
+
+        mock.side_effect enables you to conditionally return values based on inputs. 
+        """
+        if self.__str__() == """r.table('road_data').get('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]')""":
+            return {
+                'FC': 2,
+                'flow_item_id': '{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}',
+                'geometry': {'$reql_type$': 'GEOMETRY',
+                'coordinates': [
+                    [-84.40353, 33.70524],
+                    [-84.40347, 33.70551],
+                    [-84.40335, 33.70597]],
+                'type': 'LineString'},
+                'road_data_id': '["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]',
+                'value': ['33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 ']
+            }
+
+        elif self.__str__() == """r.table('flow_item').get('{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}')""":
+            return {
+                'CF': 'See table flow_data',
+                'SHP': 'See table road_data',
+                'TMC': {
+                    'DE': 'University Ave/Exit 244',
+                    'LE': 1.57367,
+                    'PC': 4117,
+                    'QD': '-'
+                },
+                'flow_item_id': '{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}'
+            }
+
+        elif self.__str__() == """r.table('flow_data').get_all(['{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}', '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a'], index='flow_crawled_batch').limit(3)""":
+            return _iter([{
+                'CN': 0.99,
+                'FF': 55.3,
+                'JF': 7.48248,
+                'LN': [],
+                'SP': 21.01,
+                'SSS': {'SS': [{'FF': 54.68,
+                   'JF': 8.00539,
+                   'LE': 0.33,
+                   'LN': [],
+                   'SP': 18.18,
+                   'SU': 18.18},
+                  {'FF': 54.68,
+                   'JF': 7.31136,
+                   'LE': 1.24,
+                   'LN': [],
+                   'SP': 21.94,
+                   'SU': 21.94}]},
+                'SU': 21.01,
+                'TY': 'TR',
+                'crawled_batch_id': '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a',
+                'created_timestamp': datetime.datetime(2017, 6, 26, 11, 30, 26, tzinfo=r.ast.RqlTzinfo('00:00')),
+                'flow_data_id': 'c83be85a-40df-47ae-a21e-e8f662cee8d2',
+                'flow_item_id': '{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}',
+                'original_data_id': 'cbded591-1554-4eba-9294-d21a732fd2e3'
+            }])
+
+        elif self.__str__() == """r.table('road_data').get('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]')['geometry'].to_geojson()""":
+            return {
+                'coordinates': [[-84.40353, 33.70524],
+                  [-84.40347, 33.70551],
+                  [-84.40335, 33.70597]],
+                'type': 'LineString'
+            }
+
+    mocked_run.side_effect = mocked_run_side_effect # pass the custome mocked_run funtion to mocked_run
+    assert traffic_data.fetch_geojson_item('["33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "]', '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a') == {
+        'geometry': {'coordinates': [[-84.40353, 33.70524],
+           [-84.40347, 33.70551],
+           [-84.40335, 33.70597]],
+          'type': 'LineString'},
+         'properties': {'CF': {'CN': 0.99,
+           'FF': 55.3,
+           'JF': 7.48248,
+           'LN': [],
+           'SP': 21.01,
+           'SSS': {'SS': [{'FF': 54.68,
+              'JF': 8.00539,
+              'LE': 0.33,
+              'LN': [],
+              'SP': 18.18,
+              'SU': 18.18},
+             {'FF': 54.68,
+              'JF': 7.31136,
+              'LE': 1.24,
+              'LN': [],
+              'SP': 21.94,
+              'SU': 21.94}]},
+           'SU': 21.01,
+           'TY': 'TR',
+           'crawled_batch_id': '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a',
+           'created_timestamp': '2017-06-26T11:30:26+00:00',
+           'flow_data_id': 'c83be85a-40df-47ae-a21e-e8f662cee8d2',
+           'flow_item_id': '{"DE": "University Ave/Exit 244", "LE": 1.57367, "PC": 4117, "QD": "-"}',
+           'original_data_id': 'cbded591-1554-4eba-9294-d21a732fd2e3'},
+          'TMC': {'DE': 'University Ave/Exit 244',
+           'LE': 1.57367,
+           'PC': 4117,
+           'QD': '-'},
+          'color': 'yellow'},
+         'type': 'Feature'
+    }
+
 
 def test_generate_geojson_collection():
     geojson_object1 = json.loads('{"type": "Feature", "geometry": {"coordinates": [[-82.42907, 34.91623], [-82.42911, 34.91647], [-82.42917, 34.91684]], "type": "LineString"}, "properties": {"TMC": {"DE": "Old Buncombe Rd", "LE": 1.67396, "PC": 10934, "QD": "-"}, "CF": {"CN": 0.7, "FF": 42.25, "JF": 1.71568, "LN": [], "SP": 33.55, "SU": 33.55, "TY": "TR"}}}')
