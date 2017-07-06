@@ -78,8 +78,12 @@
           <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
           <v-layout row wrap>
             <v-flex xs12 md4 class="my-3">
-              <h6>Pick a date</h6>
-              <v-date-picker v-model="datePicker"></v-date-picker>
+              <h6>Pick a start date</h6>
+              <v-date-picker v-model="dateStartPicker"></v-date-picker>
+            </v-flex>
+            <v-flex xs12 md4 class="my-3">
+              <h6>Pick an end date</h6>
+              <v-date-picker v-model="dateEndPicker"></v-date-picker>
             </v-flex>
 
             <v-flex xs12 md4 class="my-3">
@@ -213,7 +217,8 @@ export default {
           '2016-10-03'
         ]   // This will be initialized in the created() funciton
       },
-      datePicker: null,
+      dateStartPicker: null,
+      dateEndPicker: null,
       timeStartPicer: null,
       timeEndPicer: null
     }
@@ -254,8 +259,8 @@ export default {
     getRouteTraffic() {
       let self = this
       self.trafficInfoSliderShow = true
-      let startTime = new Date(this.datePicker + 'T' + this.timeStartPicer)
-      let endTime = new Date(this.datePicker + 'T' + this.timeEndPicer)
+      let startTime = new Date(this.dateStartPicker + 'T' + this.timeStartPicer)
+      let endTime = new Date(this.dateStartPicker + 'T' + this.timeEndPicer)
       console.log(startTime.toISOString())
       console.log(endTime.toISOString())
       this.$store.state.ws.send(JSON.stringify(['getRouteTraffic', this.route, startTime, endTime]))
@@ -294,6 +299,9 @@ export default {
       /* eslint-disable */
       console.log(this.historic_slider.data)
       /* eslint-enable */
+    },
+    getDateBetween(startDate, endDate){
+      // pass
     },
     plotGeoJson(geoJsonData) {
       /* input: geoJsonData(a geojson json object)
