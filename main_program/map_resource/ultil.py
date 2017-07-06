@@ -117,16 +117,51 @@ def get_traffic_json_resource(location_data: tuple, location_type: str, zoom: in
     return total_url
 
 
-def get_area_tile_matrix(list_points: List, zoom: int) -> pd.DataFrame:
+def produce_polygon(polygon_ordered_coordinates: List, zoom: int, plot_polygon = True) -> Path:
+    """
+    inputs: 
+    polygon_ordered_coordinates: List(an ordered list of points that composes a polygon)
+    plot_polygon = True
+    zoom: int
+    example inputs:
+    [[25.890099, -80.264561], [25.851873, -80.308744], [25.81123, -80.248538], [25.848596, -80.215765]], True
+
+
+    This function use matplotlib.path to create a Path/polygon object. Later we can use
+    this Path/polygon object to invoke Path.contains_point() method. For more details 
+    on contains_point(), refer to 
+    https://stackoverflow.com/questions/21328854/shapely-and-matplotlib-point-in-polygon-not-accurate-with-geolocation
+
+    If plot_polygon == True, we use matplotlib to plot the polygon
+    """
+    polygon_tile_points = []
+    for item in polygon_ordered_coordinates:
+        polygon_tile_points += [get_tile(*item, zoom)]
+    polygon_tile_points += [polygon_tile_points[0]]
+    polygon = Path(polygon_tile_points)
+    if plot_polygon:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        patch = patches.PathPatch(polygon, facecolor='orange', lw=2)
+        ax.add_patch(patch)
+        ax.set_xlim(min(polygon_tile_points, key = lambda item: item[0])[0], max(polygon_tile_points, key = lambda item: item[0])[0])
+        ax.set_ylim(min(polygon_tile_points, key = lambda item: item[1])[1], max(polygon_tile_points, key = lambda item: item[1])[1])
+        plt.show()
+    return polygon
+
+def get_area_tile_matrix(list_points: List, zoom: int, use_polygon = False) -> pd.DataFrame:
     """
     inputs: list_points (GPS coordinates that you want to add)
             zoom: int(zoom level)
+            use_polygon = None
 
     example inputs: [(33.766764, -84.409533), (33.740003, -84.368978)], 14
 
     This function takes the coordinates from *args and calculate their tile (col, row),
-    then it generate a matrix of tiles to cover the square defined by those
-    two coordinates.
+    then it generate a matrix of tiles to cover the square defined by those coordinates.
+
+    If use_polygon == True, then we generate a polygon given by produce_polygon,
+    and further return the area_tiles that are **inside**(not including boundry) the polygon
 
     ###^^^^^^*####  (in this example, two coordinates are denoted as *
     #  ^^^^^^^   #   and this function should generate tile to cover the
@@ -147,39 +182,23 @@ def get_area_tile_matrix(list_points: List, zoom: int) -> pd.DataFrame:
         for col in range(len(matrix.iloc[0])):
             matrix.iloc[row,col] = (left_col + col, top_row + row)
 
+    if use_polygon:
+        polygon = produce_polygon(list_points, zoom, plot_polygon = False)
+        for row in range(len(matrix)):
+            for col in range(len(matrix.iloc[0])):
+                if not polygon.contains_point(matrix.iloc[row,col]):
+                    matrix.iloc[row,col] = None
+
     return matrix
 
-def produce_polygon(polygon_ordered_points: List, plot_polygon = True) -> Path:
-    """
-    inputs: 
-    polygon_ordered_points: List(an ordered list of points that composes a polygon)
-    plot_polygon = True
-    example inputs:
-    [[4540, 6975], [4538, 6977], [4539, 6979], [4541, 6977]], True
 
 
-    This function use matplotlib.path to create a Path/polygon object. Later we can use
-    this Path/polygon object to invoke Path.contains() method. 
-
-    If plot_polygon == True, we use matplotlib to plot the polygon
-    """
-    polygon = Path(polygon_ordered_points)
-    if plot_polygon:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        patch = patches.PathPatch(p, facecolor='orange', lw=2)
-        ax.add_patch(patch)
-        ax.set_xlim(min(polygon_ordered_points, key = lambda item: item[0])[0], max(polygon_ordered_points, key = lambda item: item[0])[0])
-        ax.set_ylim(min(polygon_ordered_points, key = lambda item: item[1])[1], max(polygon_ordered_points, key = lambda item: item[1])[1])
-        plt.show()
-    return polygon
-
-
-def get_area_tile_matrix_url(resource_type: str, list_points: List, zoom: int) -> pd.DataFrame:
+def get_area_tile_matrix_url(resource_type: str, list_points: List, zoom: int, use_polygon = False) -> pd.DataFrame:
     """
     inputs: resource_type: str(a string indicating the resource type)
             list_points (GPS coordinates that you want to add)
             zoom: int(zoom level)
+            use_polygon = False
 
     The resource_type has two options:
     * map_tile
@@ -196,13 +215,14 @@ def get_area_tile_matrix_url(resource_type: str, list_points: List, zoom: int) -
 
     return :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
     """
-    matrix = get_area_tile_matrix(list_points, zoom)
+    matrix = get_area_tile_matrix(list_points, zoom, use_polygon)
     for row in range(len(matrix)):
         for col in range(len(matrix.iloc[0])):
-            if resource_type == "map_tile":
-                matrix.iloc[row,col] = get_map_tile_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom, img_size = 512)
-            elif resource_type == "traffic_json":
-                matrix.iloc[row,col] = get_traffic_json_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom)
+            if matrix.iloc[row,col]:
+                if resource_type == "map_tile":
+                    matrix.iloc[row,col] = get_map_tile_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom, img_size = 512)
+                elif resource_type == "traffic_json":
+                    matrix.iloc[row,col] = get_traffic_json_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom)
 
     return matrix
 
@@ -219,13 +239,20 @@ def assemble_matrix_images(matrix: pd.DataFrame) -> pd.DataFrame:
     img_matrix = matrix.copy(deep=True)
     for row in range(len(matrix)):
         for col in range(len(matrix.iloc[0])):
-            response = requests.get(matrix.iloc[row,col])
-            img_matrix.iloc[row,col] = Image.open(BytesIO(response.content))
+            if matrix.iloc[row,col]:
+                response = requests.get(matrix.iloc[row,col])
+                img_matrix.iloc[row,col] = Image.open(BytesIO(response.content))
 
     # producing image
     vertical = []
     for row in range(len(img_matrix)):
-        horizontal_combs = np.hstack( (np.array(i.convert("RGB"))) for i in img_matrix.iloc[row] )
+        hstack_list = []
+        for item in img_matrix.iloc[row]:
+            if item:
+                hstack_list += [(np.array(item.convert("RGB")))]
+            else:
+                hstack_list += [np.zeros((512,512,3), dtype= np.uint8)]
+        horizontal_combs = np.hstack(hstack_list)
         vertical += [horizontal_combs]
     imgs_comb = np.vstack(vertical)
     imgs_comb = Image.fromarray( imgs_comb)

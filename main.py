@@ -92,8 +92,8 @@ atlanta_worst_json_tile = ultil.get_traffic_json_resource(altanta_worst, "latlon
 ## atlanta tile
 cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
 cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
-info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+info = ultil.get_area_tile_matrix([cor1, cor2], 14)
+matrix1 = ultil.get_area_tile_matrix_url("traffic_json", [cor1, cor2], 14)
 #matrix1 = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix1)
 
@@ -192,7 +192,7 @@ with open('traffic data samples/google_routing.json') as f:
 ## Manhattan island
 man_point1 = (40.710943, -74.017559)
 man_point2 = (40.728209, -73.982583)
-matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2, 14)
+matrix2 = ultil.get_area_tile_matrix_url("traffic_json", [man_point1, man_point2], 14)
 
 #traffic_server.traffic_data.store_matrix_json([matrix1, matrix2])
 # .get_all(crawled_batch_id, index = "crawled_batch_id")
@@ -217,8 +217,8 @@ matrix2 = ultil.get_area_tile_matrix_url("traffic_json", man_point1, man_point2,
 ## Crawl atlanta city
 p1 = (33.653079, -84.505187)
 p2 = (33.873635, -84.343085)
-tile_matrix = ultil.get_area_tile_matrix(p1, p2, 14)
-url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)
+tile_matrix = ultil.get_area_tile_matrix([p1, p2], 14)
+url_matrix = ultil.get_area_tile_matrix_url("traffic_json", [p1, p2], 14)
 
 ##
 #now = time.time()
@@ -276,10 +276,98 @@ end_time_iso = "2017-06-24T03:59:59.000Z"
 # Miami
 cor1 = (25.803018, -80.267741)
 cor2 = (25.726957, -80.192897)
-info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-matrix = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
+info = ultil.get_area_tile_matrix([cor1, cor2], 14)
+matrix = ultil.get_area_tile_matrix_url("map_tile", [cor1, cor2], 14)
 
-#polygon = [[25.890099,-80.264561], [25.851873,-80.308744], [25.811230,-80.248538], [25.848596,-80.215765]]
-polygon_tile = [[4540, 6975], [4538, 6977], [4541, 6977], [4539, 6979]]
-#for cor in polygon:
-#    polygon_tile += [ultil.get_tile(*cor, 14)]
+# Use polygon to get area_tile
+polygon_points = [[25.890099,-80.264561], [25.851873,-80.308744], [25.811230,-80.248538], [25.848596,-80.215765]]
+polygon = ultil.produce_polygon(polygon_points, 14)
+info = ultil.get_area_tile_matrix(polygon_points, 14, True)
+atlanta_polygon = [[33.73233462866422, -84.43645477294922],
+ [33.786566509489155, -84.37259674072266],
+ [33.7597402884442, -84.34444427490234],
+ [33.7094898901883, -84.41619873046875],
+ [33.73233462866422, -84.43645477294922]]
+
+new_york_polygon = [[40.7701418259051, -74.15771484375],
+ [40.76806170936613, -73.8720703125],
+ [40.88444793903562, -73.27056884765625],
+ [40.959159772134896, -72.6800537109375],
+ [40.824201998489904, -72.61688232421875],
+ [40.54093880017256, -74.410400390625],
+ [40.7701418259051, -74.15771484375]]
+
+#info = ultil.get_area_tile_matrix(atlanta_polygon, 14, True)
+#matrix = ultil.get_area_tile_matrix_url("map_tile", atlanta_polygon, 14, True)
+##img_matrix = ultil.assemble_matrix_images(matrix)
+
+
+washington_baltimore_polygon = [[38.77978137804918, -77.200927734375],
+ [38.77549900381297, -76.9482421875],
+ [38.86965182408357, -76.7999267578125],
+ [39.002110299225144, -76.7999267578125],
+ [39.06184913429154, -76.783447265625],
+ [39.16414104768743, -76.5692138671875],
+ [39.22799807055236, -76.4208984375],
+ [39.33854604847979, -76.4044189453125],
+ [39.457402514270825, -76.5142822265625],
+ [39.436192999314095, -76.70654296875],
+ [39.32579941789297, -76.8768310546875],
+ [39.198205348894795, -76.8878173828125],
+ [39.01918369029135, -77.05810546875],
+ [39.06184913429154, -77.1624755859375],
+ [38.950865400919994, -77.2613525390625],
+ [38.8225909761771, -77.2503662109375],
+ [38.77978137804918, -77.200927734375]]
+
+washington_baltimore_info = ultil.get_area_tile_matrix(washington_baltimore_polygon, 14, True)
+washington_baltimore_matrix = ultil.get_area_tile_matrix_url("map_tile", washington_baltimore_polygon, 14, True)
+#img_matrix = ultil.assemble_matrix_images(matrix)
+
+def matrix_coverage(matrix):
+    filled_count = 0
+    None_count = 0
+    for row in range(len(matrix)):
+        for col in range(len(matrix.iloc[0])):
+            if matrix.iloc[row, col]:
+                filled_count += 1
+            else:
+                None_count += 1
+    
+    print('matrix has a total of', len(matrix) *len(matrix.iloc[0]), 'tiles')
+    print(filled_count, 'of them are filled')
+    print(None_count, 'of them are None because of the polygon limitation')
+                
+
+newyork_boston_polygon = [[40.51066695034288, -74.168701171875],
+ [40.606654663050485, -74.04098510742188],
+ [40.57015381856105, -73.92974853515625],
+ [40.834593138080244, -72.55096435546875],
+ [41.000629848685385, -72.59490966796875],
+ [40.83043687764923, -73.7786865234375],
+ [41.033787135218645, -73.50128173828125],
+ [41.269549502842565, -72.8009033203125],
+ [41.269549502842565, -72.2845458984375],
+ [41.376808565702355, -71.4495849609375],
+ [41.7180304600481, -71.3671875],
+ [41.475660200278206, -71.1309814453125],
+ [41.86137915587359, -70.5377197265625],
+ [41.94314874732696, -70.5377197265625],
+ [41.97991089691236, -70.6695556640625],
+ [42.14304156290942, -70.6475830078125],
+ [42.26917949243505, -70.8453369140625],
+ [42.248851700720955, -70.960693359375],
+ [42.335199554872325, -71.03759765625],
+ [42.51260171573666, -70.8343505859375],
+ [42.64204079304425, -70.59814453125],
+ [42.66628070564928, -70.872802734375],
+ [42.69454866207692, -71.2628173828125],
+ [42.4923525914282, -71.575927734375],
+ [42.19189902447192, -72.059326171875],
+ [41.50446357504803, -73.49853515625],
+ [41.469486382476376, -74.07257080078125],
+ [41.05243077390835, -74.31976318359375],
+ [40.56389453066509, -74.34722900390625],
+ [40.51066695034288, -74.168701171875]]
+newyork_boston_info = ultil.get_area_tile_matrix(newyork_boston_polygon, 14, True)
+newyork_boston_matrix = ultil.get_area_tile_matrix_url("map_tile", newyork_boston_polygon, 14, True)

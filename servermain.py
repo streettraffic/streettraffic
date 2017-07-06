@@ -15,8 +15,8 @@ traffic_server = TrafficServer(database_name= "Traffic", database_ip = "localhos
 ## atlanta tile
 p1 = (33.653079, -84.505187)
 p2 = (33.873635, -84.343085)
-tile_matrix = ultil.get_area_tile_matrix(p1, p2, 14)
-url_matrix = ultil.get_area_tile_matrix_url("traffic_json", p1, p2, 14)
+tile_matrix = ultil.get_area_tile_matrix([p1, p2], 14)
+url_matrix = ultil.get_area_tile_matrix_url("traffic_json", [p1, p2], 14)
 
 traffic_server.traffic_matrix_list = [url_matrix]
 
