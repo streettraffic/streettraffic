@@ -1,11 +1,16 @@
 import math
-from . import app_settings
 import numpy as np
 import pandas as pd
 from PIL import Image
 import requests
 from io import BytesIO
 from geopy.distance import vincenty, great_circle
+from matplotlib.path import Path
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from typing import List
+
+from . import app_settings
 
 
 # todo: convert quadkeys to tile
@@ -112,12 +117,14 @@ def get_traffic_json_resource(location_data: tuple, location_type: str, zoom: in
     return total_url
 
 
-def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
+def get_area_tile_matrix(list_points: List, zoom: int) -> pd.DataFrame:
     """
-    inputs: cor1:tuple(coordinates: (latitue, longitude)) cor2: same as cor1
+    inputs: list_points (GPS coordinates that you want to add)
             zoom: int(zoom level)
 
-    This function takes two coordinates and calculate their tile (col, row),
+    example inputs: [(33.766764, -84.409533), (33.740003, -84.368978)], 14
+
+    This function takes the coordinates from *args and calculate their tile (col, row),
     then it generate a matrix of tiles to cover the square defined by those
     two coordinates.
 
@@ -128,12 +135,13 @@ def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
 
     return :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
     """
-    tile1 = get_tile(*cor1, zoom)  #(col, row)
-    tile2 = get_tile(*cor2, zoom)  #(col, row)
-    left_col = min(tile1[0], tile2[0])
-    right_col = max(tile1[0], tile2[0])
-    top_row = min(tile1[1], tile2[1])
-    bottom_row = max(tile1[1], tile2[1])  # notice bottom_row would actually have a higher number
+    tiles = []
+    for point in list_points:
+        tiles += [get_tile(*point, zoom)]
+    left_col = min(tiles, key = lambda item: item[0])[0]
+    right_col = max(tiles, key = lambda item: item[0])[0]
+    top_row = min(tiles, key = lambda item: item[1])[1]
+    bottom_row = max(tiles, key = lambda item: item[1])[1]  # notice bottom_row would actually have a higher number
     matrix = pd.DataFrame(index = range(bottom_row - top_row + 1), columns = range(right_col - left_col + 1))
     for row in range(len(matrix)):
         for col in range(len(matrix.iloc[0])):
@@ -141,10 +149,36 @@ def get_area_tile_matrix(cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
 
     return matrix
 
-def get_area_tile_matrix_url(resource_type: str, cor1: tuple, cor2: tuple, zoom: int) -> pd.DataFrame:
+def produce_polygon(polygon_ordered_points: List, plot_polygon = True) -> Path:
+    """
+    inputs: 
+    polygon_ordered_points: List(an ordered list of points that composes a polygon)
+    plot_polygon = True
+    example inputs:
+    [[4540, 6975], [4538, 6977], [4539, 6979], [4541, 6977]], True
+
+
+    This function use matplotlib.path to create a Path/polygon object. Later we can use
+    this Path/polygon object to invoke Path.contains() method. 
+
+    If plot_polygon == True, we use matplotlib to plot the polygon
+    """
+    polygon = Path(polygon_ordered_points)
+    if plot_polygon:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        patch = patches.PathPatch(p, facecolor='orange', lw=2)
+        ax.add_patch(patch)
+        ax.set_xlim(min(polygon_ordered_points, key = lambda item: item[0])[0], max(polygon_ordered_points, key = lambda item: item[0])[0])
+        ax.set_ylim(min(polygon_ordered_points, key = lambda item: item[1])[1], max(polygon_ordered_points, key = lambda item: item[1])[1])
+        plt.show()
+    return polygon
+
+
+def get_area_tile_matrix_url(resource_type: str, list_points: List, zoom: int) -> pd.DataFrame:
     """
     inputs: resource_type: str(a string indicating the resource type)
-            cor1:tuple(coordinates: (latitue, longitude)) cor2: same as cor1
+            list_points (GPS coordinates that you want to add)
             zoom: int(zoom level)
 
     The resource_type has two options:
@@ -162,7 +196,7 @@ def get_area_tile_matrix_url(resource_type: str, cor1: tuple, cor2: tuple, zoom:
 
     return :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
     """
-    matrix = get_area_tile_matrix(cor1, cor2, zoom)
+    matrix = get_area_tile_matrix(list_points, zoom)
     for row in range(len(matrix)):
         for col in range(len(matrix.iloc[0])):
             if resource_type == "map_tile":

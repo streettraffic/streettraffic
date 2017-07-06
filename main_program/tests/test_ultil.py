@@ -44,17 +44,17 @@ def test_get_area_tile_matrix():
     df3 = pd.DataFrame([[(4351, 6557),(4352, 6557)],
                        [(4351, 6558),(4352, 6558)],
                        [(4351, 6559),(4352, 6559)]])
-    assert df1.equals(ultil.get_area_tile_matrix((33.766764, -84.409533), (33.740003, -84.368978), 14))
-    assert df2.equals(ultil.get_area_tile_matrix((33.741455, -84.397218), (33.744203, -84.369581), 14))  # asymmetrical case 1
-    assert df3.equals(ultil.get_area_tile_matrix((33.728999, -84.395856), (33.775902, -84.363917), 14))  # asymmetrical case 2
+    assert df1.equals(ultil.get_area_tile_matrix([(33.766764, -84.409533), (33.740003, -84.368978)], 14))
+    assert df2.equals(ultil.get_area_tile_matrix([(33.741455, -84.397218), (33.744203, -84.369581)], 14))  # asymmetrical case 1
+    assert df3.equals(ultil.get_area_tile_matrix([(33.728999, -84.395856), (33.775902, -84.363917)], 14))  # asymmetrical case 2
 
 
 def test_get_area_tile_matrix_url():
     df = tools.load_data_object("test_data/get_area_tile_matrix_url() for map_tile.pkl")
     cor1 = (33.766764, -84.409533)
     cor2 = (33.740003, -84.368978)
-    info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-    matrix = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
+    info = ultil.get_area_tile_matrix([cor1, cor2], 14)
+    matrix = ultil.get_area_tile_matrix_url("map_tile", [cor1, cor2], 14)
     assert df.equals(matrix)
 
 def test_get_distance():

@@ -136,8 +136,8 @@ def test_store_matrix_json(mocked_insert_json_data, mocked_run):
     mocked_run.side_effect = mocked_run_side_effect # pass the custome mocked_run funtion to mocked_run
     cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
     cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
-    info = ultil.get_area_tile_matrix(cor1, cor2, 14)
-    matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
+    info = ultil.get_area_tile_matrix([cor1, cor2], 14)
+    matrix1 = ultil.get_area_tile_matrix_url("traffic_json", [cor1, cor2], 14)
 
     traffic_data.store_matrix_json([matrix1])
     assert mocked_insert_json_data.call_count == 6 

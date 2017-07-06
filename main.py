@@ -98,16 +98,12 @@ matrix1 = ultil.get_area_tile_matrix_url("traffic_json", cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix1)
 
 
-## Dr'allen house
+## Dr. Allen house
 #cor1 = (34.939348, -82.456024)
 #cor2 = (34.910812, -82.420834)
 #matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 #img_matrix = ultil.assemble_matrix_images(matrix)
 
-# Miami
-#cor1 = (25.803018, -80.267741)
-#cor2 = (25.726957, -80.192897)
-#matrix = ultil.get_area_tile_matrix_url(cor1, cor2, 14)
 
 #with open('test.json') as f:
 #    data = json.load(f)
@@ -246,3 +242,44 @@ analytics_monitored_area_id = '[33.880079, 33.648894, -84.485086, -84.311365]'
 start_time_iso = "2017-06-23T04:00:00.000Z"
 end_time_iso = "2017-06-24T03:59:59.000Z"
 #traffic_server.traffic_data.get_analytics_traffic_pattern_between(start_time_iso,end_time_iso, '[33.880079, 33.648894, -84.485086, -84.311365]')
+
+## little benchmark
+#query = r.table('flow_item').get_field('flow_item_id').limit(10000).run(conn)
+#flow_item_id_collection = []
+#crawled_batch_id = '0e8e60c5-3936-41f0-86fc-3b6e0e37ac4a'
+#for item in query:
+#    flow_item_id_collection += [item]
+#    
+#def batch_query_get_all(flow_item_id_collection, crawled_batch_id):
+#    batch = []
+#    for flow_item_id in flow_item_id_collection:
+#        batch += [[flow_item_id, crawled_batch_id]]
+#    return batch
+
+### first way, use a for loop
+#start_time = time.time()
+#for flow_item_id in flow_item_id_collection:
+#    r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index='flow_crawled_batch').run(conn)
+#
+#print('first way used', time.time() - start_time, 'seconds')
+#    
+### second way, use batch
+#start_time = time.time()
+#r.table('flow_data').get_all(*batch_query_get_all(flow_item_id_collection, crawled_batch_id), index='flow_crawled_batch').run(conn)
+#print('second way used', time.time() - start_time, 'seconds')
+#    
+
+#p1 = (38.718152,-77.374552)
+#p2 = (39.465786, -76.455926)
+#tile_matrix = ultil.get_area_tile_matrix(p1, p2, 14)
+    
+# Miami
+cor1 = (25.803018, -80.267741)
+cor2 = (25.726957, -80.192897)
+info = ultil.get_area_tile_matrix(cor1, cor2, 14)
+matrix = ultil.get_area_tile_matrix_url("map_tile", cor1, cor2, 14)
+
+#polygon = [[25.890099,-80.264561], [25.851873,-80.308744], [25.811230,-80.248538], [25.848596,-80.215765]]
+polygon_tile = [[4540, 6975], [4538, 6977], [4541, 6977], [4539, 6979]]
+#for cor in polygon:
+#    polygon_tile += [ultil.get_tile(*cor, 14)]
