@@ -86,6 +86,12 @@ class TrafficServer:
                     route_traffic = self.traffic_data.get_historic_traffic_between(message[1], message[2], message[3])
                     await websocket.send(json.dumps(route_traffic))
                     print('sent data')
+
+                elif message[0] == "getMultipleDaysRouteTraffic":
+                    print("getMultipleDaysRouteTraffic")
+                    route_traffic = self.traffic_data.get_historic_traffic_multiple_days(message[1], message[2])
+                    await websocket.send(json.dumps(route_traffic))
+                    print('sent data')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')

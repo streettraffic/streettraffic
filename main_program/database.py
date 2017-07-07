@@ -681,6 +681,30 @@ class TrafficData:
 
         return multipe_geojson_collection
 
+    def get_historic_traffic_multiple_days(self, routing_info: Dict, date_start_end_list: List):
+        multipe_geojson_collection = []
+        for item in date_start_end_list:
+            date_start = item[0]
+            date_end = item[1]
+            crawled_batch_id_collection = self.get_crawled_batch_id_between(date_start = date_start, date_end = date_end)
+
+            for crawled_batch_id in crawled_batch_id_collection:
+                multipe_geojson_collection += [{
+                    "crawled_batch_id": crawled_batch_id,
+                    "crawled_batch_id_traffic": self.get_historic_traffic(routing_info = routing_info, crawled_batch_id = crawled_batch_id),
+                    "crawled_timestamp": r.table('crawled_batch').get(crawled_batch_id).get_field('crawled_timestamp').run(self.conn)
+                }]
+
+        ## Notice this function is slightly different from get_historic_traffic_between. We don't sort it every time we add a date_start, date_end worth 
+        ## of data.
+        multipe_geojson_collection.sort(key = lambda item: item['crawled_timestamp'])
+
+        for item in multipe_geojson_collection:
+            item['crawled_timestamp'] = item['crawled_timestamp'].isoformat()
+
+        return multipe_geojson_collection
+
+
 
     """
     Analytics part of the module

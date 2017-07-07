@@ -97,7 +97,7 @@
             </v-flex>
           </v-layout>
           <v-dialog v-model="trafficInfoSliderDialog" persistent>
-            <v-btn primary light slot="activator" @click.native="getRouteTraffic">Open Dialog</v-btn>
+            <v-btn primary light slot="activator" @click.native="getMultipleDaysRouteTraffic">Open Dialog</v-btn>
             <v-card>
               <v-card-row>
                 <v-card-title>Retrieving data from the server</v-card-title>
@@ -292,12 +292,48 @@ export default {
         self.trafficInfoSliderDialog = false
       }
     },
+    getMultipleDaysRouteTraffic() {
+      /* reference
+          https://stackoverflow.com/questions/18109481/get-all-the-dates-that-fall-between-two-dates
+      */
+      let self = this
+      self.trafficInfoSliderShow = true
+      let dateStartTimeStart = new Date(this.dateStartPicker + 'T' + this.timeStartPicer)
+      let dateStartTimeEnd = new Date(this.dateStartPicker + 'T' + this.timeEndPicer)
+      let dateEndTimeStart = new Date(this.dateEndPicker + 'T' + this.timeStartPicer)
+      let dateBetween = []
+      while (dateStartTimeStart <= dateEndTimeStart) {
+        dateBetween.push([new Date(dateStartTimeStart), new Date(dateStartTimeEnd)])
+        dateStartTimeStart.setDate(dateStartTimeStart.getDate() + 1)
+        dateStartTimeEnd.setDate(dateStartTimeEnd.getDate() + 1)
+      }
+      console.log(JSON.stringify(dateBetween))
+      this.$store.state.ws.send(JSON.stringify(['getMultipleDaysRouteTraffic', this.route, dateBetween]))
+      this.$store.state.ws.onmessage = function (event) {
+        self.geojson_historic_collection = JSON.parse(event.data)
+        // initialize local time within geojson_historic_collection
+        self.geojson_historic_collection.forEach((item, index) => {
+          item['local_timestamp'] = new Date(item['crawled_timestamp'])
+        })
+
+        console.log(self.geojson_historic_collection)
+        console.log(self.geojson_historic_collection_indices)
+        self.historic_slider['data'] = self.geojson_historic_collection.map((item, index) => {
+          self.geojson_historic_collection_indices[item.local_timestamp.toLocaleDateString() + ' ' + item.local_timestamp.toLocaleTimeString()] = index
+          return item.local_timestamp.toLocaleDateString() + ' ' + item.local_timestamp.toLocaleTimeString()
+        })
+        self.historic_slider['value'] = self.historic_slider['data'][0]
+        let slider = self.$refs['historic_slider_ref']
+        slider.refresh()
+        self.displaySelectedHistoric(self.historic_slider['value'])
+        self.trafficInfoSliderDialog = false
+      }
+    },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
     },
     test(){
       /* eslint-disable */
-      console.log(this.historic_slider.data)
       /* eslint-enable */
     },
     getDateBetween(startDate, endDate){
