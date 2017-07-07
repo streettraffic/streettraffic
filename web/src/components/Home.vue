@@ -58,6 +58,7 @@
               <vue-slider @callback="displaySelectedHistoric" :real-time="true" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
               <br>
               <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
+              <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
             </div>
           </v-card-row>
         </v-card-text>
@@ -220,7 +221,8 @@ export default {
       dateStartPicker: null,
       dateEndPicker: null,
       timeStartPicer: null,
-      timeEndPicer: null
+      timeEndPicer: null,
+      averageJammingFacotr: null
     }
   },
   methods: {
@@ -253,44 +255,8 @@ export default {
       let self = this
       console.log(value)
       console.log(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]])
-      self.deleteGeoJsonPlot()
-      self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[self.historic_slider.value]]['crawled_batch_id_traffic'])
-    },
-    getRouteTraffic() {
-      let self = this
-      self.trafficInfoSliderShow = true
-      let startTime = new Date(this.dateStartPicker + 'T' + this.timeStartPicer)
-      let endTime = new Date(this.dateStartPicker + 'T' + this.timeEndPicer)
-      console.log(startTime.toISOString())
-      console.log(endTime.toISOString())
-      this.$store.state.ws.send(JSON.stringify(['getRouteTraffic', this.route, startTime, endTime]))
-      this.$store.state.ws.onmessage = function (event) {
-        self.geojson_historic_collection = JSON.parse(event.data)
-        // initialize local time within geojson_historic_collection
-        self.geojson_historic_collection.forEach((item, index) => {
-          item['local_timestamp'] = new Date(item['crawled_timestamp'])
-        })
-
-        console.log(self.geojson_historic_collection)
-        console.log(self.geojson_historic_collection_indices)
-        self.historic_slider['data'] = self.geojson_historic_collection.map((item, index) => {
-          // if hours == 0 and minutes == 0, it must be a whole date
-          if (item.local_timestamp.getHours() == 0 && item.local_timestamp.getMinutes() == 0){
-            self.geojson_historic_collection_indices[item.local_timestamp.toLocaleDateString()] = index
-            return item.local_timestamp.toLocaleDateString()
-          }
-          // else it must be a intraday hours and minutes
-          else {
-            self.geojson_historic_collection_indices[item.local_timestamp.toLocaleTimeString()] = index
-            return item.local_timestamp.toLocaleTimeString()
-          }
-        })
-        self.historic_slider['value'] = self.historic_slider['data'][0]
-        let slider = self.$refs['historic_slider_ref']
-        slider.refresh()
-        self.displaySelectedHistoric(self.historic_slider['value'])
-        self.trafficInfoSliderDialog = false
-      }
+      self.averageJammingFacotr = self.geojson_historic_collection[self.geojson_historic_collection_indices[value]]['averageJammingFacotr']
+      self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]]['crawled_batch_id_traffic'])
     },
     getMultipleDaysRouteTraffic() {
       /* reference
@@ -314,6 +280,7 @@ export default {
         // initialize local time within geojson_historic_collection
         self.geojson_historic_collection.forEach((item, index) => {
           item['local_timestamp'] = new Date(item['crawled_timestamp'])
+          item['averageJammingFacotr'] = self.calculateAverageJammingFactor(item)
         })
 
         console.log(self.geojson_historic_collection)
@@ -327,10 +294,22 @@ export default {
         slider.refresh()
         self.displaySelectedHistoric(self.historic_slider['value'])
         self.trafficInfoSliderDialog = false
+        self.displayGeoJson()
       }
     },
     toManhattan() {
       this.center = {lat: 40.725306, lng: -73.988913}
+    },
+    calculateAverageJammingFactor(geojson_historic_collection_item) {
+      let totalGeometryLength = 0
+      geojson_historic_collection_item['crawled_batch_id_traffic']['features'].forEach((item) => { 
+        totalGeometryLength += item['geometry']['coordinates'].length
+      })
+      let averageJammingFacotr = 0
+      geojson_historic_collection_item['crawled_batch_id_traffic']['features'].forEach((item) => { 
+        averageJammingFacotr += (item['geometry']['coordinates'].length / totalGeometryLength) * item['properties']['CF']['JF']
+      })
+      return averageJammingFacotr
     },
     test(){
       /* eslint-disable */
@@ -354,8 +333,10 @@ export default {
       //     strokeWeight: 2
       //   })
       // })
-      this.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
-      this.$refs.mymap.$mapObject.data.setStyle(function(feature) {
+      let self = this
+      this.deleteGeoJsonPlot()
+      self.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
+      self.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
           strokeColor: feature.getProperty('color'),
           strokeWeight: 2,
