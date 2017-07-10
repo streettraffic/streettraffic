@@ -59,6 +59,9 @@
               <br>
               <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
               <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
+              <div class="jammingFactorChart">
+                <Chart v-if="chartFinished" :data="chartData" :labels="chartLabel" :chartTitle="'Average Jamming Factor at Each Time Period'"></Chart>
+              </div>
             </div>
           </v-card-row>
         </v-card-text>
@@ -169,6 +172,7 @@ import Vue from 'vue'
 import TestData from '../assets/level17.json'
 import vueSlider from './vue2-slider'
 import { mapState } from 'vuex'
+import Chart from './Chart.vue'
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -180,7 +184,8 @@ Vue.use(VueGoogleMaps, {
 export default {
   name: 'Home',
   components: {
-    vueSlider
+    vueSlider,
+    Chart
   },
   data () {
     return {
@@ -222,7 +227,10 @@ export default {
       dateEndPicker: null,
       timeStartPicer: null,
       timeEndPicer: null,
-      averageJammingFacotr: null
+      averageJammingFacotr: null,
+      chartLabel: [],
+      chartData: [],
+      chartFinished: false
     }
   },
   methods: {
@@ -311,8 +319,38 @@ export default {
       })
       return averageJammingFacotr
     },
+    calculateAverageJammingFactorForEachTime(){
+      let self = this
+      let eachTimeData = new Map()
+      let currentTime
+      self.geojson_historic_collection.forEach((item, index) => {
+        currentTime = item['local_timestamp'].toLocaleTimeString()
+        console.log(currentTime)
+        if (!eachTimeData.get(currentTime)) {
+          console.log('called')
+          eachTimeData.set(currentTime, [item['averageJammingFacotr']])
+        }
+        else {
+          eachTimeData.get(currentTime).push(item['averageJammingFacotr'])
+        }
+      })
+      console.log(eachTimeData)
+      let total 
+      for (let [timePoint, jammingFactorArray] of eachTimeData) {
+        self.chartLabel.push(timePoint)
+        total = 0
+        jammingFactorArray.forEach((JammingFactor) => {
+          total += JammingFactor
+        })
+        self.chartData.push(total / jammingFactorArray.length)
+      }
+      console.log(self.chartLabel)
+      console.log(self.chartData)
+      self.chartFinished = true
+    },
     test(){
       /* eslint-disable */
+      this.calculateAverageJammingFactorForEachTime()
       /* eslint-enable */
     },
     getDateBetween(startDate, endDate){

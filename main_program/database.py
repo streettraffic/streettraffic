@@ -879,8 +879,11 @@ class TrafficData:
 
         ## third step: start to calculate the traffic_pattern
         for flow_item_id in flow_item_id_collection:
-            flow_data_JF = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").get_field('JF').limit(3).run(self.conn).next()
-            analytics_traffic_pattern_insertion['average_JF'] += flow_data_JF
+            try:
+                flow_data_JF = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").get_field('JF').limit(3).run(self.conn).next()
+                analytics_traffic_pattern_insertion['average_JF'] += flow_data_JF
+            except Exception as e:
+                print("insert_analytics_traffic_pattern", e)
 
         analytics_traffic_pattern_insertion['average_JF'] = analytics_traffic_pattern_insertion['average_JF'] / analytics_traffic_pattern_insertion['flow_item_count']  # get average
 
