@@ -186,6 +186,8 @@ def get_area_tile_matrix(list_points: List, zoom: int, use_polygon = False) -> p
         polygon = produce_polygon(list_points, zoom, plot_polygon = False)
         for row in range(len(matrix)):
             for col in range(len(matrix.iloc[0])):
+                if matrix.iloc[row,col] in tiles:  # make sure the polygon points are covered
+                    continue
                 if not polygon.contains_point(matrix.iloc[row,col]):
                     matrix.iloc[row,col] = None
 

@@ -262,12 +262,13 @@ class TrafficData:
         for matrix in matrix_list:
             for i in range(len(matrix)):
                 for j in range(len(matrix.loc[0])):
-                    try:
-                        traffic_data = self.read_traffic_data(matrix.loc[i, j])
-                        self.insert_json_data(traffic_data, crawled_batch_id)
-                        time.sleep(0.5)
-                    except Exception as e:
-                        print('store_matrix_json', e)
+                    if matrix.loc[i, j]:
+                        try:
+                            traffic_data = self.read_traffic_data(matrix.loc[i, j])
+                            self.insert_json_data(traffic_data, crawled_batch_id)
+                            time.sleep(0.5)
+                        except Exception as e:
+                            print('store_matrix_json', e)
 
         self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
 
@@ -561,25 +562,25 @@ class TrafficData:
             geojson_road_id_collection = []
 
             if use_overview:
-                ## use overview to optimize query time
-                for overview_path_item in route['overview_path']:
-                    try:
-                        road_document = self.get_nearest_road((overview_path_item['lat'], overview_path_item['lng']), max_dist = 1000)
-                        road_data_id = road_document['doc']['road_data_id']
-                    except:
-                        print('cant find nearest road once')
+            #     ## use overview to optimize query time
+            #     for overview_path_item in route['overview_path']:
+            #         try:
+            #             road_document = self.get_nearest_road((overview_path_item['lat'], overview_path_item['lng']), max_dist = 1000)
+            #             road_data_id = road_document['doc']['road_data_id']
+            #         except:
+            #             print('cant find nearest road once')
 
-                    ## see if road_data_id already exists in our collection
-                    if road_data_id not in road_id_collection:
-                        road_id_collection[road_data_id] = True
-                        geojson_road_id_collection += [road_data_id]
-                    else:
-                        duplicate_road_id += [road_data_id]
+            #         ## see if road_data_id already exists in our collection
+            #         if road_data_id not in road_id_collection:
+            #             road_id_collection[road_data_id] = True
+            #             geojson_road_id_collection += [road_data_id]
+            #         else:
+            #             duplicate_road_id += [road_data_id]
 
 
-            else:
-                ## we could also query every point in our path, but the query performance is slow
-                ## there might be multiple **legs**, but we just worry about one for now
+            # else:
+            #     ## we could also query every point in our path, but the query performance is slow
+            #     ## there might be multiple **legs**, but we just worry about one for now
                 leg = route['legs'][0]
                 for step in leg['steps']:
                     for path_item in step['path']:
