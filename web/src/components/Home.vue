@@ -80,6 +80,7 @@
         </v-card-text>
         <v-card-text>
           <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
+          <v-btn dark default @click.native="dsiplayRoutingCaseStudy">dsiplay Routing Case Study</v-btn>
           <v-layout row wrap>
             <v-flex xs12 md4 class="my-3">
               <h6>Pick a start date</h6>
@@ -125,6 +126,7 @@
         <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
         <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
         <v-btn dark default @click.native="test">test</v-btn>
+        <v-btn dark default @click.native="loadControls">Load Drawing Tools</v-btn>
       </section>
       
 
@@ -170,6 +172,7 @@
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Vue from 'vue'
 import TestData from '../assets/level17.json'
+import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
 import vueSlider from './vue2-slider'
 import { mapState } from 'vuex'
 import Chart from './Chart.vue'
@@ -264,6 +267,7 @@ export default {
       console.log(value)
       console.log(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]])
       self.averageJammingFacotr = self.geojson_historic_collection[self.geojson_historic_collection_indices[value]]['averageJammingFacotr']
+      this.deleteGeoJsonPlot()
       self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]]['crawled_batch_id_traffic'])
     },
     getMultipleDaysRouteTraffic() {
@@ -286,8 +290,20 @@ export default {
       this.$store.state.ws.onmessage = function (event) {
         self.geojson_historic_collection = JSON.parse(event.data)
         // initialize local time within geojson_historic_collection
+        let local_timestamp
         self.geojson_historic_collection.forEach((item, index) => {
-          item['local_timestamp'] = new Date(item['crawled_timestamp'])
+          local_timestamp = new Date(item['crawled_timestamp'])
+          // round time. For example: 9:01 will be round to 9:00
+          if (local_timestamp.getMinutes() < 30) {
+            local_timestamp.setMinutes(0)
+            local_timestamp.setSeconds(0)
+          }
+          else {
+            local_timestamp.setMinutes(30)
+            local_timestamp.setSeconds(0)
+          }
+          console.log(local_timestamp)
+          item['local_timestamp'] = local_timestamp
           item['averageJammingFacotr'] = self.calculateAverageJammingFactor(item)
         })
 
@@ -325,9 +341,7 @@ export default {
       let currentTime
       self.geojson_historic_collection.forEach((item, index) => {
         currentTime = item['local_timestamp'].toLocaleTimeString()
-        console.log(currentTime)
         if (!eachTimeData.get(currentTime)) {
-          console.log('called')
           eachTimeData.set(currentTime, [item['averageJammingFacotr']])
         }
         else {
@@ -350,7 +364,8 @@ export default {
     },
     test(){
       /* eslint-disable */
-      this.calculateAverageJammingFactorForEachTime()
+      // this.calculateAverageJammingFactorForEachTime()
+      this.directionsDisplay.setMap(null)
       /* eslint-enable */
     },
     getDateBetween(startDate, endDate){
@@ -372,7 +387,6 @@ export default {
       //   })
       // })
       let self = this
-      this.deleteGeoJsonPlot()
       self.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
       self.$refs.mymap.$mapObject.data.setStyle(function(feature) {
         return ({
@@ -395,11 +409,6 @@ export default {
       self.$refs.mymap.$mapObject.data.forEach(function (feature) {
         self.$refs.mymap.$mapObject.data.remove(feature)
       })
-
-      // reset map directionDisplay, otherwise, the direction layer might be on the top of
-      // our traffic geojson layer.
-      this.directionsDisplay.setMap(null)
-      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
       this.displayGeoJson()
     },
     displayGeoJson() {
@@ -418,6 +427,15 @@ export default {
       this.calculateAndDisplayRoute()
       /* eslint-enable */
     },
+    dsiplayRoutingCaseStudy() {
+      /* eslint-disable */
+      console.log(google)
+      this.directionsDisplay = new google.maps.DirectionsRenderer()
+      this.directionsService = new google.maps.DirectionsService()
+      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
+      this.calculateAndDisplayRouteCaseStudy()
+      /* eslint-enable */
+    },
     getHistoric (){
       let self = this
       this.$store.state.ws.send(JSON.stringify(['getHistoric', this.route]))
@@ -430,8 +448,8 @@ export default {
       let self = this
       /* eslint-disable */
       self.directionsService.route({
-        origin: {lat: 33.736818, lng: -84.394652},  // Haight.
-        destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach.
+        origin: {lat: 33.736818, lng: -84.394652},  // Haight
+        destination: {lat: 33.769922, lng: -84.377616},  // Ocean Beach
         // Note that Javascript allows us to access the constant
         // using square brackets and a string value as its
         // "property."
@@ -445,6 +463,16 @@ export default {
         }
       })
       /* eslint-enable */
+    },
+    calculateAndDisplayRouteCaseStudy() {
+      let self = this
+      /* eslint-disable */
+      self.route = CaseStudyDirection
+      self.directionsDisplay.setDirections(CaseStudyDirection)
+      /* eslint-enable */
+    },
+    loadControls() {
+      this.$refs.mymap.$mapObject.data.setControls(['Polygon'])
     }
   },
   created() {
