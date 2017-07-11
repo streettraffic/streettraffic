@@ -1,208 +1,48 @@
 <template>
-  <v-layout row wrap>
-    <v-flex xs12 class="my-3">
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">The Map</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          <v-card-row height="auto" center>
-            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
-                @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
-              <gmap-marker v-if="location" :position="location" /></gmap-marker>
-            </gmap-map>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-    <v-flex xs12 class="my-3" v-show="trafficInfoSliderShow">
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">Traffic Info Slider</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          <v-card-row>
-            This will automatically show the geojson data that has been plotted into the map<br> <br>
-          </v-card-row>
-          <v-card-row height="auto">
-            <div class="historic_slider">
-              <vue-slider @callback="displaySelectedHistoric" :real-time="true" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
-              <br>
-              <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
-              <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
-              <div class="jammingFactorChart">
-                <Chart v-if="chartFinished" :data="chartData" :labels="chartLabel" :chartTitle="'Average Jamming Factor at Each Time Period'"></Chart>
-              </div>
-            </div>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-
-    <v-flex xs12>
-      <v-stepper v-model="e1">
-        <v-stepper-header>
-          <v-stepper-step step="1" :complete="e1 > 1">Name of step 1</v-stepper-step>
-          <v-divider></v-divider>
-          <v-stepper-step step="2" :complete="e1 > 2">Name of step 2</v-stepper-step>
-          <v-divider></v-divider>
-          <v-stepper-step step="3">Name of step 3</v-stepper-step>
-        </v-stepper-header>
-        <v-stepper-content step="1">
-          <v-card class="grey lighten-1 z-depth-1 mb-5" height="200px"></v-card>
-          <v-btn primary @click.native="e1 = 2">Continue</v-btn>
-          <v-btn flat>Cancel</v-btn>
-        </v-stepper-content>
-        <v-stepper-content step="2">
-          <v-card class="grey lighten-1 z-depth-1 mb-5" height="200px"></v-card>
-          <v-btn primary @click.native="e1 = 3">Continue</v-btn>
-          <v-btn flat>Cancel</v-btn>
-        </v-stepper-content>
-        <v-stepper-content step="3">
-          <v-card class="grey lighten-1 z-depth-1 mb-5" height="200px"></v-card>
-          <v-btn primary @click.native="e1 = 1">Continue</v-btn>
-          <v-btn flat>Cancel</v-btn>
-        </v-stepper-content>
-      </v-stepper>
-    </v-flex>
-    <v-flex xs12 class="my-3">
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">Route Traffic on a Given Day</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          Display routing. Then pick a date, start time, and end time
-        </v-card-text>
-        <v-card-text>
-          <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
-          <v-btn dark default @click.native="dsiplayRoutingCaseStudy">dsiplay Routing Case Study</v-btn>
-          <v-layout row wrap>
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick a start date</h6>
-              <v-date-picker v-model="dateStartPicker"></v-date-picker>
-            </v-flex>
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick an end date</h6>
-              <v-date-picker v-model="dateEndPicker"></v-date-picker>
-            </v-flex>
-
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick a start time</h6>
-              <v-time-picker v-model="timeStartPicer" format="24hr"></v-time-picker>
-            </v-flex>
-
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick an end time</h6>
-              <v-time-picker v-model="timeEndPicer" format="24hr"></v-time-picker>
-            </v-flex>
-          </v-layout>
-          <v-dialog v-model="trafficInfoSliderDialog" persistent>
-            <v-btn primary light slot="activator" @click.native="getMultipleDaysRouteTraffic">Open Dialog</v-btn>
-            <v-card>
-              <v-card-row>
-                <v-card-title>Retrieving data from the server</v-card-title>
-              </v-card-row>
-              <v-card-row>
-                <v-card-text>Please be patient :)</v-card-text>
-              </v-card-row>
-            </v-card>
-          </v-dialog>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-
-
-
-    <v-flex xs12>
-      <v-divider class="my-4"></v-divider>
-      <section>
-        <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
-        <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
-        <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
-        <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
-        <v-btn dark default @click.native="test">test</v-btn>
-        <v-btn dark default @click.native="loadControls">Load Drawing Tools</v-btn>
-      </section>
-      
-
-      <v-divider class="my-4"></v-divider>
-
-
-      <h6>Select your desired historic traffic:</h6>
-      <HistoricBatch></HistoricBatch>
-    </v-flex>
-  </v-layout>
+  <div>
+    <v-data-table
+      v-bind:headers="headers"
+      v-bind:items="historic_batch"
+      v-model="selected"
+      selected-key="crawled_batch_id"
+      select-all
+    >
+      <template slot="headers" scope="props">
+        <span v-tooltip:bottom="{ 'html': props.item.text }">
+          {{ props.item.text }}
+        </span>
+      </template>
+      <template slot="items" scope="props">
+        <td>
+          <v-checkbox
+            primary
+            hide-details
+            v-model="props.selected"
+          ></v-checkbox>
+        </td>
+        <td>{{ props.item.crawled_batch_id }}</td>
+        <td  class="text-xs-right">{{ props.item.crawled_timestamp }}</td>
+      </template>
+    </v-data-table>
+    <v-btn dark default @click.native="getSelectedBatchList">Submit</v-btn>
+  </div>
 </template>
 
 <script>
-// To see how we use geojson in google maps, check out
-// https://github.com/xkjyeah/vue-google-maps/issues/90 about how we use
-// To see how we use the Direction api, refer to
-// https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
-
-import * as VueGoogleMaps from 'vue2-google-maps'
-import Vue from 'vue'
-import TestData from '../assets/level17.json'
-import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
-import vueSlider from 'vue-slider-component'
-import HistoricBatch from './HistoricBatch'
-import { mapState } from 'vuex'
-import Chart from './Chart.vue'
-
-Vue.use(VueGoogleMaps, {
-  load: {
-    key: 'AIzaSyAucd0sk7vH1NjQyh3b2kN8qYKhdu4S1Ss'
-    // libraries: 'places', //// If you need to use place input
-  }
-})
-
 export default {
-  name: 'Home',
-  components: {
-    vueSlider,
-    Chart,
-    HistoricBatch
-  },
+  name: 'HistoricBatch',
   data () {
     return {
-      e1: 0,
-      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
-      map_geojson: null,
-      trafficInfoSliderDialog: false,
-      route: null,
-      directionsDisplay: null,
-      directionsService: null,
-      location: null,
-      testData: TestData,
-      geojson_data: null,   // maybe not needed
-      geojson_historic_collection: null,
-      geojson_historic_collection_indices: {},
-      trafficInfoSliderShow: false,
-      historic_slider: {
-        value: '',
-        width: '90%',
-        disabled: false,
-        tooltip: 'hover',
-        piecewise: true,
-        data: []   // This will be initialized in the created() funciton
-      },
-      dateStartPicker: null,
-      dateEndPicker: null,
-      timeStartPicer: null,
-      timeEndPicer: null,
-      averageJammingFacotr: null,
-      chartLabel: [],
-      chartData: [],
-      chartFinished: false
+      selected: [],
+      headers: [
+        {
+          text: 'crawled_batch_id',
+          left: true,
+          sortable: false,
+          value: 'name'
+        },
+        { text: 'crawled_timestamp', sortable: false, value: 'calories' }
+      ]
     }
   },
   methods: {
@@ -457,18 +297,3 @@ export default {
   }
 }
 </script>
-
-<!-- Add 'scoped' attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
-
-.geojson_output {
-  width: 100%;
-}
-  textarea {
-    border-style: solid;
-  }
-
-.historic_slider {
-  width: 100%;
-}
-</style>

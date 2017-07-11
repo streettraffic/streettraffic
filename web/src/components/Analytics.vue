@@ -1,5 +1,9 @@
 <template>
   <v-layout row wrap>
+    <v-flex xs8 class="my-3">
+      <h6>Histraffic Analytics section</h6>
+      <p>In this section, you can pick a date at the calendar below and the site will generate a graph of average jamming factor of the city you are monitoring</p>
+    </v-flex>
     <v-flex xs12 md6>
       <v-card>
         <v-card-row class="green darken-1">
@@ -114,10 +118,10 @@ export default {
     }
   },
   mounted() {
-    this.buildChart(['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], [12, 19, 3, 5, 2, 3])
+    this.buildChart([], [])
   },
   created() {
-    console.log(this)
+    // pass
   }
 }
 </script>
