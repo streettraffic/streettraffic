@@ -9,6 +9,7 @@ from matplotlib.path import Path
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from typing import List
+import json
 
 from . import app_settings
 
@@ -279,3 +280,46 @@ def get_distance(point1: tuple, point2: tuple, location_type:str = "latlon", dis
         return vincenty(point1, point2).meters
     else:
         raise Exception('undefined distance_formula')
+
+def read_geojson_polygon(geojson_polygon: str) -> List:
+    """
+    inputs: geojson_polygon: str (a json encoding of a geojson polygon)
+    example inputs:
+    '{
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -84.38658714294434,
+                  33.76908761144743
+                ],
+                [
+                  -84.37294006347656,
+                  33.766590334877485
+                ]
+              ]
+            ]
+          },
+          "properties": {}
+        }
+      ]
+    }'
+    
+    Notice in geojson, the coordinates have the format [Longitude, latitude] while matplotlib.path.Path
+    This function outputs a polygon list that consist of coordiantes that has [latitude, longitude] format.
+
+    example outputs:
+    [[33.76908761144743, -84.38658714294434],
+     [33.766590334877485, -84.37294006347656]]
+    """
+    geojson_polygon_dict = json.loads(geojson_polygon)
+    polygon_coordinates = geojson_polygon_dict['features'][0]['geometry']['coordinates'][0]
+    polygon = []
+    for item in polygon_coordinates:
+        polygon += [[item[1], item[0]]]
+    return polygon
