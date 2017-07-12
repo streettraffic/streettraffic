@@ -1,138 +1,25 @@
 <template>
-  <v-layout row wrap>
-    <HomeStepper></HomeStepper>
-    <v-flex xs12 md6 class="my-3">
-      <v-card class="elevation-12">
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">The Map</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
+  <v-flex xs12 md6 class="my-3">
+    <v-card class="elevation-12">
+      <v-card-row class="green darken-1">
+        <v-card-title>
+          <span class="white--text">The Map</span>
+          <v-spacer></v-spacer>
+        </v-card-title>
+      </v-card-row>
+      <v-card-text>
+        <v-card-row height="auto" center>
+          <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
+              @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
+            <gmap-marker v-if="location" :position="location" /></gmap-marker>
+          </gmap-map>
         </v-card-row>
-        <v-card-text>
-          <v-card-row height="auto" center>
-            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
-                @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
-              <gmap-marker v-if="location" :position="location" /></gmap-marker>
-            </gmap-map>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-    <v-flex xs12 class="my-3" v-show="trafficInfoSliderShow">
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">Traffic Info Slider</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          <v-card-row>
-            This will automatically show the geojson data that has been plotted into the map<br> <br>
-          </v-card-row>
-          <v-card-row height="auto">
-            <div class="historic_slider">
-              <vue-slider @callback="displaySelectedHistoric" :real-time="true" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
-              <br>
-              <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
-              <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
-              <div class="jammingFactorChart">
-                <Chart v-if="chartFinished" :data="chartData" :labels="chartLabel" :chartTitle="'Average Jamming Factor at Each Time Period'"></Chart>
-              </div>
-            </div>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-    <v-flex xs12 class="my-3">
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">Route Traffic on a Given Day</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          Display routing. Then pick a date, start time, and end time
-        </v-card-text>
-        <v-card-text>
-          <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
-          <v-btn dark default @click.native="dsiplayRoutingCaseStudy">dsiplay Routing Case Study</v-btn>
-          <v-layout row wrap>
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick a start date</h6>
-              <v-date-picker v-model="dateStartPicker"></v-date-picker>
-            </v-flex>
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick an end date</h6>
-              <v-date-picker v-model="dateEndPicker"></v-date-picker>
-            </v-flex>
-
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick a start time</h6>
-              <v-time-picker v-model="timeStartPicer" format="24hr"></v-time-picker>
-            </v-flex>
-
-            <v-flex xs12 md4 class="my-3">
-              <h6>Pick an end time</h6>
-              <v-time-picker v-model="timeEndPicer" format="24hr"></v-time-picker>
-            </v-flex>
-          </v-layout>
-          <v-dialog v-model="trafficInfoSliderDialog" persistent>
-            <v-btn primary light slot="activator" @click.native="getMultipleDaysRouteTraffic">Open Dialog</v-btn>
-            <v-card>
-              <v-card-row>
-                <v-card-title>Retrieving data from the server</v-card-title>
-              </v-card-row>
-              <v-card-row>
-                <v-card-text>Please be patient :)</v-card-text>
-              </v-card-row>
-            </v-card>
-          </v-dialog>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-
-
-
-    <v-flex xs12>
-      <v-divider class="my-4"></v-divider>
-      <section>
-        <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
-        <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
-        <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
-        <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
-        <v-btn dark default @click.native="test">test</v-btn>
-        <v-btn dark default @click.native="loadControls">Load Drawing Tools</v-btn>
-      </section>
-      
-
-      <v-divider class="my-4"></v-divider>
-
-
-      <h6>Select your desired historic traffic:</h6>
-      <HistoricBatch></HistoricBatch>
-    </v-flex>
-  </v-layout>
+      </v-card-text>
+    </v-card>
+  </v-flex>
 </template>
 
 <script>
-// To see how we use geojson in google maps, check out
-// https://github.com/xkjyeah/vue-google-maps/issues/90 about how we use
-// To see how we use the Direction api, refer to
-// https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
-
-import TestData from '../assets/level17.json'
-import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
-import vueSlider from 'vue-slider-component'
-import HistoricBatch from './HistoricBatch'
-import { mapState } from 'vuex'
-
-// import custom components
-import Chart from './Chart.vue'
-import HomeStepper from './HomeStepper.vue'
-
 export default {
   name: 'Home',
   components: {
@@ -449,18 +336,3 @@ export default {
   }
 }
 </script>
-
-<!-- Add 'scoped' attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
-
-.geojson_output {
-  width: 100%;
-}
-  textarea {
-    border-style: solid;
-  }
-
-.historic_slider {
-  width: 100%;
-}
-</style>
