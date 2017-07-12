@@ -1,8 +1,22 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/components/Home'
 
 Vue.use(Router)
+
+const Home = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/Home')
+})
+
+const Landing = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/Landing')
+})
+
+const Main = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/Main')
+})
 
 const Analytics = () => ({
   // The component to load. Should be a Promise
@@ -18,27 +32,44 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: Home,
+      name: 'Landing',
+      component: Landing,
       meta: {
-        title: 'Histraffic Home'
+        title: 'Histraffic Landing'
       }
     },
     {
-      path: '/Analytics',
-      name: 'Analytics',
-      component: Analytics,
+      path: '/Main',
+      component: Main,
       meta: {
-        title: 'Histraffic Analytics'
-      }
-    },
-    {
-      path: '/Polygon',
-      name: 'Polygon',
-      component: Polygon,
-      meta: {
-        title: 'Histraffic Polygon'
-      }
+        title: 'Histraffic Main'
+      },
+      children: [
+        {
+          path: '',
+          name: 'Home',
+          component: Home,
+          meta: {
+            title: 'Histraffic Home'
+          }
+        },
+        {
+          path: 'Analytics',
+          name: 'Analytics',
+          component: Analytics,
+          meta: {
+            title: 'Histraffic Analytics'
+          }
+        },
+        {
+          path: 'Polygon',
+          name: 'Polygon',
+          component: Polygon,
+          meta: {
+            title: 'Histraffic Polygon'
+          }
+        }
+      ]
     }
   ]
 })
