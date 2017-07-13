@@ -26,6 +26,7 @@
 // https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
 
 import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
+import _ from 'lodash'
 
 export default {
   name: 'HomeMap',
@@ -157,17 +158,25 @@ export default {
   },
   watch: {
     local_center(val) {
+      console.log(val)
       this.$emit('update:center', val)
     },
     origin_obj(val) {
-      if(val) {
-        if (this.destination_obj){
-          dsiplayRouting(val, this.destination_obj)
+      if (!_.isEmpty(val)) {
+        if (!_.isEmpty(this.destination_obj)) {
+          this.dsiplayRouting(val, this.destination_obj)
+        }
+      }
+    },
+    destination_obj(val) {
+      if (!_.isEmpty(val)) {
+        if (!_.isEmpty(this.origin_obj)) {
+          this.dsiplayRouting(this.origin_obj, this.destination_obj)
         }
       }
     },
     geojson_data(val) {
-      plotGeoJson(val)
+      this.plotGeoJson(val)
     }
   }
 }

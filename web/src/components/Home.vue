@@ -1,24 +1,18 @@
 <template>
   <v-layout row wrap>
-    <HomeStepper v-on:select_routes="dsiplayRouting" v-on:select_time="getMultipleDaysRouteTraffic" :traffic_data_received="traffic_data_received"></HomeStepper>
-    <v-flex xs12 md6 class="my-3">
-      <v-card class="elevation-12">
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">The Map</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          <v-card-row height="auto" center>
-            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
-                @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
-              <gmap-marker v-if="location" :position="location" /></gmap-marker>
-            </gmap-map>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
+    <HomeStepper 
+      ref="HomeStepper"
+      v-on:select_routes="HomeStepper_select_routes" 
+      v-on:select_time="HomeStepper_select_time" 
+      :traffic_data_received="traffic_data_received">
+    </HomeStepper>
+    <HomeMap 
+      ref="HomeMap"
+      :center.sync="center" 
+      :origin_obj="origin_obj" 
+      :destination_obj="destination_obj" 
+      :geojson_data="geojson_data">
+    </HomeMap>
     <v-flex xs12 class="my-3" v-show="trafficInfoSliderShow">
       <v-card>
         <v-card-row class="green darken-1">
@@ -47,7 +41,7 @@
     </v-flex>
 
 
-    <v-flex xs12>
+<!--     <v-flex xs12>
       <v-divider class="my-4"></v-divider>
       <section>
         <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
@@ -64,7 +58,7 @@
 
       <h6>Select your desired historic traffic:</h6>
       <HistoricBatch></HistoricBatch>
-    </v-flex>
+    </v-flex> -->
   </v-layout>
 </template>
 
@@ -98,9 +92,9 @@ export default {
     return {
       // HomeMap related states
       center: {lat: 33.7601, lng: -84.37429},
-      origin_obj: null,
-      destination_obj: null,
-      geojson_data: null,
+      origin_obj: {},
+      destination_obj: {},
+      geojson_data: {},
       // other
       map_geojson: null,
       traffic_data_received: false,
@@ -131,30 +125,15 @@ export default {
     }
   },
   methods: {
-    getLocation() {
-      let self = this
-      this.$store.state.ws.send(JSON.stringify(['getRoadData', this.location, 10000, 10]))
-      this.$store.state.ws.onmessage = function (event) {
-        self.plotGeoJson(JSON.parse(event.data))
-      }
+    HomeStepper_select_routes(starting_address_obj, destination_obj) {
+      let HomeMap = this.$refs.HomeMap
+      console.log(starting_address_obj)
+      console.log(HomeMap)
+      HomeMap.dsiplayRouting(starting_address_obj, destination_obj)
+      // pass
     },
-    getSelectedBatch() {
-      let self = this
-      this.$store.state.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))
-      this.$store.state.ws.onmessage = function (event) {
-        console.log(JSON.parse(event.data))
-        self.plotGeoJson(JSON.parse(event.data))
-      }
-    },
-    getSelectedBatchList() {
-      let self = this
-      this.$store.state.ws.send(JSON.stringify(['getSelectedBatchList', this.route, this.selected]))
-      this.$store.state.ws.onmessage = function (event) {
-        console.log(JSON.parse(event.data))
-        self.geojson_historic_collection = JSON.parse(event.data)
-        self.historic_slider['data'] = self.geojson_historic_collection
-        self.historic_slider['value'] = self.historic_slider['data'][0]
-      }
+    HomeStepper_select_time() {
+      // pass
     },
     displaySelectedHistoric(value) {
       let self = this
@@ -219,9 +198,6 @@ export default {
         self.calculateAverageJammingFactorForEachTime()
       }
     },
-    toManhattan() {
-      this.center = {lat: 40.725306, lng: -73.988913}
-    },
     calculateAverageJammingFactor(geojson_historic_collection_item) {
       let totalGeometryLength = 0
       geojson_historic_collection_item['crawled_batch_id_traffic']['features'].forEach((item) => { 
@@ -265,107 +241,6 @@ export default {
       // this.calculateAverageJammingFactorForEachTime()
       console.log('haha')
       /* eslint-enable */
-    },
-    getDateBetween(startDate, endDate){
-      // pass
-    },
-    plotGeoJson(geoJsonData) {
-      /* input: geoJsonData(a geojson json object)
-
-         This fucntion add the geoJson data to the google map object
-      */
-      /* eslint-disable */
-      let self = this
-      self.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
-      self.$refs.mymap.$mapObject.data.setStyle(function(feature) {
-        return ({
-          strokeColor: feature.getProperty('color'),
-          strokeWeight: 2,
-          zIndex: 5
-        })
-      })
-      this.displayGeoJson()
-      /* eslint-enable */
-    },
-    deleteGeoJsonPlot() {
-      /*  inputs: None
-          This funciton clears the geojson plotting in the google maps
-          return None
-      */
-      let self = this
-      self.$refs.mymap.$mapObject.data.forEach(function (feature) {
-        self.$refs.mymap.$mapObject.data.remove(feature)
-      })
-      this.displayGeoJson()
-    },
-    displayGeoJson() {
-      let results
-      this.$refs.mymap.$mapObject.data.toGeoJson((geojson) => {
-        results = JSON.stringify(geojson, null, 2)
-      })
-      this.map_geojson = results
-    },
-    dsiplayRouting(origin_obj, destination_obj) {
-      /* eslint-disable */
-      console.log(google)
-      this.directionsDisplay = new google.maps.DirectionsRenderer()
-      this.directionsService = new google.maps.DirectionsService()
-      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
-      this.calculateAndDisplayRoute(origin_obj, destination_obj)
-      /* eslint-enable */
-    },
-    dsiplayRoutingCaseStudy() {
-      /* eslint-disable */
-      console.log(google)
-      this.directionsDisplay = new google.maps.DirectionsRenderer()
-      this.directionsService = new google.maps.DirectionsService()
-      this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
-      this.calculateAndDisplayRouteCaseStudy()
-      /* eslint-enable */
-    },
-    getHistoric (){
-      let self = this
-      this.$store.state.ws.send(JSON.stringify(['getHistoric', this.route]))
-      this.$store.state.ws.onmessage = function (event) {
-        console.log(JSON.parse(event.data))
-        self.plotGeoJson(JSON.parse(event.data))
-      }
-    },
-    calculateAndDisplayRoute(origin_obj, destination_obj) {
-      /* 
-      example inputs:
-      origin_obj = {lat: 33.736818, lng: -84.394652}
-      destination_obj = {lat: 33.769922, lng: -84.377616}
-      */
-      console.log(origin_obj, destination_obj)
-      let self = this
-      /* eslint-disable */
-      self.directionsService.route({
-        origin: origin_obj,  // Haight
-        destination: destination_obj,  // Ocean Beach
-        // Note that Javascript allows us to access the constant
-        // using square brackets and a string value as its
-        // "property."
-        travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
-      }, function(response, status) {
-        if (status == 'OK') {
-          self.route = response
-          self.directionsDisplay.setDirections(response)
-        } else {
-          window.alert('Directions request failed due to ' + status)
-        }
-      })
-      /* eslint-enable */
-    },
-    calculateAndDisplayRouteCaseStudy() {
-      let self = this
-      /* eslint-disable */
-      self.route = CaseStudyDirection
-      self.directionsDisplay.setDirections(CaseStudyDirection)
-      /* eslint-enable */
-    },
-    loadControls() {
-      this.$refs.mymap.$mapObject.data.setControls(['Polygon'])
     }
   },
   created() {

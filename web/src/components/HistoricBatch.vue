@@ -46,13 +46,6 @@ export default {
     }
   },
   methods: {
-    getLocation() {
-      let self = this
-      this.$store.state.ws.send(JSON.stringify(['getRoadData', this.location, 10000, 10]))
-      this.$store.state.ws.onmessage = function (event) {
-        self.plotGeoJson(JSON.parse(event.data))
-      }
-    },
     getSelectedBatch() {
       let self = this
       this.$store.state.ws.send(JSON.stringify(['getSelectedBatch', this.route, this.selected_batch]))

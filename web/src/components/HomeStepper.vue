@@ -161,7 +161,6 @@ export default {
   methods: {
     select_routes() {
       this.$emit('select_routes', this.starting_address_obj, this.destination_obj)
-      this.$emit('xixi')
     },
     select_time() {
       this.$emit('select_time', this.dateStartPicker, this.dateEndPicker, this.timeStartPicer, this.timeEndPicer)
