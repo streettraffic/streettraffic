@@ -78,6 +78,7 @@ import TestData from '../assets/level17.json'
 import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
 import vueSlider from 'vue-slider-component'
 import HistoricBatch from './HistoricBatch'
+import HomeMap from './HomeMap.vue'
 import { mapState } from 'vuex'
 
 // import custom components
@@ -90,11 +91,17 @@ export default {
     vueSlider,
     Chart,
     HistoricBatch,
-    HomeStepper
+    HomeStepper,
+    HomeMap
   },
   data () {
     return {
-      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
+      // HomeMap related states
+      center: {lat: 33.7601, lng: -84.37429},
+      origin_obj: null,
+      destination_obj: null,
+      geojson_data: null,
+      // other
       map_geojson: null,
       traffic_data_received: false,
       route: null,
@@ -268,15 +275,6 @@ export default {
          This fucntion add the geoJson data to the google map object
       */
       /* eslint-disable */
-      // this.geojson_data = new google.maps.Data()
-      // this.geojson_data.addGeoJson(geoJsonData)
-      // this.geojson_data.setMap(this.$refs.mymap.$mapObject)
-      // this.geojson_data.setStyle(function(feature) {
-      //   return ({
-      //     strokeColor: feature.getProperty('color'),
-      //     strokeWeight: 2
-      //   })
-      // })
       let self = this
       self.$refs.mymap.$mapObject.data.addGeoJson(geoJsonData)
       self.$refs.mymap.$mapObject.data.setStyle(function(feature) {
@@ -294,8 +292,6 @@ export default {
           This funciton clears the geojson plotting in the google maps
           return None
       */
-      // this.geojson_data.setMap(null)
-      // this.geojson_data = null
       let self = this
       self.$refs.mymap.$mapObject.data.forEach(function (feature) {
         self.$refs.mymap.$mapObject.data.remove(feature)
