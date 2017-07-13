@@ -12,5 +12,3 @@ export const HomeMap_add_google_map_geojson = 'HomeMap_add_google_map_geojson'
 export const HomeMap_get_google_map_geojson = 'HomeMap_get_google_map_geojson'
 export const HomeMap_delete_google_map_geojson = 'HomeMap_delete_google_map_geojson'
 export const HomeMap_set_google_directionsDisplay_direction = 'HomeMap_set_google_directionsDisplay_direction'
-export const HomeMap_set_google_directionsDisplay_direction = 'HomeMap_set_google_directionsDisplay_direction'
-

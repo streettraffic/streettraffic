@@ -1,6 +1,6 @@
 <template>
   <v-layout row wrap>
-    <HomeStepper></HomeStepper>
+    <HomeStepper v-on:select_routes="dsiplayRouting" v-on:select_time="getMultipleDaysRouteTraffic"></HomeStepper>
     <v-flex xs12 md6 class="my-3">
       <v-card class="elevation-12">
         <v-card-row class="green darken-1">
@@ -57,7 +57,7 @@
           Display routing. Then pick a date, start time, and end time
         </v-card-text>
         <v-card-text>
-          <v-btn dark default @click.native="dsiplayRouting">dsiplay Routing</v-btn>
+          <v-btn dark default @click.native="dsiplayRouting({lat: 33.736818, lng: -84.394652}, {lat: 33.769922, lng: -84.377616})">dsiplay Routing</v-btn>
           <v-btn dark default @click.native="dsiplayRoutingCaseStudy">dsiplay Routing Case Study</v-btn>
           <v-layout row wrap>
             <v-flex xs12 md4 class="my-3">
@@ -143,10 +143,6 @@ export default {
   },
   data () {
     return {
-      e1: 0,
-      e6: 0,
-      starting_address: '',
-      destination: '',
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       map_geojson: null,
       trafficInfoSliderDialog: false,
@@ -155,7 +151,6 @@ export default {
       directionsService: null,
       location: null,
       testData: TestData,
-      geojson_data: null,   // maybe not needed
       geojson_historic_collection: null,
       geojson_historic_collection_indices: {},
       trafficInfoSliderShow: false,
@@ -211,15 +206,15 @@ export default {
       this.deleteGeoJsonPlot()
       self.plotGeoJson(self.geojson_historic_collection[self.geojson_historic_collection_indices[value]]['crawled_batch_id_traffic'])
     },
-    getMultipleDaysRouteTraffic() {
+    getMultipleDaysRouteTraffic(dateStartPicker, dateEndPicker, timeStartPicer, timeEndPicer) {
       /* reference
           https://stackoverflow.com/questions/18109481/get-all-the-dates-that-fall-between-two-dates
       */
       let self = this
       self.trafficInfoSliderShow = true
-      let dateStartTimeStart = new Date(this.dateStartPicker + 'T' + this.timeStartPicer)
-      let dateStartTimeEnd = new Date(this.dateStartPicker + 'T' + this.timeEndPicer)
-      let dateEndTimeStart = new Date(this.dateEndPicker + 'T' + this.timeStartPicer)
+      let dateStartTimeStart = new Date(dateStartPicker + 'T' + timeStartPicer)
+      let dateStartTimeEnd = new Date(dateStartPicker + 'T' + timeEndPicer)
+      let dateEndTimeStart = new Date(dateEndPicker + 'T' + timeStartPicer)
       let dateBetween = []
       while (dateStartTimeStart <= dateEndTimeStart) {
         dateBetween.push([new Date(dateStartTimeStart), new Date(dateStartTimeEnd)])
@@ -260,6 +255,7 @@ export default {
         self.displaySelectedHistoric(self.historic_slider['value'])
         self.trafficInfoSliderDialog = false
         self.displayGeoJson()
+        self.calculateAverageJammingFactorForEachTime()
       }
     },
     toManhattan() {
@@ -306,7 +302,7 @@ export default {
     test(){
       /* eslint-disable */
       // this.calculateAverageJammingFactorForEachTime()
-      this.directionsDisplay.setMap(null)
+      console.log('haha')
       /* eslint-enable */
     },
     getDateBetween(startDate, endDate){
@@ -359,13 +355,13 @@ export default {
       })
       this.map_geojson = results
     },
-    dsiplayRouting() {
+    dsiplayRouting(origin_obj, destination_obj) {
       /* eslint-disable */
       console.log(google)
       this.directionsDisplay = new google.maps.DirectionsRenderer()
       this.directionsService = new google.maps.DirectionsService()
       this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
-      this.calculateAndDisplayRoute({lat: 33.736818, lng: -84.394652}, {lat: 33.769922, lng: -84.377616})
+      this.calculateAndDisplayRoute(origin_obj, destination_obj)
       /* eslint-enable */
     },
     dsiplayRoutingCaseStudy() {
@@ -391,6 +387,7 @@ export default {
       origin_obj = {lat: 33.736818, lng: -84.394652}
       destination_obj = {lat: 33.769922, lng: -84.377616}
       */
+      console.log(origin_obj, destination_obj)
       let self = this
       /* eslint-disable */
       self.directionsService.route({
@@ -426,19 +423,6 @@ export default {
   },
   mounted() {
     /* eslint-disable */
-    let starting_address_input = document.getElementById('starting_address')
-    let starting_address_autocomplete = new google.maps.places.Autocomplete(starting_address_input)
-    starting_address_autocomplete.addListener('place_changed', function() {
-      let place = starting_address_autocomplete.getPlace();
-      console.log(place.geometry.location)
-    });
-
-    let destination_input = document.getElementById('destination')
-    let destination_autocomplete = new google.maps.places.Autocomplete(destination_input)
-    destination_autocomplete.addListener('place_changed', function() {
-      let place = destination_autocomplete.getPlace();
-      console.log(place.geometry)
-    });
 
     /* eslint-enable */
   },
