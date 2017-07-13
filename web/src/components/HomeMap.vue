@@ -1,6 +1,5 @@
 <template>
   <v-layout row wrap>
-    <HomeStepper v-on:select_routes="dsiplayRouting" v-on:select_time="getMultipleDaysRouteTraffic" :traffic_data_received="traffic_data_received"></HomeStepper>
     <v-flex xs12 md6 class="my-3">
       <v-card class="elevation-12">
         <v-card-row class="green darken-1">
@@ -11,7 +10,7 @@
         </v-card-row>
         <v-card-text>
           <v-card-row height="auto" center>
-            <gmap-map ref = "mymap" :center="center" :zoom="14" style="width: 100%; height: 400px" 
+            <gmap-map ref = "mymap" :center="local_center" :zoom="14" style="width: 100%; height: 400px" 
                 @click="location = {lat: $event.latLng.lat(), lng:$event.latLng.lng()}; getLocation()">
               <gmap-marker v-if="location" :position="location" /></gmap-marker>
             </gmap-map>
@@ -45,26 +44,6 @@
         </v-card-text>
       </v-card>
     </v-flex>
-
-
-    <v-flex xs12>
-      <v-divider class="my-4"></v-divider>
-      <section>
-        <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
-        <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
-        <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
-        <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
-        <v-btn dark default @click.native="test">test</v-btn>
-        <v-btn dark default @click.native="loadControls">Load Drawing Tools</v-btn>
-      </section>
-      
-
-      <v-divider class="my-4"></v-divider>
-
-
-      <h6>Select your desired historic traffic:</h6>
-      <HistoricBatch></HistoricBatch>
-    </v-flex>
   </v-layout>
 </template>
 
@@ -94,7 +73,7 @@ export default {
   },
   data () {
     return {
-      center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
+      local_center: this.center, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       map_geojson: null,
       traffic_data_received: false,
       route: null,
@@ -122,6 +101,9 @@ export default {
       chartData: [],
       chartFinished: false
     }
+  },
+  props: {
+    center: Object
   },
   methods: {
     getLocation() {
@@ -383,6 +365,11 @@ export default {
   computed: {
     historic_batch() {
       return this.$store.state.historic_batch
+    }
+  },
+  watch: {
+    local_center(val) {
+      this.$emit('update:center', val)
     }
   }
 }

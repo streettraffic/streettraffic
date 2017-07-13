@@ -106,12 +106,25 @@
             <v-time-picker v-model="timeEndPicer" autosave format="24hr"></v-time-picker>
           </v-menu>
         </div>
-        <v-btn primary @click.native="current_step = 4; select_time()" light>Continue</v-btn>
+        <v-dialog v-model="retrieving_dialog" persistent>
+          <v-btn primary slot="activator" @click.native="current_step = 4; select_time()" light>Query Data</v-btn>
+          <v-card>
+            <v-card-row>
+              <v-card-title>Retrieving data from the server</v-card-title>
+            </v-card-row>
+            <v-card-row>
+              <v-card-text>Please be patient :)</v-card-text>
+            </v-card-row>
+          </v-card>
+        </v-dialog>
+        
       </v-stepper-content>
       <v-stepper-step step="4">View setup instructions</v-stepper-step>
       <v-stepper-content step="4">
-        <v-card class="grey lighten-1 z-depth-1 mb-5" height="200px"></v-card>
-        <v-btn primary @click.native="current_step = 1" light>Continue</v-btn>
+        <div class="mb-5">
+          Great! Now you have query your first data, if you want to try a different time range, hit the try again button.
+        </div>
+        <v-btn primary @click.native="current_step = 3" light>Try Again</v-btn>
       </v-stepper-content>
     </v-stepper>
   </v-flex>
@@ -136,7 +149,13 @@ export default {
       timeStartPicer: null,
       timeStartPicerMenu: false,
       timeEndPicer: null,
-      timeEndPicerMenu: false
+      timeEndPicerMenu: false,
+      retrieving_dialog: false
+    }
+  },
+  props: {
+    traffic_data_received: {
+      type: Boolean
     }
   },
   methods: {
@@ -146,6 +165,13 @@ export default {
     },
     select_time() {
       this.$emit('select_time', this.dateStartPicker, this.dateEndPicker, this.timeStartPicer, this.timeEndPicer)
+    }
+  },
+  watch: {
+    traffic_data_received(val) {
+      if (val) {
+        this.retrieving_dialog = false
+      }
     }
   },
   mounted() {
