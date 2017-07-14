@@ -69,6 +69,14 @@ export default {
   },
   mounted() {
     this.buildChart(this.labels, this.data)
+  },
+  watch: {
+    labels(val) {
+      this.buildChart(this.labels, this.data)
+    },
+    data(val) {
+      this.buildChart(this.labels, this.data)
+    }
   }
 }
 </script>

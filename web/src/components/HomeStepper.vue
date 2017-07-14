@@ -160,17 +160,13 @@ export default {
   },
   methods: {
     select_routes() {
-      this.$emit('select_routes', this.starting_address_obj, this.destination_obj)
+      this.$emit('HomeStepper_select_routes', this.starting_address_obj, this.destination_obj)
     },
     select_time() {
-      this.$emit('select_time', this.dateStartPicker, this.dateEndPicker, this.timeStartPicer, this.timeEndPicer)
-    }
-  },
-  watch: {
-    traffic_data_received(val) {
-      if (val) {
-        this.retrieving_dialog = false
-      }
+      this.$emit('HomeStepper_select_time', this.dateStartPicker, this.dateEndPicker, this.timeStartPicer, this.timeEndPicer)
+    },
+    finished_querying_data() {
+      this.retrieving_dialog = false
     }
   },
   mounted() {

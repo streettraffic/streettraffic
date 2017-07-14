@@ -26,7 +26,6 @@
 // https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
 
 import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
-import _ from 'lodash'
 
 export default {
   name: 'HomeMap',
@@ -35,7 +34,7 @@ export default {
       local_center: this.center,
       map_geojson: null,
       traffic_data_received: false,
-      route: null,
+      local_route: this.route,
       directionsDisplay: null,
       directionsService: null,
       location: null
@@ -45,7 +44,8 @@ export default {
     center: Object,
     origin_obj: Object,
     destination_obj: Object,
-    geojson_data: Object
+    geojson_data: Object,
+    route: Object
   },
   methods: {
     getLocation() {
@@ -93,7 +93,7 @@ export default {
       })
       this.map_geojson = results
     },
-    dsiplayRouting(origin_obj, destination_obj) {
+    displayRouting(origin_obj, destination_obj) {
       /* eslint-disable */
       console.log(google)
       this.directionsDisplay = new google.maps.DirectionsRenderer()
@@ -102,7 +102,7 @@ export default {
       this.calculateAndDisplayRoute(origin_obj, destination_obj)
       /* eslint-enable */
     },
-    dsiplayRoutingCaseStudy() {
+    displayRoutingCaseStudy() {
       /* eslint-disable */
       console.log(google)
       this.directionsDisplay = new google.maps.DirectionsRenderer()
@@ -129,7 +129,7 @@ export default {
         travelMode: google.maps.TravelMode['DRIVING']     // There are multiple travel mode such as biking walking
       }, function(response, status) {
         if (status == 'OK') {
-          self.route = response
+          self.local_route = response
           self.directionsDisplay.setDirections(response)
         } else {
           window.alert('Directions request failed due to ' + status)
@@ -140,7 +140,7 @@ export default {
     calculateAndDisplayRouteCaseStudy() {
       let self = this
       /* eslint-disable */
-      self.route = CaseStudyDirection
+      self.local_route = CaseStudyDirection
       self.directionsDisplay.setDirections(CaseStudyDirection)
       /* eslint-enable */
     },
@@ -158,25 +158,11 @@ export default {
   },
   watch: {
     local_center(val) {
-      console.log(val)
       this.$emit('update:center', val)
     },
-    origin_obj(val) {
-      if (!_.isEmpty(val)) {
-        if (!_.isEmpty(this.destination_obj)) {
-          this.dsiplayRouting(val, this.destination_obj)
-        }
-      }
-    },
-    destination_obj(val) {
-      if (!_.isEmpty(val)) {
-        if (!_.isEmpty(this.origin_obj)) {
-          this.dsiplayRouting(this.origin_obj, this.destination_obj)
-        }
-      }
-    },
-    geojson_data(val) {
-      this.plotGeoJson(val)
+    local_route(val) {
+      console.log(val)
+      this.$emit('update:route', val)
     }
   }
 }

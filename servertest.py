@@ -4,7 +4,6 @@ import rethinkdb as r
 import time
 import datetime as dt
 import asyncio
-import websockets
 
 ## import custom module
 from main_program.map_resource import ultil
@@ -12,18 +11,32 @@ from main_program.database import TrafficData
 from main_program import tools
 from main_program.server import TrafficServer
 
-##
 class TestTrafficServer(TrafficServer):
 
-    def _loop_in_thread(self, loop):
-        start_server = websockets.serve(self.handler, '0.0.0.0', 8765)
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(start_server)
-        loop.create_task(self.main_crawler())
-        loop.run_forever()
+    async def main_crawler(self):
+        """
+        """
+        self.crawler_running = True
+        while self.crawler_running:
+            print('start crawling')
+            self.traffic_data.store_matrix_json(self.traffic_matrix_list)
+            #self.traffic_data.insert_analytics_traffic_pattern('[33.880079, 33.648894, -84.485086, -84.311365]')
+
+            # time management, we want to execute script every 30 minutes
+            # in order to do that we need to calculate how many seconds we should sleep
+            current = dt.datetime.utcnow()
+            if current.minute < 30:
+                wait_seconds = 30*60 - current.minute*60 - current.second
+            else:
+                wait_seconds = 60*60 - current.minute*60 - current.second
+
+            print('crawling finished')
+
+            await asyncio.sleep(wait_seconds)    
 
 
 ## initialize traffic server
 traffic_server = TestTrafficServer(database_name= "Traffic", database_ip = "localhost")
+
+# start
 traffic_server.start()
-conn = traffic_server.traffic_data.conn
