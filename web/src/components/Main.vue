@@ -57,9 +57,6 @@ export default {
       title: 'Histraffic'
     }
   },
-  created() {
-    this.$store.dispatch('setWsConnection')
-  },
   mounted() {
     // pass
   }

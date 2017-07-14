@@ -96,6 +96,9 @@ export default {
     displayRouting(origin_obj, destination_obj) {
       /* eslint-disable */
       console.log(google)
+      if (this.directionsDisplay) {
+        this.directionsDisplay.setMap(null)
+      }
       this.directionsDisplay = new google.maps.DirectionsRenderer()
       this.directionsService = new google.maps.DirectionsService()
       this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
