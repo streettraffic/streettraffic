@@ -854,16 +854,16 @@ class TrafficData:
         inputs: 
         polygon: List, grid_point_distance: "int meters" = 1000 (those parameters will be used in Traffic_data.spatial_sampling_points())
         description: str (a brief description of the monitored area)
-        force: bool (In the case when the table already has a document with the same boudingbox_encoding, if force == True, we replace the existing document; if force == False, we raise an Exception)
+        force: bool (In the case when the table already has a document with the same polygon_encoding, if force == True, we replace the existing document; if force == False, we raise an Exception)
         
 
         This function will insert documents to table 'analytics_monitored_area'
         """
         ## analytics_monitored_area_id is automatically generated 
         sampling_points = TrafficData.spatial_sampling_points_polygon(polygon = polygon, grid_point_distance = grid_point_distance)
-        boudingbox_encoding = json.dumps(polygon)[:120]  # primary key's length is at most 127
+        polygon_encoding = json.dumps(polygon)[:120]  # primary key's length is at most 127
         analytics_monitored_area_insertion = {
-            "analytics_monitored_area_id": boudingbox_encoding,
+            "analytics_monitored_area_id": polygon_encoding,
             "description": description,
             "list_points": json.dumps(sampling_points),
             "flow_item_id_collection": []
@@ -884,10 +884,10 @@ class TrafficData:
                 print('get_nearest_road fail in set_traffic_patter_monitoring_area')
 
         ## determine if we are inserting or updating , if it exist, we delete it and insert a new one
-        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(boudingbox_encoding).run(self.conn)
+        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(polygon_encoding).run(self.conn)
         if analytics_monitored_area_doc:
             if force:
-                r.table('analytics_monitored_area').get(boudingbox_encoding).delete().run(self.conn)
+                r.table('analytics_monitored_area').get(polygon_encoding).delete().run(self.conn)
                 r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
             else:
                 raise Exception('monitored_area alerady exist, check your primary key')
