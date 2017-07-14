@@ -10,6 +10,7 @@ import json
 import asyncio
 import threading
 import datetime
+from shapely.geometry import Point, Polygon
 
 from .map_resource import ultil
 
@@ -714,8 +715,11 @@ class TrafficData:
     @staticmethod
     def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 1000) -> List:
         """
+        will be depreciated. 
+
+
         input: top: float, bottom: float, left: float, right: float,   where top and bottom are latitudes, left and right are longitudes
-        grid_point_distance: int = 5
+        grid_point_distance: int = 1000
 
         NOTICE THIS FUNCTION DOES **NOT** HANDLE any region passes lon90 lat180
 
@@ -762,6 +766,69 @@ class TrafficData:
         return sample_points
 
     @staticmethod
+    def spatial_sampling_points_polygon(polygon: List, grid_point_distance: "int meters" = 1000) -> List:
+        """
+        input: polygon: List (a list of coordinates)
+        grid_point_distance: int = 1000
+
+        example inputs:
+        polygon = [[34.9033898371637, -82.37823486328125],
+         [34.7963254002056, -82.26699829101562],
+         [34.70775131553934, -82.38304138183594],
+         [34.82564109038491, -82.50457763671875],
+         [34.9033898371637, -82.37823486328125]]
+
+        NOTICE THIS FUNCTION DOES **NOT** HANDLE any region passes lon90 lat180
+
+        example input: (41.49008, -71.312796, 42.49008, -72.3154396, grid_point_distance = 10)
+        currently only support latlon
+        the default grid_point_distance unit is meters
+
+        This funciton will take two coordinate and create a rectangle area ready for query
+        
+        For example:
+        ###^^^*^^^####  (in this example, top, bottom, left, right are denoted as *
+        #  *^^^^^*   #   and this function should generate tile to cover the
+        #  ^^^^^^^   #   area denoted by ^ and *)
+        ###^^*^^^####
+
+        Then, this function will create a even distribution of query points based on grid_point_distance
+
+        For example:
+        ###^$^$^$*####  (in this example, the query point are denoted as $)
+        #  ^^^^^^^   #   
+        #  ^$^$^$^   #   
+        #  ^^^^^^^   #        
+        ###*$^$^$^####
+
+        Finally, we are going to query the nearst road around $ and return a list of road_data_id related to those points
+        """
+        top = max(polygon, key = lambda item: item[0])[0]
+        bottom = min(polygon, key = lambda item: item[0])[0]
+        right = max(polygon, key = lambda item: item[1])[1]
+        left = min(polygon, key = lambda item: item[1])[1]
+        shapely_polygon = Polygon(polygon)
+
+        horizontal_distance = ultil.get_distance((top, left), (top, right))  
+        horizontal_divide_factor = int(horizontal_distance / grid_point_distance)
+        horizontal_point_diff = right - left
+        horizontal_increment = horizontal_point_diff / horizontal_divide_factor
+
+        vertical_distance = ultil.get_distance((top, left), (bottom, left))
+        vertical_divide_factor = int(vertical_distance / grid_point_distance)
+        vertical_point_diff = top - bottom
+        vertical_increment = vertical_point_diff / vertical_divide_factor
+        print(horizontal_distance, vertical_distance)
+
+        sample_points = []
+        for i in range(horizontal_divide_factor):
+            for j in range(vertical_divide_factor):
+                if Point(bottom + vertical_increment * j, left + horizontal_increment * i).within(shapely_polygon):
+                    sample_points += [[bottom + vertical_increment * j, left + horizontal_increment * i]]
+
+        return sample_points
+
+    @staticmethod
     def format_list_points_for_display(list_points: List) -> str:
         """
         inputs: list_points: List
@@ -782,10 +849,10 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, top: float, bottom: float, left: float, right: float, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
+    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
         """
         inputs: 
-        top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 1000 (those parameters will be used in Traffic_data.spatial_sampling_points())
+        polygon: List, grid_point_distance: "int meters" = 1000 (those parameters will be used in Traffic_data.spatial_sampling_points())
         description: str (a brief description of the monitored area)
         force: bool (In the case when the table already has a document with the same boudingbox_encoding, if force == True, we replace the existing document; if force == False, we raise an Exception)
         
@@ -793,8 +860,8 @@ class TrafficData:
         This function will insert documents to table 'analytics_monitored_area'
         """
         ## analytics_monitored_area_id is automatically generated 
-        sampling_points = TrafficData.spatial_sampling_points(top=top, bottom=bottom, left=left, right=right, grid_point_distance = grid_point_distance)
-        boudingbox_encoding = json.dumps([top, bottom, left, right])
+        sampling_points = TrafficData.spatial_sampling_points_polygon(polygon = polygon, grid_point_distance = grid_point_distance)
+        boudingbox_encoding = json.dumps(polygon)[:120]  # primary key's length is at most 127
         analytics_monitored_area_insertion = {
             "analytics_monitored_area_id": boudingbox_encoding,
             "description": description,
@@ -832,6 +899,19 @@ class TrafficData:
 
 
         return analytics_monitored_area_insertion
+
+    def get_analytics_monitored_area_description_collection(self) -> List:
+        """
+        inputs: None
+
+        This function return a list of analytics_monitored_area description
+        """
+        description_stream = r.db('Traffic').table('analytics_monitored_area').get_field('description').run(self.conn)
+        description_collection = []
+        for description in description_stream:
+            description_collection += [description]
+
+        return description_collection
 
  
     def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
@@ -931,13 +1011,18 @@ class TrafficData:
             return None
         
 
-    def get_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str):
+    def get_analytics_traffic_pattern_between(self, 
+            date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_description: str, 
+            analytics_monitored_area_id: str = None):
         """
         inputs: 
         date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
 
         This function fetch all the analytics_traffic_pattern within the time range specified by date_start to date_end
         """
+        if not analytics_monitored_area_id:
+            analytics_monitored_area_id = r.table('analytics_monitored_area').get_all(analytics_monitored_area_description, index="description").get_field('analytics_monitored_area_id').run(self.conn).next()
+        print(analytics_monitored_area_id)
         ## First step: get all related crawled_id within the requested range: date_start to date_end
         date_start = parser.parse(date_start)
         date_end = parser.parse(date_end)

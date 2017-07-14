@@ -77,7 +77,7 @@ class TrafficServer:
 
                 elif message[0] == "getTrafficPattern":
                     print(message)
-                    traffic_pattern = self.traffic_data.get_analytics_traffic_pattern_between(message[1], message[2], '[33.880079, 33.648894, -84.485086, -84.311365]')
+                    traffic_pattern = self.traffic_data.get_analytics_traffic_pattern_between(message[1], message[2], analytics_monitored_area_description = message[3])
                     await websocket.send(json.dumps(traffic_pattern))
                     print('sent data')
 
@@ -91,6 +91,12 @@ class TrafficServer:
                     print("getMultipleDaysRouteTraffic")
                     route_traffic = self.traffic_data.get_historic_traffic_multiple_days(message[1], message[2])
                     await websocket.send(json.dumps(route_traffic))
+                    print('sent data')
+
+                elif message[0] == "getAnalyticsMonitoredAreaDescriptionCollection":
+                    print("getAnalyticsMonitoredAreaDescriptionCollection")
+                    analytics_monitored_area_description_collection = self.traffic_data.get_analytics_monitored_area_description_collection()
+                    await websocket.send(json.dumps(analytics_monitored_area_description_collection))
                     print('sent data')
             
             except websockets.exceptions.ConnectionClosed:

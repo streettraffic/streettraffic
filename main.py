@@ -6,8 +6,10 @@ from main_program.datafeed import DataFeed
 import json
 import rethinkdb as r
 import time
-import datetime
+import datetime as dt
+import asyncio
 from dateutil import parser
+
 
 
 ## Furman's coordinates is 34.9237° N, 82.4383° W
@@ -108,7 +110,30 @@ matrix1 = ultil.get_area_tile_matrix_url("traffic_json", [cor1, cor2], 14)
 #with open('test.json') as f:
 #    data = json.load(f)
 
-traffic_server = TrafficServer(database_name= "Traffic", database_ip = "localhost")
+class TestTrafficServer(TrafficServer):
+
+    async def main_crawler(self):
+        """
+        """
+        self.crawler_running = True
+        while self.crawler_running:
+            print('start crawling')
+            self.traffic_data.store_matrix_json(self.traffic_matrix_list)
+            #self.traffic_data.insert_analytics_traffic_pattern('[33.880079, 33.648894, -84.485086, -84.311365]')
+
+            # time management, we want to execute script every 30 minutes
+            # in order to do that we need to calculate how many seconds we should sleep
+            current = dt.datetime.utcnow()
+            if current.minute < 30:
+                wait_seconds = 30*60 - current.minute*60 - current.second
+            else:
+                wait_seconds = 60*60 - current.minute*60 - current.second
+
+            print('crawling finished')
+
+            await asyncio.sleep(wait_seconds)   
+
+traffic_server = TestTrafficServer(database_name= "Traffic", database_ip = "localhost")
 traffic_server.start()
 conn = traffic_server.traffic_data.conn
 
@@ -236,11 +261,11 @@ sampling_points_atlanta_plot = traffic_server.traffic_data.format_list_points_fo
 #x = traffic_server.traffic_data.set_traffic_patter_monitoring_area(top=33.880079, bottom=33.648894, left=-84.485086, right=-84.311365, description='test_atlanta', grid_point_distance=1000, testing=True, force=True)
 
 # analyzing traffic patter
-start = datetime.datetime(2017,6,27,0,0,0, tzinfo = r.make_timezone('00:00'))
-end = datetime.datetime(2017,6,27,23,0,0, tzinfo = r.make_timezone('00:00'))
-analytics_monitored_area_id = '[33.880079, 33.648894, -84.485086, -84.311365]'
-start_time_iso = "2017-06-23T04:00:00.000Z"
-end_time_iso = "2017-06-24T03:59:59.000Z"
+#start = datetime.datetime(2017,6,27,0,0,0, tzinfo = r.make_timezone('00:00'))
+#end = datetime.datetime(2017,6,27,23,0,0, tzinfo = r.make_timezone('00:00'))
+#analytics_monitored_area_id = '[33.880079, 33.648894, -84.485086, -84.311365]'
+#start_time_iso = "2017-06-23T04:00:00.000Z"
+#end_time_iso = "2017-06-24T03:59:59.000Z"
 #traffic_server.traffic_data.get_analytics_traffic_pattern_between(start_time_iso,end_time_iso, '[33.880079, 33.648894, -84.485086, -84.311365]')
 
 ## little benchmark
@@ -412,3 +437,4 @@ print("========================================")
 for item in combined_matrix:
     info_matrix = ultil.get_area_tile_matrix(item, 14, True)
     matrix_coverage(info_matrix)
+    

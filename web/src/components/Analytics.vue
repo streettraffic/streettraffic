@@ -3,6 +3,13 @@
     <v-flex xs8 class="my-3">
       <h6>Histraffic Analytics section</h6>
       <p>In this section, you can pick a date at the calendar below and the site will generate a graph of average jamming factor of the city you are monitoring</p>
+      <p>Now pick a city that we monitored</p>
+      <v-select
+        v-bind:items="analytics_monitored_area_description_collection"
+        v-model="selected_area_description"
+        label="Select"
+        class="input-group--focused"
+      ></v-select>
     </v-flex>
     <v-flex xs12 md6>
       <v-card>
@@ -37,6 +44,8 @@ export default {
   name: 'Analytics',
   data: function () {
     return {
+      selected_area_description: null,
+      analytics_monitored_area_description_collection: [],
       data: {
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         series: [
@@ -65,11 +74,12 @@ export default {
         This funciton will request the traffic pattern of this date from '2017-5-23 0:00' to '2017-5-23 23:59'
         with respect to local time. Then use the traffic pattern data to build a chart
       */
+      console.log('getTrafficPattern')
       let self = this
       let day_start = new Date(this.datePicker + 'T00:00')
       let day_end = new Date(this.datePicker + 'T23:59')
       console.log(day_start)
-      this.$store.state.ws.send(JSON.stringify(['getTrafficPattern', day_start.toISOString(), day_end.toISOString()]))
+      this.$store.state.ws.send(JSON.stringify(['getTrafficPattern', day_start.toISOString(), day_end.toISOString(), this.selected_area_description]))
       this.$store.state.ws.onmessage = function(event) {
         let traffic_pattern = JSON.parse(event.data)
         let time = null
@@ -90,7 +100,7 @@ export default {
           datasets: [{
             label: 'Jamming Factor',
             data: data,
-            backgroundColor: colors[0].concat(colors[1]).concat(colors[2]).concat(colors[3]).concat(colors[4]).concat(colors[5]).concat(colors[6]).concat(colors[7]),
+            backgroundColor: Array(data.length).fill('#3498db'),
             borderWidth: 1
           }]
         },
@@ -121,7 +131,12 @@ export default {
     this.buildChart([], [])
   },
   created() {
-    // pass
+    let self = this
+    this.$store.state.ws.send(JSON.stringify(['getAnalyticsMonitoredAreaDescriptionCollection']))
+    this.$store.state.ws.onmessage = function (event) {
+      self.analytics_monitored_area_description_collection = JSON.parse(event.data)
+      console.log(self.analytics_monitored_area_description_collection)
+    }
   }
 }
 </script>
