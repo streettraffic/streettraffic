@@ -30,10 +30,51 @@
         </div>
         <v-btn primary @click.native="current_step = 3;select_routes()" light>Select Them</v-btn>
       </v-stepper-content>
-      <v-stepper-step step="3" v-bind:complete="current_step > 3" editable>Select a desired start date, end date, start time, and end time</v-stepper-step>
+      <v-stepper-step step="3" v-bind:complete="current_step > 3" editable>Select a time interval</v-stepper-step>
       <v-stepper-content step="3">
         <div class="mb-5">
-          For Example, if the start date is 2017-07-05, end date is 2017-07-13, start time is 09:00, and end time is 12:00, our program would pull the traffic data from 09:00 to 12:00 on each day bewteen 2017-07-05 and 2017-07-13
+          What is the time interval of the day that intrigues/annoys you the most? For example, you could choose the rush hours from 8:00 to 10:00
+          <br></br>
+          <v-menu
+            lazy
+            :close-on-content-click="false"
+            v-model="timeStartPicerMenu"
+            offset-y
+            :nudge-left="40"
+          >
+            <v-text-field
+              slot="activator"
+              label="Start Time"
+              v-model="timeStartPicer"
+              prepend-icon="access_time"
+              readonly
+            ></v-text-field>
+            <v-time-picker v-model="timeStartPicer" autosave format="24hr"></v-time-picker>
+          </v-menu>
+          <v-menu
+            lazy
+            :close-on-content-click="false"
+            v-model="timeEndPicerMenu"
+            offset-y
+            :nudge-left="40"
+          >
+            <v-text-field
+              slot="activator"
+              label="End Time"
+              v-model="timeEndPicer"
+              prepend-icon="access_time"
+              readonly
+            ></v-text-field>
+            <v-time-picker v-model="timeEndPicer" autosave format="24hr"></v-time-picker>
+          </v-menu>
+        </div>
+        <v-btn primary @click.native="current_step = 4" light>Continue</v-btn>
+        
+      </v-stepper-content>
+      <v-stepper-step step="4" v-bind:complete="current_step > 3" editable>Choose a date interval</v-stepper-step>
+      <v-stepper-content step="4">
+        <div class="mb-5">
+          Now that you have selected the time interval of day, you can query the that interval for multiple dates. Pick a start date and an end data.
           <br></br>
           <v-menu
             lazy
@@ -73,41 +114,9 @@
             <v-date-picker v-model="dateEndPicker" no-title scrollable autosave>
             </v-date-picker>
           </v-menu>
-          <v-menu
-            lazy
-            :close-on-content-click="false"
-            v-model="timeStartPicerMenu"
-            offset-y
-            :nudge-left="40"
-          >
-            <v-text-field
-              slot="activator"
-              label="Start Time"
-              v-model="timeStartPicer"
-              prepend-icon="access_time"
-              readonly
-            ></v-text-field>
-            <v-time-picker v-model="timeStartPicer" autosave format="24hr"></v-time-picker>
-          </v-menu>
-          <v-menu
-            lazy
-            :close-on-content-click="false"
-            v-model="timeEndPicerMenu"
-            offset-y
-            :nudge-left="40"
-          >
-            <v-text-field
-              slot="activator"
-              label="End Time"
-              v-model="timeEndPicer"
-              prepend-icon="access_time"
-              readonly
-            ></v-text-field>
-            <v-time-picker v-model="timeEndPicer" autosave format="24hr"></v-time-picker>
-          </v-menu>
         </div>
         <v-dialog v-model="retrieving_dialog" persistent>
-          <v-btn primary slot="activator" @click.native="current_step = 4; select_time()" light>Query Data</v-btn>
+          <v-btn primary slot="activator" @click.native="current_step = 5; select_time()" light>Query Data</v-btn>
           <v-card>
             <v-card-row>
               <v-card-title>Retrieving data from the server</v-card-title>
@@ -119,8 +128,8 @@
         </v-dialog>
         
       </v-stepper-content>
-      <v-stepper-step step="4">View setup instructions</v-stepper-step>
-      <v-stepper-content step="4">
+      <v-stepper-step step="5">View setup instructions</v-stepper-step>
+      <v-stepper-content step="5">
         <div class="mb-5">
           Great! Now you have query your first data, if you want to try a different time range, hit the try again button.
         </div>

@@ -115,11 +115,6 @@ export default {
     this.HomeMap = this.$refs.HomeMap
     this.HomeSlider = this.$refs.HomeSlider
     /* eslint-enable */
-  },
-  computed: {
-    historic_batch() {
-      return this.$store.state.historic_batch
-    }
   }
 }
 </script>

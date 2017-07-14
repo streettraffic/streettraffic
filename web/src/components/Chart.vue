@@ -50,7 +50,7 @@ export default {
           datasets: [{
             label: 'Jamming Factor',
             data: data,
-            backgroundColor: colors[0].concat(colors[1]).concat(colors[2]).concat(colors[3]).concat(colors[4]).concat(colors[5]).concat(colors[6]).concat(colors[7]),
+            backgroundColor: Array(this.data.length).fill('#3498db'),
             borderWidth: 1
           }]
         },
