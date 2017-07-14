@@ -8,6 +8,7 @@ export const setWsConnection = function ({ commit, state, dispatch }) {
     commit(types.SET_WS_CONNECTION_STATUS, temp_ws)
     dispatch('getHistoricBatch')
   }
+  temp_ws.onclose = () => { alert('Opps, something went wrong, you have disconnected from the server. Try to refresh') }
 }
 
 export const getHistoricBatch = function ({ commit, state }) {
