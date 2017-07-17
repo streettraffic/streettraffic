@@ -1,21 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Main from '@/components/Main'
+import Landing from '@/components/Landing'
 
 Vue.use(Router)
 
 const Home = () => ({
   // The component to load. Should be a Promise
   component: import('@/components/Home')
-})
-
-const Landing = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Landing')
-})
-
-const Main = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Main')
 })
 
 const Analytics = () => ({
@@ -26,6 +18,11 @@ const Analytics = () => ({
 const Polygon = () => ({
   // The component to load. Should be a Promise
   component: import('@/components/Polygon')
+})
+
+const RouteLab = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/RouteLab')
 })
 
 const router = new Router({
@@ -59,6 +56,14 @@ const router = new Router({
           component: Analytics,
           meta: {
             title: 'Histraffic Analytics'
+          }
+        },
+        {
+          path: 'RouteLab',
+          name: 'RouteLab',
+          component: RouteLab,
+          meta: {
+            title: 'Histraffic RouteLab'
           }
         },
         {

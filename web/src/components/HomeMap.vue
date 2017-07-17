@@ -95,7 +95,6 @@ export default {
     },
     displayRouting(origin_obj, destination_obj) {
       /* eslint-disable */
-      console.log(google)
       if (this.directionsDisplay) {
         this.directionsDisplay.setMap(null)
       }
@@ -107,7 +106,6 @@ export default {
     },
     displayRoutingCaseStudy() {
       /* eslint-disable */
-      console.log(google)
       this.directionsDisplay = new google.maps.DirectionsRenderer()
       this.directionsService = new google.maps.DirectionsService()
       this.directionsDisplay.setMap(this.$refs.mymap.$mapObject)
@@ -120,7 +118,6 @@ export default {
       origin_obj = {lat: 33.736818, lng: -84.394652}
       destination_obj = {lat: 33.769922, lng: -84.377616}
       */
-      console.log(origin_obj, destination_obj)
       let self = this
       /* eslint-disable */
       self.directionsService.route({
@@ -164,7 +161,6 @@ export default {
       this.$emit('update:center', val)
     },
     local_route(val) {
-      console.log(val)
       this.$emit('update:route', val)
     }
   }
