@@ -66,6 +66,7 @@ export default {
       // HomeMap related states
       center: {lat: 33.7601, lng: -84.37429},
       route: {},
+      current_origin_destination: {},
       current_route: {},
       // References to components
       RouteLabStepper: null,
@@ -81,13 +82,15 @@ export default {
         self.HomeMap.displayRouting(item[0], item[1])
         console.log('displayed', item[0], item[1])
         await self.sleep(1000)  // wait the direction to load 
-        self.current_route = item
+        self.current_origin_destination = item
+        self.current_route = self.route
         await self.RouteLabSlider.getMultipleDaysRouteTraffic(dateStartPicker, dateEndPicker, timeStartPicer, timeEndPicer)
       }
       self.RouteLabStepper.finished_querying_data()
     },
     RouteLabSlider_ChartFinished() {
       this.traffic_pattern.push({
+        origin_destination: this.current_origin_destination,
         route: this.current_route,
         chartLabel: this.RouteLabSlider.chartLabel,
         chartData: this.RouteLabSlider.chartData

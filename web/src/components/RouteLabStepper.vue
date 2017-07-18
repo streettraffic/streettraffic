@@ -108,7 +108,7 @@
             </v-date-picker>
           </v-menu>
         </div>
-        <v-dialog v-model="retrieving_dialog" width="600px">
+        <v-dialog v-model="retrieving_dialog" width="600px" persistent>
           <v-btn primary slot="activator" @click.native="current_step = 5; select_time()" light>Query Data</v-btn>
           <v-card>
             <v-card-row>
