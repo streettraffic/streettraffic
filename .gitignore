@@ -8,3 +8,9 @@ main_program/tests/__init__\.py
 *.pyc
 
 main_program/tests/\.cache/v/cache/lastfailed
+
+build/*
+
+main_program.egg-info/*
+
+dist/*
