@@ -79,7 +79,7 @@ df['distance (in meters)'] = [overview_path_distance(item['route']['routes'][0][
 for i in range(len(route_traffic_pattern_collection[0]['chartLabel'])):
     df[route_traffic_pattern_collection[0]['chartLabel'][i]] = [item['chartData'][i] for item in route_traffic_pattern_collection]
 
-df.sort_values(by="distance")
+df.sort_values(by='distance (in meters)')
 #
 #print(df.mean(axis=1))
 #print(df.std())
