@@ -154,7 +154,7 @@ class Utility:
         """
         polygon_tile_points = []
         for item in polygon_ordered_coordinates:
-            polygon_tile_points += [self.get_tile(*item, zoom)]
+            polygon_tile_points += [Utility.get_tile(*item, zoom)]
         polygon_tile_points += [polygon_tile_points[0]]
         polygon = Path(polygon_tile_points)
         if plot_polygon:
@@ -179,7 +179,7 @@ class Utility:
         This function takes the coordinates from *args and calculate their tile (col, row),
         then it generate a matrix of tiles to cover the square defined by those coordinates.
 
-        If use_polygon == True, then we generate a polygon given by produce_polygon,
+        If use_polygon == True, then we generate a polygon given by self.produce_polygon,
         and further return the area_tiles that are **inside**(not including boundry) the polygon
 
         ###^^^^^^*####  (in this example, two coordinates are denoted as *
@@ -202,7 +202,7 @@ class Utility:
                 matrix.iloc[row,col] = (left_col + col, top_row + row)
 
         if use_polygon:
-            polygon = produce_polygon(list_points, zoom, plot_polygon = False)
+            polygon = Utility.produce_polygon(list_points, zoom, plot_polygon = False)
             for row in range(len(matrix)):
                 for col in range(len(matrix.iloc[0])):
                     if matrix.iloc[row,col] in tiles:  # make sure the polygon points are covered

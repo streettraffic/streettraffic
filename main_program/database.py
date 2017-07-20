@@ -30,6 +30,7 @@ class TrafficData:
         else:
             r.db_create(database_name).run(self.conn)
             self.conn.use(database_name)
+            self.helper_create_tables()
         try:
             self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
         except:

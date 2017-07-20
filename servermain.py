@@ -6,7 +6,7 @@ import datetime as dt
 import asyncio
 
 ## import custom module
-from main_program.map_resource import ultil
+from main_program.map_resource.utility import Utility
 from main_program.database import TrafficData
 from main_program import tools
 from main_program.server import TrafficServer
