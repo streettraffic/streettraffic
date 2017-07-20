@@ -18,7 +18,13 @@
             <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
             <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
             <div class="jammingFactorChart">
-              <Chart v-if="chartFinished" :data="chartData" :labels="chartLabel" :chartTitle="'Average Jamming Factor at Each Time Period'"></Chart>
+              <Chart 
+                v-if="chartFinished" 
+                :data="chartData" 
+                :labels="chartLabel" 
+                :chartTitle="'Average Jamming Factor at Each Time Period'"
+                chartId="instant">
+              </Chart>
             </div>
           </div>
         </v-card-row>

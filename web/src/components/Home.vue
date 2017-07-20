@@ -101,7 +101,6 @@ export default {
     },
     test(){
       /* eslint-disable */
-      // this.calculateAverageJammingFactorForEachTime()
       console.log('haha')
       /* eslint-enable */
     }
