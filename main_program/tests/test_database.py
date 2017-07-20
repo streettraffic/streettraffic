@@ -13,11 +13,20 @@ import asyncio
 from unittest import mock
 import datetime
 
-from ..map_resource import ultil
+from ..map_resource.utility import Utility
 from .. import tools
 from ..database import TrafficData
 from .. import database
 from ..datafeed import DataFeed
+
+settings = {
+    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+}
+
+util = Utility(settings)
 
 
 class _iter:
@@ -136,8 +145,8 @@ def test_store_matrix_json(mocked_insert_json_data, mocked_run):
     mocked_run.side_effect = mocked_run_side_effect # pass the custome mocked_run funtion to mocked_run
     cor1 = (33.728999, -84.395856)#(33.766764, -84.409533)
     cor2 = (33.775902, -84.363917)#(33.740003, -84.368978)
-    info = ultil.get_area_tile_matrix([cor1, cor2], 14)
-    matrix1 = ultil.get_area_tile_matrix_url("traffic_json", [cor1, cor2], 14)
+    info = util.get_area_tile_matrix([cor1, cor2], 14)
+    matrix1 = util.get_area_tile_matrix_url("traffic_json", [cor1, cor2], 14)
 
     traffic_data.store_matrix_json([matrix1])
     assert mocked_insert_json_data.call_count == 6 

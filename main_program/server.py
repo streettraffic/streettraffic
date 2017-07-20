@@ -8,6 +8,7 @@ from dateutil import parser
 
 ## import our modules
 from .database import TrafficData
+from .map_resource.utility import Utility
 
 class TrafficServer:
 
