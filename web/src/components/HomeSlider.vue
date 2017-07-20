@@ -18,7 +18,20 @@
             <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
             <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
             <div class="jammingFactorChart">
-              <Chart v-if="chartFinished" :data="chartData" :labels="chartLabel" :chartTitle="'Average Jamming Factor at Each Time Period'"></Chart>
+              <Chart 
+                v-if="chartFinished" 
+                :data="chartData" 
+                :labels="chartLabel" 
+                :chartTitle="'Average Jamming Factor at Each Instant'"
+                chartId="instant">
+              </Chart>
+              <Chart 
+                v-if="chartFinished" 
+                :data="intervalChartData" 
+                :labels="intervalChartLabel" 
+                :chartTitle="'Average Jamming Factor for Each Interval of Travel'"
+                chartId="interval">
+              </Chart>
             </div>
           </div>
         </v-card-row>
@@ -53,6 +66,8 @@ export default {
       averageJammingFacotr: null,
       chartLabel: [],
       chartData: [],
+      intervalChartLabel: [],
+      intervalChartData: [],
       chartFinished: false
     }
   },
@@ -113,6 +128,7 @@ export default {
         self.$emit('HomeSlider_finishedQueryingData')
         self.$emit('HomeSlider_displayGeoJson')
         self.calculateAverageJammingFactorForEachTime()
+        self.calculateAverageJammingFactorForEachInterval(1.1)
       }
     },
     displaySelectedHistoric(value) {
@@ -134,7 +150,7 @@ export default {
       })
       return averageJammingFacotr
     },
-    calculateAverageJammingFactorForEachTime(){
+    calculateAverageJammingFactorForEachTime() {
       let self = this
       let eachTimeData = new Map()
       let currentTime
@@ -149,8 +165,6 @@ export default {
       })
       console.log(eachTimeData)
       let total 
-      self.chartData = []
-      self.chartLabel = []
       for (let [timePoint, jammingFactorArray] of eachTimeData) {
         self.chartLabel.push(timePoint)
         total = 0
@@ -163,6 +177,31 @@ export default {
       console.log(self.chartData)
       self.chartFinished = true
       self.$emit('HomeSlider_ChartFinished')
+    },
+    calculateAverageJammingFactorForEachInterval(duration_enlarge_factor) {
+      let self = this
+      // first, estimate the duration of the journey. The unit is seconds.
+      let journey_duration = self.route['routes'][0]['legs'][0]['duration']['value'] * duration_enlarge_factor
+      console.log(journey_duration)
+      // notice chartLabel are 30 minutes away from each other.
+      let index_skip = Math.ceil(journey_duration / (30 * 60))
+      if (index_skip > self.chartLabel.length - 1){
+        // nothing we can do
+      }
+      else {
+        let sum
+        for (let i = 0; i < self.chartLabel.length - index_skip; i++) {
+          self.intervalChartLabel.push(self.chartLabel[i] + ' to ' + self.chartLabel[i + index_skip])
+          sum = 0
+          for (let jammingFactor of self.chartData.slice(i, i + index_skip)) {
+            sum += jammingFactor
+          }
+          self.intervalChartData.push(sum / index_skip)
+        }
+      }
+      console.log('calculateAverageJammingFactorForEachInterval')
+      console.log(self.intervalChartLabel)
+      console.log(self.intervalChartData)
     }
   }
 }

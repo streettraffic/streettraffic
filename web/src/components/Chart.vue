@@ -8,7 +8,7 @@
     </v-card-row>
     <v-card-text>
       <v-card-row height="auto" center>
-        <canvas id="myChart" width="400" height="400"></canvas>
+        <canvas :id="chartId" width="400" height="400"></canvas>
       </v-card-row>
     </v-card-text>
   </v-card>
@@ -35,11 +35,14 @@ export default {
     },
     chartTitle: {
       type: String
+    },
+    chartId: {
+      type: String
     }
   },
   methods: {
     buildChart(labels, data) {
-      let ctx = document.getElementById('myChart').getContext('2d')
+      let ctx = document.getElementById(this.chartId).getContext('2d')
       if (this.chart) {
         this.chart.destroy()
       }
