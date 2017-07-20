@@ -25,6 +25,11 @@ const RouteLab = () => ({
   component: import('@/components/RouteLab')
 })
 
+const CaseStudy = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/CaseStudy')
+})
+
 const router = new Router({
   routes: [
     {
@@ -72,6 +77,14 @@ const router = new Router({
           component: Polygon,
           meta: {
             title: 'Histraffic Polygon'
+          }
+        },
+        {
+          path: 'CaseStudy',
+          name: 'CaseStudy',
+          component: CaseStudy,
+          meta: {
+            title: 'Histraffic CaseStudy'
           }
         }
       ]

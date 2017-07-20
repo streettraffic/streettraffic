@@ -18,3 +18,5 @@ dist/*
 main_program/research/multiple_routes_analysis/\.ipynb_checkpoints/
 
 main_program/research/main/\.ipynb_checkpoints/
+
+Profile\.prof

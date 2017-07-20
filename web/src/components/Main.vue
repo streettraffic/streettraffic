@@ -52,7 +52,8 @@ export default {
         { icon: 'home', title: 'Home', routerAddress: '/Main' },
         { icon: 'insert_chart', title: 'Analytics', routerAddress: '/Main/Analytics' },
         { icon: 'create', title: 'Polygon', routerAddress: '/Main/Polygon' },
-        { icon: 'build', title: 'RouteLab', routerAddress: '/Main/RouteLab' }
+        { icon: 'build', title: 'RouteLab', routerAddress: '/Main/RouteLab' },
+        { icon: 'build', title: 'CaseStudy', routerAddress: '/Main/CaseStudy' }
       ],
       miniVariant: false,
       title: 'Histraffic'
