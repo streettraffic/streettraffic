@@ -6,10 +6,10 @@ import datetime as dt
 import asyncio
 
 ## import custom module
-from main_program.map_resource import ultil
-from main_program.database import TrafficData
-from main_program import tools
-from main_program.server import TrafficServer
+from streettraffic.map_resource import ultil
+from streettraffic.database import TrafficData
+from streettraffic import tools
+from streettraffic.server import TrafficServer
 
 ##
 class TestTrafficServer(TrafficServer):

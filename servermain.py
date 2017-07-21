@@ -6,10 +6,10 @@ import datetime as dt
 import asyncio
 
 ## import custom module
-from main_program.map_resource.utility import Utility
-from main_program.database import TrafficData
-from main_program import tools
-from main_program.server import TrafficServer
+from streettraffic.map_resource.utility import Utility
+from streettraffic.database import TrafficData
+from streettraffic import tools
+from streettraffic.server import TrafficServer
 
 ##
 class TestTrafficServer(TrafficServer):
@@ -37,6 +37,6 @@ class TestTrafficServer(TrafficServer):
 
 
 ## initialize traffic server
-traffic_server = TestTrafficServer(database_name= "Traffic", database_ip = "localhost")
+traffic_server = TestTrafficServer(database_name="Traffic", database_ip="localhost")
 traffic_server.start()
 conn = traffic_server.traffic_data.conn
