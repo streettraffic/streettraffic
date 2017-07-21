@@ -663,8 +663,16 @@ class TrafficData:
         return crawled_batch_id_collection
 
 
-    def get_historic_traffic_between(self, routing_info: Dict, date_start: 'str ISO format', date_end: 'str ISO foramt', use_overview: bool = True) -> None:
+    def get_historic_traffic_between(self, routing_info: Dict, date_start: str, date_end: str, use_overview: bool = True) -> None:
         """
+        inputs:    
+            routing_info: Dict, 
+            date_start: str ('date time ISO format'), 
+            date_end: str ('str ISO format'), 
+            use_overview: bool = True
+
+
+        'str ISO format'
         Given a routing_info, this function will get a historic_traffic for each crawled_batch_id between date_start and date_end.
         """
         crawled_batch_id_collection = self.get_crawled_batch_id_between(date_start = date_start, date_end = date_end)
@@ -714,13 +722,13 @@ class TrafficData:
     """
 
     @staticmethod
-    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: "int meters" = 1000) -> List:
+    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: int = 1000) -> List:
         """
         will be depreciated. 
 
 
         input: top: float, bottom: float, left: float, right: float,   where top and bottom are latitudes, left and right are longitudes
-        grid_point_distance: int = 1000
+        grid_point_distance: int = 1000 (default unit: meters)
 
         NOTICE THIS FUNCTION DOES **NOT** HANDLE any region passes lon90 lat180
 

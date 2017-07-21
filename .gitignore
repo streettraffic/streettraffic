@@ -4,7 +4,7 @@ build/*
 
 dist/*
 
-main_program.egg-info/*
+streettraffic.egg-info/*
 
 # Various cache 
 
@@ -15,5 +15,7 @@ __pycache__
 \.ipynb_checkpoints
 
 \.cache
+
+\.vscode
 
 Profile\.prof

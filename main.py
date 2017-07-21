@@ -1,8 +1,8 @@
-from main_program.map_resource import ultil
-from main_program.database import TrafficData
-from main_program import tools
-from main_program.server import TrafficServer
-from main_program.datafeed import DataFeed
+from streettraffic.map_resource import ultil
+from streettraffic.database import TrafficData
+from streettraffic import tools
+from streettraffic.server import TrafficServer
+from streettraffic.datafeed import DataFeed
 import json
 import rethinkdb as r
 import time
