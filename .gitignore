@@ -1,24 +1,19 @@
-
-main_program/__init__\.py
-
-main_program/HERE_map/__init__\.py
-
-main_program/tests/__init__\.py
-
-*.pyc
-
-main_program/tests/\.cache/v/cache/lastfailed
+# build and dist
 
 build/*
 
-main_program.egg-info/*
-
 dist/*
 
-main_program/research/multiple_routes_analysis/\.ipynb_checkpoints/
+main_program.egg-info/*
 
-main_program/research/main/\.ipynb_checkpoints/
+# Various cache 
+
+__pycache__
+
+\.mypy_cache
+
+\.ipynb_checkpoints
+
+\.cache
 
 Profile\.prof
-
-\.cache/v/cache/lastfailed
