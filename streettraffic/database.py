@@ -747,7 +747,7 @@ class TrafficData:
     """
 
     @staticmethod
-    def spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: int = 1000) -> List:
+    def _spatial_sampling_points(top: float, bottom: float, left: float, right: float, grid_point_distance: int = 1000) -> List:
         """
         will be depreciated. 
 
@@ -800,42 +800,53 @@ class TrafficData:
         return sample_points
 
     @staticmethod
-    def spatial_sampling_points_polygon(polygon: List, grid_point_distance: "int meters" = 1000) -> List:
-        """
-        input: polygon: List (a list of coordinates)
-        grid_point_distance: int = 1000
-
-        example inputs:
-        polygon = [[34.9033898371637, -82.37823486328125],
-         [34.7963254002056, -82.26699829101562],
-         [34.70775131553934, -82.38304138183594],
-         [34.82564109038491, -82.50457763671875],
-         [34.9033898371637, -82.37823486328125]]
-
-        NOTICE THIS FUNCTION DOES **NOT** HANDLE any region passes lon90 lat180
-
-        example input: (41.49008, -71.312796, 42.49008, -72.3154396, grid_point_distance = 10)
-        currently only support latlon
-        the default grid_point_distance unit is meters
-
-        This funciton will take two coordinate and create a rectangle area ready for query
+    def spatial_sampling_points_polygon(polygon: List, grid_point_distance: int = 1000) -> List:
+        """This function generates a list of sample points that are grid_point_distance away
+        from each other within the polygon 
         
-        For example:
-        ###^^^*^^^####  (in this example, top, bottom, left, right are denoted as *
-        #  *^^^^^*   #   and this function should generate tile to cover the
-        #  ^^^^^^^   #   area denoted by ^ and *)
-        ###^^*^^^####
+        For example, let's use * to denote those points that construct the polygon:
 
-        Then, this function will create a even distribution of query points based on grid_point_distance
+        :: 
 
-        For example:
-        ###^$^$^$*####  (in this example, the query point are denoted as $)
-        #  ^^^^^^^   #   
-        #  ^$^$^$^   #   
-        #  ^^^^^^^   #        
-        ###*$^$^$^####
+            ###^^^*^^^####  (in this example, )
+            #  *^^^^^*   #
+            #  ^^^^^^^   #
+            ###^^*^^^^####
 
-        Finally, we are going to query the nearst road around $ and return a list of road_data_id related to those points
+        Then, this function will create a even distribution of query points based on grid_point_distance. For example:
+
+        ::
+
+            ###^$^$^$*####  (in this example, the sample point are denoted as $)
+            #  ^^^^^^^   #   
+            #  ^$^$^$^   #   
+            #  ^^^^^^^   #        
+            ###*$^$^$^####
+
+        Args:
+            polygon (List): a list of latlon coordiantes
+            grid_point_distance (int): how far away is each point to each other (this is probably very bad english)
+
+        Returns:
+            List: a list of sample points within the polygon
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> polygon = [[33.75931214236421, -84.41242218017578], 
+                [33.77030054809328, -84.37989234924316], 
+                [33.75731409904876, -84.36701774597168],
+                [33.745110752457876, -84.37491416931152],
+                [33.74368334701714, -84.40461158752441],
+                [33.75931214236421, -84.41242218017578]]
+            >>> traffic_server.traffic_data.spatial_sampling_points_polygon(polygon)
+            [[33.75699194755521, -84.40107107162476],
+            [33.75699194755521, -84.38971996307373],
+            [33.75699194755521, -84.3783688545227]]
+            >>> # these are the sampling points that are 1000 meters away from each other
+            >>> # and all of them are within the specified polygon
+
+        Note:
+            This function does **NOT** handle any region passes lon90 lat180
         """
         top = max(polygon, key = lambda item: item[0])[0]
         bottom = min(polygon, key = lambda item: item[0])[0]
@@ -852,7 +863,6 @@ class TrafficData:
         vertical_divide_factor = int(vertical_distance / grid_point_distance)
         vertical_point_diff = top - bottom
         vertical_increment = vertical_point_diff / vertical_divide_factor
-        print(horizontal_distance, vertical_distance)
 
         sample_points = []
         for i in range(horizontal_divide_factor):
@@ -864,14 +874,30 @@ class TrafficData:
 
     @staticmethod
     def format_list_points_for_display(list_points: List) -> str:
-        """
-        inputs: list_points: List
+        """This function format the example inputs into a string that can be used
+        to plot in https://www.darrinward.com/lat-long/
 
-        example inputs:
-        [(33.732724942, -84.409469),
-        (33.732727471, -84.409469)]
+        Args:
+            list_points (List): a list of latlon coordiantes
 
-        This function format the example inputs into a string that can be used in https://www.darrinward.com/lat-long/
+        Returns:
+            str: print the string and plot it in 
+            https://www.darrinward.com/lat-long/
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> polygon = [[33.75931214236421, -84.41242218017578], 
+                [33.77030054809328, -84.37989234924316], 
+                [33.75731409904876, -84.36701774597168],
+                [33.745110752457876, -84.37491416931152],
+                [33.74368334701714, -84.40461158752441],
+                [33.75931214236421, -84.41242218017578]]
+            >>> output = traffic_server.traffic_data.spatial_sampling_points_polygon(polygon)
+            >>> print(traffic_server.traffic_data.format_list_points_for_display(output))
+            use https://www.darrinward.com/lat-long/ for plotting
+            33.75699194755521,-84.40107107162476
+            33.75699194755521,-84.38971996307373
+            33.75699194755521,-84.3783688545227
         """
         formatted_string = ""
         for point in list_points:
@@ -884,14 +910,23 @@ class TrafficData:
         return formatted_string
 
     def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
-        """
-        inputs: 
-        polygon: List, grid_point_distance: "int meters" = 1000 (those parameters will be used in Traffic_data.spatial_sampling_points())
-        description: str (a brief description of the monitored area)
-        force: bool (In the case when the table already has a document with the same polygon_encoding, if force == True, we replace the existing document; if force == False, we raise an Exception)
+        """this function sample points within the polygon, store the nearest
+        ``flow_item`` in a list and store the information in 
+        ``analytics_monitored_area`` table. 
         
+        Args:
+            polygon (List): a list of latlon coordiantes
+            description (str): a description of the monitoring area. e.g 'Atlanta_polygon'
+            grid_point_distance (int): how far away is each point to each other.
+                The default value is set to 1000 meters
+            testing (List): for testing purposes only. If set True,
+                it prints out how many duplicate flow_item_id are there.
+                Default is set to False.
+            force (bool): whether to overide a analytics_monitored_area document
+                if force == False, we raise an Exception
 
-        This function will insert documents to table 'analytics_monitored_area'
+        Returns:
+            None
         """
         ## analytics_monitored_area_id is automatically generated 
         sampling_points = TrafficData.spatial_sampling_points_polygon(polygon = polygon, grid_point_distance = grid_point_distance)
