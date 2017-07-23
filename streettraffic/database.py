@@ -17,9 +17,21 @@ from .map_resource.utility import Utility
 
 class TrafficData:
 
+    """This class deals with traffic data interaction with database
+
+    Interaction include inserting traffic flow data from `HERE.com` and 
+    retriving them.
+
+    Attributes:
+        conn (connection): The connection to RethinkDB database
+        latest_crawled_batch_id (str): the latest crawled_batch_id of crawled_batch table
+
+    """
+
+
     def __init__(self, database_name: str = "Traffic", database_ip: str = None):
         """
-        This class establishes a connection towards the database
+        When initializing this class, establish a connection towards the database
         """
         if not database_ip:
             self.conn = r.connect('localhost', 28015)
@@ -37,18 +49,24 @@ class TrafficData:
             pass
 
     def insert_json_data(self, data: Dict, crawled_batch_id: str, testing = False) -> None:
-        """
-        inputs: data: Dict(json dictionary)
+        """This funciton will analyze a JSON raw data from 
+        Here.com and insert cooresponding documents. each documents
+        is associated with a ``crawled_batch_id``, which specifies
+        the time of documents retrieval. 
 
-        The function ...
+        Args:
+            data: Dict: The JSON raw data
+            crawled_batch_id: str: the id of `crawled_batch` table, it tells
+                us about the time of documents retrieval
 
-        We will try to avoid duplicate of flow_data document and road_data document
-
-        For documentation of the file format, refer to
-        http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
-
-        return: None, although if testing = True, we would return a tuple (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
-        to trace what have we inserted
+        Returns:
+            None, although if testing = True, we would return a tuple 
+            (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
+            to trace what have we inserted
+        
+        Note:
+            For documentation of the file format, refer to
+            http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
         """
         ## Testing purpose
         if testing:  
@@ -152,18 +170,24 @@ class TrafficData:
 
 
     def parse_SHP_values(self, value: List) -> List:
-        """
-        inputs: value: List(the ['SHP']['values'])
-        example inputs:
-        ["34.9495,-82.43912 34.94999,-82.4392 34.95139,-82.4394 "], where each point is 
-
-        This function convert the values into a list that conforms line specification of RethinkDB.
+        """This function convert the ``['SHP']['values']`` of the JSON raw data into a list that 
+        conforms line specification of RethinkDB.
+        
         More specifically, in RethinkDB every point has the **opposite** parameters: (long, lat) while our 
         data has point (lat, long). For more details,
         refer to https://rethinkdb.com/api/python/line/ and https://rethinkdb.com/api/javascript/point/
 
-        example outputs:
-        [[-82.43912, 34.9495], [-82.4392, 34.94999], [-82.4394, 34.95139]]
+        Args:
+            value: List: the ``['SHP']['values']`` of the JSON raw data
+
+        Returns:
+            List: a list of coordinates that is compliant with RethinkDB coordinates
+            specification
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> traffic_server.traffic_data.parse_SHP_values(["34.9495,-82.43912 34.94999,-82.4392 34.95139,-82.4394 "])
+            [[-82.43912, 34.9495], [-82.4392, 34.94999], [-82.4394, 34.95139]]
         """
         temp = value[0].split()
         result = []
@@ -178,13 +202,13 @@ class TrafficData:
         return result
     
     def read_traffic_data(self, url: str) -> Dict:
-        """
-        inputs: url: str(a url that has HERE traffic json file)
-        example inputs: https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc 
+        """This functios takes the input url and return its json object
 
-        This functios takes the input url and return its json object
+        Args:
+            url: str: a url that has HERE traffic json file
 
-        return :Dict(json dict)
+        Returns:
+            Dict: a parsed JSON file of the url
         """
         r = requests.get(url)
         if r.status_code == 204:  # no content
@@ -192,8 +216,7 @@ class TrafficData:
         return r.json()
 
     def helper_create_tables(self):
-        """
-        This is a helper function to create tables in rethinkDB
+        """This is a helper function to create default tables in rethinkDB
         """
         ## creating tables
         r.table_create('original_data', primary_key ='original_data_id').run(self.conn)
@@ -222,27 +245,32 @@ class TrafficData:
         # r.table('original_data').index_create('crawled_batch_id').run(self.conn)
         #r.table('original_data').index_create('crawled_batch_id').run(self.conn)
 
-    def store_matrix_json(self, matrix_list: List) -> None:
-        """
-        inputs: matrix: pd.DataFrame(a matrix of urls of json traffic information generated by Utility.get_area_tile_matrix_url())
-        example inputs:
-                                                           0  \
-        0  https://traffic.cit.api.here.com/traffic/6.2/f...   
-        1  https://traffic.cit.api.here.com/traffic/6.2/f...   
-        2  https://traffic.cit.api.here.com/traffic/6.2/f...   
-
-                                                           1  \
-        0  https://traffic.cit.api.here.com/traffic/6.2/f...   
-        1  https://traffic.cit.api.here.com/traffic/6.2/f...   
-        2  https://traffic.cit.api.here.com/traffic/6.2/f...   
-
-                                                           2  
-        0  https://traffic.cit.api.here.com/traffic/6.2/f...  
-        1  https://traffic.cit.api.here.com/traffic/6.2/f...  
-        2  https://traffic.cit.api.here.com/traffic/6.2/f...  
-
-        This function takes the matrix, download all the jsons in the matrix, store them in 
+    def store_matrix_json(self, matrix_list: pd.DataFrame) -> None:
+        """This function takes the matrix, download all the jsons in the matrix, store them in 
         the database
+
+        Args:
+            matrix_list: pd.DataFrame: a matrix of urls of json traffic information generated 
+                by ``Utility.get_area_tile_matrix_url()``
+
+        Returns:
+            None
+
+        Examples:
+            >>> df
+                                                               0  \\
+            0  https://traffic.cit.api.here.com/traffic/6.2/f...   
+            1  https://traffic.cit.api.here.com/traffic/6.2/f...   
+            2  https://traffic.cit.api.here.com/traffic/6.2/f...   
+                                                               1  \\
+            0  https://traffic.cit.api.here.com/traffic/6.2/f...   
+            1  https://traffic.cit.api.here.com/traffic/6.2/f...   
+            2  https://traffic.cit.api.here.com/traffic/6.2/f...   
+                                                               2  
+            0  https://traffic.cit.api.here.com/traffic/6.2/f...  
+            1  https://traffic.cit.api.here.com/traffic/6.2/f...  
+            2  https://traffic.cit.api.here.com/traffic/6.2/f...  
+            >>> # this df is an example input
         """
         # store info about matrix_list and when do we crawled them
         if len(matrix_list) == 0:
@@ -275,89 +303,48 @@ class TrafficData:
         self.latest_crawled_batch_id = r.table('crawled_batch').order_by(index = r.desc("crawled_timestamp")).limit(1).run(self.conn).next()['crawled_batch_id']
 
     def fetch_geojson_item(self, road_data_id: str, crawled_batch_id: str = None, calculate_traffic_color = True) -> Dict:
-        """
-        inputs: road_data_id: str(a primary key of road_data table), calculate_traffic_color = True
-
-        Notice the road_data table only stores the 'geometry' info of a geojson object.
-        An example data from road_data would be 
-
-        
-          {
-            "FC": 2,
-            "flow_item_id": "{\"DE\": \"University Ave/Exit 244\", \"LE\": 1.57367, \"PC\": 4117, \"QD\": \"-\"}",
-            "geometry": {
-              "$reql_type$": "GEOMETRY",
-              "coordinates": [
-                [
-                  -84.40353,
-                  33.70524
-                ],
-                [
-                  -84.40347,
-                  33.70551
-                ],
-                [
-                  -84.40335,
-                  33.70597
-                ]
-              ],
-              "type": "LineString"
-            },
-            "road_data_id": "[\"33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 \"]",
-            "value": [
-              "33.70524,-84.40353 33.70551,-84.40347 33.70597,-84.40335 "
-            ]
-          }
-
-        This function uses a road_data_id(primary key) to fethe a geojson object from 
+        """This function uses a road_data_id(primary key) to fethe a geojson object from 
         the road_data database. If calculate_traffic_color == True, then we also use
         traffic_flow_color_scheme() to calcuroad_data_idlate a color for the road
 
-        Example output with color is :
-        {
-          "geometry": {
-            "coordinates": [
-              [
-                -84.40353,
-                33.70524
-              ],
-              [
-                -84.40347,
-                33.70551
-              ],
-              [
-                -84.40335,
-                33.70597
-              ]
-            ],
-            "type": "LineString"
-          },
-          "properties": {
-            "CF": {
-              "CN": 0.99,
-              "FF": 55.3,
-              "JF": 8.73969,
-              "LN": [],
-              "SP": 12.26,
-              "SU": 12.26,
-              "TY": "TR",
-              "crawled_batch_id": "6dcfea39-e0e0-47e5-b8cc-2d20e1acbd46",
-              "created_timestamp": "2017-06-20T19:05:33+00:00",
-              "original_data_id": "8b8c9c9a-afbb-41dd-8e65-9111c38d3cb8"
-            },
-            "TMC": {
-              "DE": "University Ave/Exit 244",
-              "LE": 1.57367,
-              "PC": 4117,
-              "QD": "-"
-            },
-            "color": "red"
-          },
-          "type": "Feature"
-        }
-
         For more infomation about geojson, check out
         http://geojson.org/
+
+        Args:
+            road_data_id: str: the primary key of table ``road_data``
+            crawled_batch_id: str: the primary key of table ``crawled_batch``, if crawled_batch_id is ``None``,
+                the default setting, then it will be initlized to be the same as 
+                ``self.latest_crawled_batch_id``
+            calculate_traffic_color: bool: whether you want to have a color attribute attached to your geojson
+                object. The color is calculated by ``self.traffic_flow_color_scheme()``
+
+        Returns:
+            Dict: a geojson object, see the example below.
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> traffic_server.traffic_data.fetch_geojson_item('["34.85075,-82.39899 34.85154,-82.39863 "]', 
+                    '44b57efd-8b63-4c49-8c86-9e92f79f528a', True)
+            {'geometry': {'coordinates': [[-82.39899, 34.85075], [-82.39863, 34.85154]],
+             'type': 'LineString'},
+            'properties': {'CF': {'CN': 0.7,
+              'FF': 10.56,
+              'JF': 0,
+              'LN': [],
+              'SP': 8.7,
+              'SU': 8.7,
+              'TY': 'TR',
+              'crawled_batch_id': '44b57efd-8b63-4c49-8c86-9e92f79f528a',
+              'created_timestamp': '2017-07-14T05:06:39+00:00',
+              'flow_data_id': '337cb755-8eb9-4808-94c9-29e422bc3e32',
+              'flow_item_id': '{"DE": "SC-183/Beattie Pl/College St", "LE": 0.64899, "PC": 11029, "QD": "-"}',
+              'original_data_id': '1a84e269-2070-4697-b75b-1349edcb7bbb'},
+             'TMC': {'DE': 'SC-183/Beattie Pl/College St',
+              'LE': 0.64899,
+              'PC': 11029,
+              'QD': '-'},
+             'color': 'green'},
+            'type': 'Feature'}
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -365,7 +352,7 @@ class TrafficData:
         flow_item_id = data['flow_item_id']
         flow_item = r.table('flow_item').get(flow_item_id).run(self.conn)
         flow_data = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").limit(3).run(self.conn).next()
-
+        print(road_data_id, crawled_batch_id)
 
         flow_data['created_timestamp'] = flow_data['created_timestamp'].isoformat()
         geojson_properties = {'TMC': flow_item['TMC'], 'CF': flow_data}
@@ -380,37 +367,30 @@ class TrafficData:
 
     @staticmethod
     def generate_geojson_collection(geojson_list: List) -> Dict:
-        """
-        inputs: geojson_list: List (a list of geojson objects)
-        example inputs:
-        [ {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [125.6, 10.1]
-          },
-          "properties": {
-            "name": "Dinagat Islands"
-          }
-        }, ....]
-
-        This function takes a list of geojson objects and assemble them in the following way
+        """This function takes a list of geojson objects and assemble them in the following way
         The following format allows for multiple geojson object to be stored in the 
         same geojson object. For more details, refer to 
         https://macwright.org/2015/03/23/geojson-second-bite.html
 
-        Example outputs:
-        {
-          "type": "FeatureCollection",
-          "features": [
-            {
+        Args:
+            geojson_list: List: a list of geojson objects generated by 
+                ``self.fetch_geojson_item()``
+
+        Returns:
+            Dict: a valid geojson object that contains all the 
+            geojson object in geojson_list
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> input_list
+            [{
               "type": "Feature",
               "geometry": {
                 "type": "Point",
                 "coordinates": [125.6, 10.1]
               },
               "properties": {
-                "name": "Dinagat island"
+                "name": "Dinagat Islands"
               }
             },
             {
@@ -422,38 +402,67 @@ class TrafficData:
               "properties": {
                 "name": "Test Islands"
               }
+            }]  # notice the ... just mean more of those geojson object
+            >>> traffic_server.traffic_data.generate_geojson_collection(input_list)
+            {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [125.6, 10.1]
+                  },
+                  "properties": {
+                    "name": "Dinagat island"
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [15,15]
+                  },
+                  "properties": {
+                    "name": "Test Islands"
+                  }
+                }
+              ]
             }
-          ]
-        }
-
-        such that the output is still a geojson_object but it contains all the 
-        geojson_object in geojson_list
         """
         output_geojson = {"type": "FeatureCollection"}
         output_geojson['features'] = geojson_list
         return output_geojson
 
     def traffic_flow_color_scheme(self, traffic_flow_data: Dict) -> str: 
-        """
-        inputs: traffic_flow_data: Dict (traffic flow data)
-        example inputs:
-        {
-            "CN": 0.7 ,  // Confidence, an indication of how the speed was determined. -1.0 road closed. 1.0=100% 0.7-100% Historical Usually a value between .7 and 1.0.
-            "FF": 41.01 , // The free flow speed on this stretch of road.
-            "JF": 1.89393 , // The number between 0.0 and 10.0 indicating the expected quality of travel. When there is a road closure, the Jam Factor will be 10. As the number approaches 10.0 the quality of travel is getting worse. -1.0 indicates that a Jam Factor could not be calculated.
-            "LN": [ ],
-            "SP": 31.69 , // Speed (based on UNITS) capped by speed limit MPH
-            "SU": 31.69 , // Speed (based on UNITS) not capped by speed limit
-            "TY":  "TR"   //Used when it is needed to differentiate between different kinds of location types.
-        }
+        """Given the traffic_flow_data, we calculate a color that indicates the traffic situation of the road
+        
         for further details on those encoding, refer to 
         http://traffic.cit.api.here.com/traffic/6.0/xsd/flow.xsd?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw
 
-        Given the traffic_flow_data, we calculate a color that indicates the traffic situation of the road
         Check out the following link for coloring Map
         https://developer.here.com/rest-apis/documentation/traffic/topics/tiles.html
 
-        return :str(a color)
+        Args:
+            traffic_flow_data: Dict: traffic flow data
+
+        Returns:
+            str: a color
+
+        Examples:
+            >>> traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
+            >>> traffic_flow_data
+            {
+                "CN": 0.7 ,  # Confidence, an indication of how the speed was determined. -1.0 road closed. 1.0=100% 0.7-100% Historical Usually a value between .7 and 1.0.
+                "FF": 41.01 , # The free flow speed on this stretch of road.
+                "JF": 1.89393 , # The number between 0.0 and 10.0 indicating the expected quality of travel. When there is a road closure, the Jam Factor will be 10. As the number approaches 10.0 the quality of travel is getting worse. -1.0 indicates that a Jam Factor could not be calculated.
+                "LN": [ ],
+                "SP": 31.69 , # Speed (based on UNITS) capped by speed limit MPH
+                "SU": 31.69 , # Speed (based on UNITS) not capped by speed limit
+                "TY":  "TR"   # Used when it is needed to differentiate between different kinds of location types.
+            }
+            >>> traffic_server.traffic_data.traffic_flow_color_scheme(traffic_flow_data)
+            'green'
         """
         
         ## right now we just simply write a temporary fix
@@ -465,30 +474,6 @@ class TrafficData:
             return 'red'
         else:
             return 'black'
-
-    # def display_json_traffic(self, original_data_id_list: List) -> Dict:
-    #     """
-    #     inputs: original_data_id: str(the primary key/id for original_data table)
-    #     ## TODO: apparently a lot more optimization can be done here
-    #     ## TODO: there might be overlapping documents with the same road_data_id
-
-    #     This function takes a list of original_data_id, get every road related to them
-    #     and lastly output a geojson object containing every road.
-
-    #     """
-    #     geojson_list = []
-    #     for original_data_id in original_data_id_list:
-    #         ## maybe instead of query the whole document, we just query the index?
-    #         flow_data_collection = r.db("Traffic").table("flow_data").get_all(original_data_id, index="original_data_id").run(self.conn)  
-    #         for flow_data in flow_data_collection:
-    #             flow_data_id = flow_data['id']
-    #             road_data_collection = r.db("Traffic").table("road_data").get_all(flow_data_id, index="flow_data_id").run(self.conn)
-
-    #             for road_data in road_data_collection:
-    #                 geojson_list += [self.fetch_geojson_item(road_data['id'])]
-
-    #     ## Lastly we assemble the geojson_list by using generate_geojson_collection()
-    #     return TrafficData.generate_geojson_collection(geojson_list)
 
     def get_nearest_road(self, location_data: tuple, max_dist: int, max_results: int = 1, location_type: str = "latlon") -> Dict:
         """

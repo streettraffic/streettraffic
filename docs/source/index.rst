@@ -10,6 +10,7 @@ Welcome to StreetTraffic's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   modules
 
 
 Indices and tables
