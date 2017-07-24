@@ -9,7 +9,6 @@ import time
 import json
 import asyncio
 import threading
-import datetime
 from shapely.geometry import Point, Polygon
 
 from .map_resource.utility import Utility
@@ -913,7 +912,7 @@ class TrafficData:
         """this function sample points within the polygon, store the nearest
         ``flow_item`` in a list and store the information in 
         ``analytics_monitored_area`` table. 
-        
+
         Args:
             polygon (List): a list of latlon coordiantes
             description (str): a description of the monitoring area. e.g 'Atlanta_polygon'
