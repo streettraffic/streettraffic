@@ -21,27 +21,29 @@ class Custom_bdist_wheel(bdist_wheel):
 
 
 setup(
-  name = 'streettraffic',
-  packages = find_packages(), # this must be the same as the name above
-  version = '0.1.1',
-  description = 'Monitor the traffic flow of your favorite routes, cities, and more',
-  url='https://github.com/vwxyzjn/streettraffic',
-  author = 'Costa Huang',
-  author_email = 'Costa.Huang@outlook.com',
-  python_requires='>=3.6',
-  install_requires = [
-    'rethinkdb',
-    'pandas',
-    'python-dateutil',
-    'requests',
-    'pillow',
-    'geopy',
-    'matplotlib'
-  ],
-  cmdclass={
-    'install': CustomInstallCommand,
-    'bdist_wheel': Custom_bdist_wheel
-  }
+    name = 'streettraffic',
+    packages = find_packages(), # this must be the same as the name above
+    version = '0.1.2',
+    description = 'Monitor the traffic flow of your favorite routes, cities, and more',
+    url='https://github.com/vwxyzjn/streettraffic',
+    author = 'Costa Huang',
+    author_email = 'Costa.Huang@outlook.com',
+    python_requires='>=3.6',
+    include_package_data = True,
+    install_requires = [
+        'rethinkdb',
+        'pandas',
+        'python-dateutil',
+        'requests',
+        'pillow',
+        'geopy',
+        'matplotlib',
+        'websockets'
+    ],
+    cmdclass={
+        'install': CustomInstallCommand,
+        'bdist_wheel': Custom_bdist_wheel
+    }
 )
 
 # run python setup.py sdist for distribution.
