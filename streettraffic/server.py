@@ -5,6 +5,9 @@ import asyncio
 import threading
 import datetime as dt
 from dateutil import parser
+import http.server
+import socketserver
+import os
 
 ## import our modules
 from .database import TrafficData
@@ -24,7 +27,15 @@ class TrafficServer:
         self.loop = asyncio.get_event_loop()
         self.crawler_running = False
         self.traffic_matrix_list = []
+        self.http_port = 9000
 
+    def init_http_server(self):
+        web_dir = os.path.join(os.path.dirname(__file__), 'webui')
+        os.chdir(web_dir)
+        Handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("", self.http_port), Handler)
+        httpd.serve_forever()
+    
     async def consumer_handler(self, websocket):
         while True:
             try:
@@ -148,7 +159,10 @@ class TrafficServer:
 
 
     def start(self):
-        t = threading.Thread(target=self._loop_in_thread, args=(self.loop,))
-        t.start()
+        t1 = threading.Thread(target=self._loop_in_thread, args=(self.loop,))
+        t1.start()
+        t2 = threading.Thread(target=self.init_http_server)
+        t2.start()
         print('server served at ws://127.0.0.1:8765/')
+        print("Web UI is serving at port", self.http_port)
 
