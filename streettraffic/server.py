@@ -27,6 +27,7 @@ class TrafficServer:
         self.loop = asyncio.get_event_loop()
         self.crawler_running = False
         self.traffic_matrix_list = []
+        self.traffic_pattern_list = []
         self.http_port = 9000
 
     def init_http_server(self):
@@ -135,7 +136,8 @@ class TrafficServer:
         while self.crawler_running:
             print('start crawling')
             self.traffic_data.store_matrix_json(self.traffic_matrix_list)
-            self.traffic_data.insert_analytics_traffic_pattern('[33.880079, 33.648894, -84.485086, -84.311365]')
+            for traffic_pattern in self.traffic_pattern_list:
+                self.traffic_data.insert_analytics_traffic_pattern(traffic_pattern)
 
             # time management, we want to execute script every 30 minutes
             # in order to do that we need to calculate how many seconds we should sleep
