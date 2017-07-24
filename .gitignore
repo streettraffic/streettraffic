@@ -1,10 +1,23 @@
+# build and dist
 
-main_program/__init__\.py
+build/*
 
-main_program/HERE_map/__init__\.py
+docs/build/*
 
-main_program/tests/__init__\.py
+dist/*
 
-*.pyc
+streettraffic.egg-info/*
 
-main_program/tests/\.cache/v/cache/lastfailed
+# Various cache 
+
+__pycache__
+
+\.mypy_cache
+
+\.ipynb_checkpoints
+
+\.cache
+
+\.vscode
+
+Profile\.prof

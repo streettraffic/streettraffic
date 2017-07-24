@@ -1,23 +1,39 @@
 <template>
-  <div id="app">
-    <img src="./assets/logo.png">
-    <router-view></router-view>
-  </div>
+  <v-app>
+    <transition name="slide" mode="out-in">
+      <router-view></router-view>
+    </transition>
+  </v-app>
 </template>
 
 <script>
+
 export default {
-  name: 'app'
+  created() {
+    this.$store.dispatch('setWsConnection')
+  }
 }
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss">
+.slide-enter-active, .slide-enter {
+  transition: all .3s ease
 }
+  
+.slide-enter, .slide-leave-to{
+  opacity: 0
+}
+  
+.slide-enter{
+  transform: translateX(-3rem)
+}
+  
+.slide-leave, .slide-leave-active{
+  transition: all .4s ease
+}
+  
+.slide-leave-to{
+  transform: translateX(3rem)
+}
+
 </style>

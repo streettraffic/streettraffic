@@ -1,0 +1,12 @@
+[Unit]
+Description= traffic_server 
+After=multi-user.target
+
+[Service]
+WorkingDirectory=/root/server/scTrafficCount/
+Type=idle
+ExecStart=/usr/bin/python3 /root/server/scTrafficCount/servermain.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
