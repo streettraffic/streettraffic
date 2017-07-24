@@ -7,7 +7,7 @@ import pip
 
 def custom_command():
     # pip.main(['install', package]) # for whatever reason, this command does not work
-    call(['pip', 'install', 'http://localhost:81/Shapely-1.5.17-cp36-cp36m-win_amd64.whl'])
+    call(['pip', 'install', 'https://github.com/vwxyzjn/histraffic/raw/master/Shapely-1.5.17-cp36-cp36m-win_amd64.whl'])
     print('hello world')
 
 class CustomInstallCommand(install):
