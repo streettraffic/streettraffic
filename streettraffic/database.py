@@ -969,10 +969,10 @@ class TrafficData:
         return analytics_monitored_area_insertion
 
     def get_analytics_monitored_area_description_collection(self) -> List:
-        """
-        inputs: None
+        """This function get_analytics_monitored_area_description_collection
 
-        This function return a list of analytics_monitored_area description
+        Returns:
+            List: a color
         """
         description_stream = r.db('Traffic').table('analytics_monitored_area').get_field('description').run(self.conn)
         description_collection = []
