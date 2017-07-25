@@ -8,7 +8,6 @@ import asyncio
 ## import custom module
 from streettraffic.server import TrafficServer
 
-
 settings = {
     'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
     'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
