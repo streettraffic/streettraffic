@@ -494,8 +494,8 @@ class TrafficData:
              'road_data_id': '["33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 "]',
              'value': ['33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 ']}}
         """
-        query_result = r.table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
-                                                                max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
+        query_result = r.table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry',
+                                                        max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
 
         if len(query_result) == 0:
             raise Exception('query_result has no results')
@@ -659,11 +659,11 @@ class TrafficData:
             b26f0022-f003-4def-95e5-e6be291d5979
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
 
         ## second step: get all the crawled_batch_id related to this particular time interval 
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
         
         return crawled_batch_id_collection
 
@@ -898,7 +898,7 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: int = 1000, testing: bool = False, force: bool = False) -> None:
+    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: int = 1000, testing: bool = False, force: bool = False) -> Dict:
         """this function sample points within the polygon, store the nearest
         ``flow_item`` in a list and store the information in 
         ``analytics_monitored_area`` table. 
@@ -1051,12 +1051,12 @@ class TrafficData:
             None
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
 
         ## second step: get all the crawled_batch_id related to this particular time interval and then insert them
         ## by using insert_analytics_traffic_pattern()
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
         for crawled_batch_id in crawled_batch_id_collection:
             try:
                 self.insert_analytics_traffic_pattern(analytics_monitored_area_id, crawled_batch_id)
@@ -1112,9 +1112,9 @@ class TrafficData:
             analytics_monitored_area_id = r.table('analytics_monitored_area').get_all(analytics_monitored_area_description, index="description").get_field('analytics_monitored_area_id').run(self.conn).next()
         print(analytics_monitored_area_id)
         ## First step: get all related crawled_id within the requested range: date_start to date_end
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
 
         ## Second step: get all cooresponding traffic_pattern with respect to crawled_batch_id
         traffic_pattern_collection = []
