@@ -38,7 +38,8 @@ setup(
         'pillow',
         'geopy',
         'matplotlib',
-        'websockets'
+        'websockets',
+        'sphinxcontrib-napoleon'
     ],
     cmdclass={
         'install': CustomInstallCommand,
