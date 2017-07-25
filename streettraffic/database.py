@@ -28,7 +28,7 @@ class TrafficData:
     """
 
 
-    def __init__(self, database_name: str = "Traffic", database_ip: str = None):
+    def __init__(self, database_name: str = "Traffic", database_ip: str = None) -> None:
         """
         When initializing this class, establish a connection towards the database
         """
@@ -72,11 +72,9 @@ class TrafficData:
             # Notice you can ignore every lines under if testing:
             # codes under that block are for testing purposes
             # It's not really part of the core code
-            flow_data_duplicate = 0
+            flow_item_duplicate = 0
+            road_data_duplicate = 0
             roadflow_item_data_duplicate = 0
-            original_data_insertion_ids = []
-            flow_data_insertion_ids = []
-            road_data_insertion_ids = []
 
         if not data:
             print('inserted nothing')
@@ -91,8 +89,6 @@ class TrafficData:
         }
         insert_result = r.table('original_data').insert(original_data_insertion).run(self.conn)
         original_data_id = insert_result['generated_keys'][0]
-        if testing:
-            original_data_insertion_ids += [original_data_id]
 
         ## start parsing the data
         for RWS_item in data['RWS']:
@@ -119,14 +115,11 @@ class TrafficData:
                             r.table('flow_item').insert(flow_item_insertion).run(self.conn)
                             flow_item_id = TMC_encoding
 
-                            if testing:
-                                flow_item_insertion_ids += [TMC_encoding]
-
                         ## if flow_item_doc already exist, we simply update the CF field
-                        else: 
+                        else:
                             flow_item_id = flow_item_doc['flow_item_id']
-                            if testing: 
-                                flow_item_duplicate += 1  
+                            if testing:
+                                flow_item_duplicate += 1
 
                         flow_data_insertion = {
                             "crawled_batch_id": crawled_batch_id,
@@ -137,7 +130,7 @@ class TrafficData:
                         r.table('flow_data').insert(flow_data_insertion).run(self.conn)
                         
                         for SHP_item in SHP_list:
-                            geometry_encoding = json.dumps(SHP_item['value'], sort_keys = True)[:120]  # primary key's length is at most 127
+                            geometry_encoding = json.dumps(SHP_item['value'], sort_keys=True)[:120]  # primary key's length is at most 127
                             road_data_doc = r.table('road_data').get(geometry_encoding).run(self.conn)
 
                             # if road_data_doc does not exist, we insert the road into db. Notice that if road_data_doc exists, we simply ignore it.
@@ -147,8 +140,6 @@ class TrafficData:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
                                     SHP_item['road_data_id'] = geometry_encoding
                                     r.table('road_data').insert(SHP_item).run(self.conn)
-                                    if testing:
-                                        road_data_insertion_ids += [geometry_encoding]
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
@@ -163,9 +154,8 @@ class TrafficData:
                                     #     print(flow_item_id)
 
         if testing:
-            print('there are ',flow_data_duplicate, 'flow_data duplicate')
+            print('there are ',flow_item_duplicate, 'flow_data duplicate')
             print('there are ',road_data_duplicate, 'road_data duplicate')
-            return (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
 
 
     def parse_SHP_values(self, value: List) -> List:
@@ -504,8 +494,8 @@ class TrafficData:
              'road_data_id': '["33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 "]',
              'value': ['33.76865,-84.37777 33.76952,-84.37775 33.76994,-84.37774 ']}}
         """
-        query_result = r.table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry', 
-                                                                max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
+        query_result = r.table('road_data').get_nearest(r.point(location_data[1],location_data[0]), index = 'geometry',
+                                                        max_dist = max_dist, max_results = max_results).run(self.conn)  # Probably not very efficient
 
         if len(query_result) == 0:
             raise Exception('query_result has no results')
@@ -642,8 +632,8 @@ class TrafficData:
         """This function will get all the crawled_batch_id between date_start and date_end
 
         Args:
-            date_start (str): an ISO 8601 format string indicating the starting data
-            date_end (str): an ISO 8601 format string indicating the ending data
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
 
         Returns:
             r.net.DefaultCursor: a Cursor object of all crawled_batch_id in ``crawled_batch`` table that
@@ -669,11 +659,11 @@ class TrafficData:
             b26f0022-f003-4def-95e5-e6be291d5979
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
 
         ## second step: get all the crawled_batch_id related to this particular time interval 
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
         
         return crawled_batch_id_collection
 
@@ -684,8 +674,8 @@ class TrafficData:
         
         Args:
             routing_info (Dict): the routing JSON object from Google Javascript Direction API
-            date_start (str): an ISO 8601 format string indicating the starting data
-            date_end (str): an ISO 8601 format string indicating the ending data
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
             use_overview (bool): whether to use ``route['overview_polyline']`` to build ``route_cached_doc``.
                 If set to be True, the execution will be generally faster, but you will have less coordiantes
                 in your route_cached_doc.
@@ -908,7 +898,7 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
+    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: int = 1000, testing: bool = False, force: bool = False) -> Dict:
         """this function sample points within the polygon, store the nearest
         ``flow_item`` in a list and store the information in 
         ``analytics_monitored_area`` table. 
@@ -969,10 +959,12 @@ class TrafficData:
         return analytics_monitored_area_insertion
 
     def get_analytics_monitored_area_description_collection(self) -> List:
-        """
-        inputs: None
+        """This function returns a list of ``description`` (the secondary key of 
+        the ``analytics_monitored_area`` table) of each analytics_monitored_area 
+        documents
 
-        This function return a list of analytics_monitored_area description
+        Returns:
+            List
         """
         description_stream = r.db('Traffic').table('analytics_monitored_area').get_field('description').run(self.conn)
         description_collection = []
@@ -982,22 +974,28 @@ class TrafficData:
         return description_collection
 
  
-    def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
-        """
-        inputs: 
-        analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False
+    def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False) -> None:
+        """Insert a analytics_traffic_pattern document.
 
-        Given a analytics_monitored_area_id and crawled_batch_id, insert a analytics_traffic_pattern. An example
-        insertion would look like this
+        Args:
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
+            crawled_batch_id (str): the primary key of table ``crawled_batch``
+            force (bool): whether to overide a analytics_traffic_pattern document
+                if force == False, we raise an Exception
 
-        {
-            "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
-            "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
-            "average_JF": 0.09392949526813882 ,
-            "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
-            "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
-            "flow_item_count": 317
-        }
+        Returns:
+            None
+
+        Example:
+            >>> typical_insertion  # this is an example of documents that are inserted
+            {
+                "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
+                "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
+                "average_JF": 0.09392949526813882 ,
+                "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
+                "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
+                "flow_item_count": 317
+            }
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -1039,22 +1037,26 @@ class TrafficData:
         r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
 
 
-    def insert_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str) -> None:
-        """
-        inputs:
-        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
+    def insert_analytics_traffic_pattern_between(self, date_start: str, date_end: str, analytics_monitored_area_id: str) -> None:
+        """Insert ``analytics_traffic_pattern`` documents for each ``crawled_batch_id`` 
+        between ``date_start`` and ``date_end``. (given that you have inserted ``flow_data``
+        documents between ``date_start`` and ``date_end``)
+        
+        Args:
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
 
-        This function insert the insert_analytics_traffic_pattern for all the crawled_batch data within the time specified by date_start
-        and date_end 
-
+        Returns:
+            None
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
 
         ## second step: get all the crawled_batch_id related to this particular time interval and then insert them
         ## by using insert_analytics_traffic_pattern()
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
         for crawled_batch_id in crawled_batch_id_collection:
             try:
                 self.insert_analytics_traffic_pattern(analytics_monitored_area_id, crawled_batch_id)
@@ -1062,12 +1064,16 @@ class TrafficData:
                 print(e)
 
 
-    def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None):
-        """
-        inputs:
-        analytics_monitored_area_id: str, crawled_batch_id: str = None
+    def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None) -> Dict:
+        """Given a ``analytics_monitored_area_id`` and ``crawled_batch_id``, 
+        fetch the related ``analytics_traffic_pattern`` documents
 
-        Given a analytics_monitored_area_id and crawled_batch_id, fetch the related analytics_traffic_pattern
+        Args:
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
+            crawled_batch_id (str): the primary key of table ``crawled_batch``
+
+        Returns:
+            Dict: the corresponding ``analytics_traffic_pattern`` documents
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -1080,21 +1086,35 @@ class TrafficData:
         
 
     def get_analytics_traffic_pattern_between(self, 
-            date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_description: str, 
+            date_start: str, date_end: str, analytics_monitored_area_description: str, 
             analytics_monitored_area_id: str = None):
-        """
-        inputs: 
-        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
+        """Fetch all possible ``analytics_traffic_pattern`` documents
+        between ``date_start`` and ``date_end`` for a ``analytics_monitored_area``
+        documents
 
-        This function fetch all the analytics_traffic_pattern within the time range specified by date_start to date_end
+        Args:
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
+            analytics_monitored_area_description (str): the secondary key of 
+                table ``analytics_monitored_area``
+            analytics_monitored_area_id (str): the primary key of table 
+                ``analytics_monitored_area``. The default is set to None
+                if specified, the program will fetch ``analytics_monitored_area``
+                documents based on ``analytics_monitored_area_id`` rather than
+                ``analytics_monitored_area_description``
+
+        Returns:
+            List: a list of all ``analytics_traffic_pattern`` documents
+            between ``date_start`` and ``date_end`` for a ``analytics_monitored_area``
+            documents
         """
         if not analytics_monitored_area_id:
             analytics_monitored_area_id = r.table('analytics_monitored_area').get_all(analytics_monitored_area_description, index="description").get_field('analytics_monitored_area_id').run(self.conn).next()
         print(analytics_monitored_area_id)
         ## First step: get all related crawled_id within the requested range: date_start to date_end
-        date_start = parser.parse(date_start)
-        date_end = parser.parse(date_end)
-        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start), r.expr(date_end), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
+        date_start_datetime = parser.parse(date_start)
+        date_end_datetime = parser.parse(date_end)
+        crawled_batch_id_collection = r.table('crawled_batch').between(r.expr(date_start_datetime), r.expr(date_end_datetime), index="crawled_timestamp").get_field('crawled_batch_id').run(self.conn)
 
         ## Second step: get all cooresponding traffic_pattern with respect to crawled_batch_id
         traffic_pattern_collection = []

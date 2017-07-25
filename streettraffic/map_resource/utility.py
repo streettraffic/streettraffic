@@ -341,3 +341,29 @@ class Utility:
         for item in polygon_coordinates:
             polygon += [[item[1], item[0]]]
         return polygon
+
+    @staticmethod
+    def matrix_coverage(matrix: pd.DataFrame):
+        """Generate some statistical information about
+        how many valid query tiles are there in your
+        provided matrix
+
+        Args:
+            matrix (pd.DataFrame): The JSON raw data
+
+        Returns:
+            None, but it prints out some information
+            about your matrix
+        """
+        filled_count = 0
+        None_count = 0
+        for row in range(len(matrix)):
+            for col in range(len(matrix.iloc[0])):
+                if matrix.iloc[row, col]:
+                    filled_count += 1
+                else:
+                    None_count += 1
+
+        print('matrix has a total of', len(matrix) *len(matrix.iloc[0]), 'tiles')
+        print(filled_count, 'of them are filled')
+        print(None_count, 'of them are None because of the polygon limitation')

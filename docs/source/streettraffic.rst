@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     streettraffic.map_resource
-    streettraffic.tests
 
 Submodules
 ----------

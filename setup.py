@@ -1,6 +1,5 @@
 from setuptools.command.install import install
-from setuptools.command.develop import develop
-from setuptools.command.egg_info import egg_info
+from wheel.bdist_wheel import bdist_wheel
 from subprocess import call
 from setuptools import setup, find_packages
 import pip
@@ -15,26 +14,37 @@ class CustomInstallCommand(install):
         custom_command()
         install.run(self)
 
+class Custom_bdist_wheel(bdist_wheel):
+    def run(self):
+        custom_command()
+        bdist_wheel.run(self)
+
 
 setup(
-  name = 'streettraffic',
-  packages = find_packages(), # this must be the same as the name above
-  version = '0.1',
-  description = 'A random test lib',
-  author = 'Costa Huang',
-  author_email = 'Costa.Huang@outlook.com',
-  install_requires = [
-    'rethinkdb',
-    'pandas',
-    'python-dateutil',
-    'requests',
-    'pillow',
-    'geopy',
-    'matplotlib'
-  ],
-  cmdclass={
-    'install': CustomInstallCommand
-  }
+    name = 'streettraffic',
+    packages = find_packages(), # this must be the same as the name above
+    version = '0.1.3',
+    description = 'Monitor the traffic flow of your favorite routes, cities, and more',
+    url='https://github.com/vwxyzjn/streettraffic',
+    author = 'Costa Huang',
+    author_email = 'Costa.Huang@outlook.com',
+    python_requires='>=3.6',
+    include_package_data = True,
+    install_requires = [
+        'rethinkdb',
+        'pandas',
+        'python-dateutil',
+        'requests',
+        'pillow',
+        'geopy',
+        'matplotlib',
+        'websockets',
+        'sphinxcontrib-napoleon'
+    ],
+    cmdclass={
+        'install': CustomInstallCommand,
+        'bdist_wheel': Custom_bdist_wheel
+    }
 )
 
 # run python setup.py sdist for distribution.

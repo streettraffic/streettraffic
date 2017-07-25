@@ -10,12 +10,8 @@ Welcome to StreetTraffic's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   intro
    modules
 
+ok let's see
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
