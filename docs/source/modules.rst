@@ -1,4 +1,4 @@
-streettraffic
+StreetTraffic Reference
 =============
 
 .. toctree::
