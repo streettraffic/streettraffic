@@ -6,13 +6,17 @@ import datetime as dt
 import asyncio
 
 ## import custom module
-from streettraffic.map_resource.utility import Utility
-from streettraffic.database import TrafficData
-from streettraffic import tools
 from streettraffic.server import TrafficServer
 
 
+settings = {
+    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+}
+
 ## initialize traffic server
-traffic_server = TrafficServer(database_name="Traffic", database_ip="localhost")
-traffic_server.start()
-conn = traffic_server.traffic_data.conn
+server = TrafficServer(settings)
+server.start()
+conn = server.traffic_data.conn

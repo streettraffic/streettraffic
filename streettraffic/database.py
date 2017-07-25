@@ -1074,7 +1074,7 @@ class TrafficData:
                 print(e)
 
 
-    def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None):
+    def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None) -> Dict:
         """Given a ``analytics_monitored_area_id`` and ``crawled_batch_id``, 
         fetch the related ``analytics_traffic_pattern`` documents
 
@@ -1083,7 +1083,7 @@ class TrafficData:
             crawled_batch_id (str): the primary key of table ``crawled_batch``
 
         Returns:
-            None
+            Dict: the corresponding ``analytics_traffic_pattern`` documents
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id

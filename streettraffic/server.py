@@ -8,6 +8,7 @@ from dateutil import parser
 import http.server
 import socketserver
 import os
+from typing import Dict, List
 
 ## import our modules
 from .database import TrafficData
@@ -15,15 +16,16 @@ from .map_resource.utility import Utility
 
 class TrafficServer:
 
-    def __init__(self, database_name: str = "Traffic", database_ip: str = None):
+    def __init__(self, settings: Dict, database_name: str = "Traffic", database_ip: str = None):
         """
         self.msg_queue is used to communicate with consumer_handler() and producer_handler()
         """
         self.msg_queue = asyncio.Queue()
         if not database_ip:
-            self.traffic_data = TrafficData(database_name = database_name)
+            self.traffic_data = TrafficData(database_name=database_name, database_ip='localhost')
         else:
-            self.traffic_data = TrafficData(database_name = database_name, database_ip = database_ip)
+            self.traffic_data = TrafficData(database_name=database_name, database_ip=database_ip)
+        self.util = Utility(settings)
         self.loop = asyncio.get_event_loop()
         self.crawler_running = False
         self.traffic_matrix_list = []
