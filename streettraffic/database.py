@@ -969,10 +969,12 @@ class TrafficData:
         return analytics_monitored_area_insertion
 
     def get_analytics_monitored_area_description_collection(self) -> List:
-        """This function get_analytics_monitored_area_description_collection
+        """This function returns a list of ``description`` (the secondary key of 
+        the ``analytics_monitored_area`` table) of each analytics_monitored_area 
+        documents
 
         Returns:
-            List: a color
+            List
         """
         description_stream = r.db('Traffic').table('analytics_monitored_area').get_field('description').run(self.conn)
         description_collection = []
@@ -982,22 +984,29 @@ class TrafficData:
         return description_collection
 
  
-    def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False):
-        """
-        inputs: 
-        analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False
+    def insert_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None, force = False) -> None:
+        """Insert a analytics_traffic_pattern document.
 
-        Given a analytics_monitored_area_id and crawled_batch_id, insert a analytics_traffic_pattern. An example
-        insertion would look like this
+        Args:
+            analytics_monitored_area_id (str): a list of latlon coordiantes
+            crawled_batch_id (str): a description of the monitoring area. e.g 'Atlanta_polygon'
+            force (bool): whether to overide a analytics_monitored_area document
+                if force == False, we raise an Exception
 
-        {
-            "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
-            "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
-            "average_JF": 0.09392949526813882 ,
-            "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
-            "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
-            "flow_item_count": 317
-        }
+        Returns:
+            None
+
+        Example:
+            A typical insertion to the analytics_traffic_pattern would look like the following
+            >>> typical_insertion
+            {
+                "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
+                "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
+                "average_JF": 0.09392949526813882 ,
+                "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
+                "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
+                "flow_item_count": 317
+            }
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
