@@ -642,8 +642,8 @@ class TrafficData:
         """This function will get all the crawled_batch_id between date_start and date_end
 
         Args:
-            date_start (str): an ISO 8601 format string indicating the starting data
-            date_end (str): an ISO 8601 format string indicating the ending data
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
 
         Returns:
             r.net.DefaultCursor: a Cursor object of all crawled_batch_id in ``crawled_batch`` table that
@@ -684,8 +684,8 @@ class TrafficData:
         
         Args:
             routing_info (Dict): the routing JSON object from Google Javascript Direction API
-            date_start (str): an ISO 8601 format string indicating the starting data
-            date_end (str): an ISO 8601 format string indicating the ending data
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
             use_overview (bool): whether to use ``route['overview_polyline']`` to build ``route_cached_doc``.
                 If set to be True, the execution will be generally faster, but you will have less coordiantes
                 in your route_cached_doc.
@@ -988,17 +988,16 @@ class TrafficData:
         """Insert a analytics_traffic_pattern document.
 
         Args:
-            analytics_monitored_area_id (str): a list of latlon coordiantes
-            crawled_batch_id (str): a description of the monitoring area. e.g 'Atlanta_polygon'
-            force (bool): whether to overide a analytics_monitored_area document
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
+            crawled_batch_id (str): the primary key of table ``crawled_batch``
+            force (bool): whether to overide a analytics_traffic_pattern document
                 if force == False, we raise an Exception
 
         Returns:
             None
 
         Example:
-            A typical insertion to the analytics_traffic_pattern would look like the following
-            >>> typical_insertion
+            >>> typical_insertion  # this is an example of documents that are inserted
             {
                 "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
                 "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
@@ -1048,14 +1047,18 @@ class TrafficData:
         r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
 
 
-    def insert_analytics_traffic_pattern_between(self, date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str) -> None:
-        """
-        inputs:
-        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
+    def insert_analytics_traffic_pattern_between(self, date_start: str, date_end: str, analytics_monitored_area_id: str) -> None:
+        """Insert ``analytics_traffic_pattern`` documents for each ``crawled_batch_id`` 
+        between ``date_start`` and ``date_end``. (given that you have inserted ``flow_data``
+        documents between ``date_start`` and ``date_end``)
+        
+        Args:
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
 
-        This function insert the insert_analytics_traffic_pattern for all the crawled_batch data within the time specified by date_start
-        and date_end 
-
+        Returns:
+            None
         """
         ## first step: change the date ISO-formatted datetime to python datetime.datetime object
         date_start = parser.parse(date_start)
@@ -1072,11 +1075,15 @@ class TrafficData:
 
 
     def get_analytics_traffic_pattern(self, analytics_monitored_area_id: str, crawled_batch_id: str = None):
-        """
-        inputs:
-        analytics_monitored_area_id: str, crawled_batch_id: str = None
+        """Given a ``analytics_monitored_area_id`` and ``crawled_batch_id``, 
+        fetch the related ``analytics_traffic_pattern`` documents
 
-        Given a analytics_monitored_area_id and crawled_batch_id, fetch the related analytics_traffic_pattern
+        Args:
+            analytics_monitored_area_id (str): the primary key of table ``analytics_monitored_area``
+            crawled_batch_id (str): the primary key of table ``crawled_batch``
+
+        Returns:
+            None
         """
         if not crawled_batch_id:
             crawled_batch_id = self.latest_crawled_batch_id
@@ -1089,13 +1096,27 @@ class TrafficData:
         
 
     def get_analytics_traffic_pattern_between(self, 
-            date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_description: str, 
+            date_start: str, date_end: str, analytics_monitored_area_description: str, 
             analytics_monitored_area_id: str = None):
-        """
-        inputs: 
-        date_start: 'str ISO format', date_end: 'str ISO foramt', analytics_monitored_area_id: str
+        """Fetch all possible ``analytics_traffic_pattern`` documents
+        between ``date_start`` and ``date_end`` for a ``analytics_monitored_area``
+        documents
 
-        This function fetch all the analytics_traffic_pattern within the time range specified by date_start to date_end
+        Args:
+            date_start (str): an ISO 8601 format string indicating the starting date
+            date_end (str): an ISO 8601 format string indicating the ending date
+            analytics_monitored_area_description (str): the secondary key of 
+                table ``analytics_monitored_area``
+            analytics_monitored_area_id (str): the primary key of table 
+                ``analytics_monitored_area``. The default is set to None
+                if specified, the program will fetch ``analytics_monitored_area``
+                documents based on ``analytics_monitored_area_id`` rather than
+                ``analytics_monitored_area_description``
+
+        Returns:
+            List: a list of all ``analytics_traffic_pattern`` documents
+            between ``date_start`` and ``date_end`` for a ``analytics_monitored_area``
+            documents
         """
         if not analytics_monitored_area_id:
             analytics_monitored_area_id = r.table('analytics_monitored_area').get_all(analytics_monitored_area_description, index="description").get_field('analytics_monitored_area_id').run(self.conn).next()
