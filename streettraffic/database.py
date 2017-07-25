@@ -28,7 +28,7 @@ class TrafficData:
     """
 
 
-    def __init__(self, database_name: str = "Traffic", database_ip: str = None):
+    def __init__(self, database_name: str = "Traffic", database_ip: str = None) -> None:
         """
         When initializing this class, establish a connection towards the database
         """
@@ -72,11 +72,9 @@ class TrafficData:
             # Notice you can ignore every lines under if testing:
             # codes under that block are for testing purposes
             # It's not really part of the core code
-            flow_data_duplicate = 0
+            flow_item_duplicate = 0
+            road_data_duplicate = 0
             roadflow_item_data_duplicate = 0
-            original_data_insertion_ids = []
-            flow_data_insertion_ids = []
-            road_data_insertion_ids = []
 
         if not data:
             print('inserted nothing')
@@ -91,8 +89,6 @@ class TrafficData:
         }
         insert_result = r.table('original_data').insert(original_data_insertion).run(self.conn)
         original_data_id = insert_result['generated_keys'][0]
-        if testing:
-            original_data_insertion_ids += [original_data_id]
 
         ## start parsing the data
         for RWS_item in data['RWS']:
@@ -119,14 +115,11 @@ class TrafficData:
                             r.table('flow_item').insert(flow_item_insertion).run(self.conn)
                             flow_item_id = TMC_encoding
 
-                            if testing:
-                                flow_item_insertion_ids += [TMC_encoding]
-
                         ## if flow_item_doc already exist, we simply update the CF field
-                        else: 
+                        else:
                             flow_item_id = flow_item_doc['flow_item_id']
-                            if testing: 
-                                flow_item_duplicate += 1  
+                            if testing:
+                                flow_item_duplicate += 1
 
                         flow_data_insertion = {
                             "crawled_batch_id": crawled_batch_id,
@@ -137,7 +130,7 @@ class TrafficData:
                         r.table('flow_data').insert(flow_data_insertion).run(self.conn)
                         
                         for SHP_item in SHP_list:
-                            geometry_encoding = json.dumps(SHP_item['value'], sort_keys = True)[:120]  # primary key's length is at most 127
+                            geometry_encoding = json.dumps(SHP_item['value'], sort_keys=True)[:120]  # primary key's length is at most 127
                             road_data_doc = r.table('road_data').get(geometry_encoding).run(self.conn)
 
                             # if road_data_doc does not exist, we insert the road into db. Notice that if road_data_doc exists, we simply ignore it.
@@ -147,8 +140,6 @@ class TrafficData:
                                     SHP_item['geometry'] = r.line(r.args(self.parse_SHP_values(SHP_item['value']))).run(self.conn)
                                     SHP_item['road_data_id'] = geometry_encoding
                                     r.table('road_data').insert(SHP_item).run(self.conn)
-                                    if testing:
-                                        road_data_insertion_ids += [geometry_encoding]
                                 except:
                                     raise Exception('exception in parsing SHP values')
                             else:
@@ -163,9 +154,8 @@ class TrafficData:
                                     #     print(flow_item_id)
 
         if testing:
-            print('there are ',flow_data_duplicate, 'flow_data duplicate')
+            print('there are ',flow_item_duplicate, 'flow_data duplicate')
             print('there are ',road_data_duplicate, 'road_data duplicate')
-            return (original_data_insertion_ids, flow_data_insertion_ids, road_data_insertion_ids)
 
 
     def parse_SHP_values(self, value: List) -> List:
@@ -908,7 +898,7 @@ class TrafficData:
         print('use https://www.darrinward.com/lat-long/ for plotting')
         return formatted_string
 
-    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: "int meters" = 1000, testing: bool = False, force: bool = False) -> None:
+    def set_traffic_patter_monitoring_area(self, polygon: List, description: str, grid_point_distance: int = 1000, testing: bool = False, force: bool = False) -> None:
         """this function sample points within the polygon, store the nearest
         ``flow_item`` in a list and store the information in 
         ``analytics_monitored_area`` table. 
