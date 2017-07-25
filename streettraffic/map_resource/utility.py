@@ -342,6 +342,7 @@ class Utility:
             polygon += [[item[1], item[0]]]
         return polygon
 
+    @staticmethod
     def matrix_coverage(matrix: pd.DataFrame):
         """Generate some statistical information about
         how many valid query tiles are there in your
