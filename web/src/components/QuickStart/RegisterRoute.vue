@@ -1,9 +1,8 @@
 <template lang="pug">
   v-layout(row wrap)
-    HomeStepper(
-      ref="HomeStepper"
-      @HomeStepper_select_routes="HomeStepper_select_routes" 
-      @HomeStepper_select_time="HomeStepper_select_time"
+    RegisterRouteStepper(
+      ref="RegisterRouteStepper"
+      @RegisterRouteStepper_select_routes="RegisterRouteStepper_select_routes"
     )
     HomeMap(
       ref="HomeMap"
@@ -14,13 +13,13 @@
 
 <script>
 // import custom components
-import HomeStepper from '../HomeStepper.vue'
+import RegisterRouteStepper from './RegisterRouteStepper.vue'
 import HomeMap from '../HomeMap.vue'
 
 export default {
-  name: 'Home',
+  name: 'RegisterRoute',
   components: {
-    HomeStepper,
+    RegisterRouteStepper,
     HomeMap
   },
   data () {
@@ -29,47 +28,32 @@ export default {
       center: {lat: 33.7601, lng: -84.37429},
       route: {},
       // References to components
-      HomeStepper: null,
+      RegisterRouteStepper: null,
       HomeMap: null,
       HomeSlider: null
     }
   },
   methods: {
-    HomeStepper_select_routes(starting_address_obj, destination_obj) {
-      console.log(this)
+    RegisterRouteStepper_select_routes(starting_address_obj, destination_obj) {
       this.HomeMap.displayRouting(starting_address_obj, destination_obj)
-      // pass
     },
-    HomeStepper_select_time(dateStartPicker, dateEndPicker, timeStartPicer, timeEndPicer) {
-      this.HomeSlider.getMultipleDaysRouteTraffic(dateStartPicker, dateEndPicker, timeStartPicer, timeEndPicer)
-    },
-    HomeSlider_requestingRoutes() {
-      this.HomeSlider
-    },
-    HomeSlider_plotGeoJson(geojson) {
-      this.HomeMap.plotGeoJson(geojson)
-    },
-    HomeSlider_deleteGeoJsonPlot() {
-      this.HomeMap.deleteGeoJsonPlot()
-    },
-    HomeSlider_displayGeoJson() {
-      this.HomeMap.displayGeoJson()
-    },
-    HomeSlider_finishedQueryingData() {
-      this.HomeStepper.finished_querying_data()
-    },
-    test(){
-      /* eslint-disable */
-      console.log('haha')
-      /* eslint-enable */
+    registerRoute() {
+      this.$store.state.ws.send(JSON.stringify(['registerRoute', this.route]))
+      this.$store.state.ws.onmessage = function (event) { }
     }
   },
   created() {
     // pass
   },
+  watch: {
+    route(val) {
+      console.log(val)
+      this.registerRoute()
+    }
+  },
   mounted() {
     /* eslint-disable */
-    this.HomeStepper = this.$refs.HomeStepper
+    this.RegisterRouteStepper = this.$refs.RegisterRouteStepper
     this.HomeMap = this.$refs.HomeMap
     this.HomeSlider = this.$refs.HomeSlider
     /* eslint-enable */
