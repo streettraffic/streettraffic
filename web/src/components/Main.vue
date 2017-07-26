@@ -20,6 +20,7 @@
                 v-icon(light) keyboard_arrow_down
             v-list-tile(
               v-for="subItem in item.items" v-bind:key="subItem.title"
+              router
               v-bind="{ \
                 to: !subItem.target ? subItem.href : null, \
                 href: subItem.target && subItem.href \
@@ -72,9 +73,9 @@ export default {
         {
           title: 'Quick Start',
           action: 'apps',
-          group: 'vuetify',
+          group: 'QuickStart',
           items: [
-            { href: '/#/Main', title: 'Monitor a route' },
+            { href: '/Main/QuickStart/RegisterRoute', title: 'Register a route' },
             { href: '/vuetify/sandbox', title: 'Monitor a city' }
           ]
         },
@@ -83,8 +84,8 @@ export default {
           action: 'devices',
           group: 'layout',
           items: [
-            { href: '/layout/pre-defined', title: 'Pre-defined', action: 'star', actionClass: 'white--text' },
-            { href: '/layout/grid', title: 'Grid' },
+            { href: '/layout/pre-defined', title: 'Traffic flow for multiple days' },
+            { href: '/layout/grid', title: 'Traffic for ' },
             { href: '/layout/spacing', title: 'Spacing' },
             { href: '/layout/alignment', title: 'Alignment' },
             { href: '/layout/display', title: 'Display' },
