@@ -113,6 +113,16 @@ class TrafficServer:
                     analytics_monitored_area_description_collection = self.traffic_data.get_analytics_monitored_area_description_collection()
                     await websocket.send(json.dumps(analytics_monitored_area_description_collection))
                     print('sent data')
+
+                elif message[0] == "registerRoute":
+                    print("registerRoute")
+                    self.util.register_route_tile(message[1])
+                    print('register finished')
+
+                elif message[0] == "runCrawler":
+                    print("runCrawler")
+                    self.run_crawler()
+                    print('runCrawler finished')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')

@@ -16,7 +16,7 @@ def test_get_tile():
     The official example provided by HERE
     https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/key-concepts.html
     """
-    assert util.get_tile(52.525439, 13.38727, 12) == (2200, 1343)
+    assert util.get_tile(52.525439, 13.38727, 12) == [2200, 1343]
 
 
 def test_get_quadkeys():
