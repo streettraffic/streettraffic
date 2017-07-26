@@ -7,16 +7,41 @@
       dark
       :mini-variant.sync="mini"
     )
-      v-list
-        v-list-item(
-          v-for="(item, i) in items"
-          :key="i"
-        )
-          v-list-tile(value="true" router :to="item.routerAddress" ripple)
+
+      v-list(dense)
+        template(v-for="item in items")
+          v-list-group(v-if="item.items" v-bind:group="item.group")
+            v-list-tile(slot="item" ripple)
+              v-list-tile-action
+                v-icon(light) {{ item.action }}
+              v-list-tile-content
+                v-list-tile-title {{ item.title }}
+              v-list-tile-action
+                v-icon(light) keyboard_arrow_down
+            v-list-tile(
+              v-for="subItem in item.items" v-bind:key="subItem.title"
+              v-bind="{ \
+                to: !subItem.target ? subItem.href : null, \
+                href: subItem.target && subItem.href \
+              }"
+              ripple
+              v-bind:disabled="subItem.disabled"
+              v-bind:target="subItem.target"
+            )
+              v-list-tile-content
+                v-list-tile-title {{ subItem.title }}
+              v-list-tile-action(v-if="subItem.action")
+                v-icon(light :class="[subItem.actionClass || 'success--text']") {{ subItem.action }}
+          v-subheader(v-else-if="item.header" light) {{ item.header }}
+          v-divider(v-else-if="item.divider")
+          v-list-tile(:to="item.href" ripple v-bind:disabled="item.disabled" v-else)
             v-list-tile-action
-              v-icon(light v-html="item.icon")
+              v-icon(light) {{ item.action }}
             v-list-tile-content
-              v-list-tile-title(v-text="item.title")
+              v-list-tile-title {{ item.title }}
+            v-list-tile-action(v-if="item.subAction")
+              v-icon(light class="success--text") {{ item.subAction }}
+
 
     
     v-toolbar(light)
@@ -43,6 +68,64 @@ export default {
       drawer: true,
       mini: false,
       items: [
+        { header: 'Welcome to StreetTraffic Web UI' },
+        {
+          title: 'Quick Start',
+          action: 'apps',
+          group: 'vuetify',
+          items: [
+            { href: '/#/Main', title: 'Monitor a route' },
+            { href: '/vuetify/sandbox', title: 'Monitor a city' }
+          ]
+        },
+        {
+          title: 'Query',
+          action: 'devices',
+          group: 'layout',
+          items: [
+            { href: '/layout/pre-defined', title: 'Pre-defined', action: 'star', actionClass: 'white--text' },
+            { href: '/layout/grid', title: 'Grid' },
+            { href: '/layout/spacing', title: 'Spacing' },
+            { href: '/layout/alignment', title: 'Alignment' },
+            { href: '/layout/display', title: 'Display' },
+            { href: '/layout/elevation', title: 'Elevation' }
+          ]
+        },
+        {
+          title: 'Analytics',
+          action: 'insert_chart',
+          group: 'style',
+          items: [
+            { href: '/style/colors', title: 'Colors' },
+            { href: '/style/theme', title: 'Theme' },
+            { href: '/style/typography', title: 'Typography' },
+            { href: '/style/content', title: 'Content' }
+          ]
+        },
+        {
+          title: 'Research',
+          action: 'build',
+          group: 'motion',
+          items: [
+            { href: '/motion/transitions', title: 'Transitions' }
+          ]
+        },
+        { action: 'home', title: 'Home', href: '/#/Main/Analytics' }
+      ],
+      items2: [
+        {
+          icon: 'home',
+          title: 'Vuetify',
+          action: 'apps',
+          group: 'vuetify',
+          routerAddress: '/Main'
+          // children: [
+          //   { href: '/vuetify/quick-start', title: 'Quick start' },
+          //   { href: '/vuetify/sandbox', title: 'Sandbox' },
+          //   { href: '/vuetify/frequently-asked-questions', title: 'Frequently asked questions' },
+          //   { href: '/vuetify/sponsors-and-backers', title: 'Sponsors and backers' }
+          // ]
+        },
         { icon: 'home', title: 'Home', routerAddress: '/Main' },
         { icon: 'insert_chart', title: 'Analytics', routerAddress: '/Main/Analytics' },
         { icon: 'create', title: 'Polygon', routerAddress: '/Main/Polygon' },

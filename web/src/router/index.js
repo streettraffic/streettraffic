@@ -5,6 +5,11 @@ import Landing from '@/components/Landing'
 
 Vue.use(Router)
 
+const QuickStartRegisterRoute = () => ({
+  // The component to load. Should be a Promise
+  component: import('@/components/QuickStart/RegisterRoute')
+})
+
 const Home = () => ({
   // The component to load. Should be a Promise
   component: import('@/components/Home')
@@ -37,22 +42,22 @@ const router = new Router({
       name: 'Landing',
       component: Landing,
       meta: {
-        title: 'Histraffic Landing'
+        title: 'Streettraffic Landing'
       }
     },
     {
       path: '/Main',
       component: Main,
       meta: {
-        title: 'Histraffic Main'
+        title: 'Streettraffic Main'
       },
       children: [
         {
           path: '',
-          name: 'Home',
-          component: Home,
+          name: 'QuickStartRegisterRoute',
+          component: QuickStartRegisterRoute,
           meta: {
-            title: 'Histraffic Home'
+            title: 'Streettraffic Register a route'
           }
         },
         {
@@ -60,7 +65,7 @@ const router = new Router({
           name: 'Analytics',
           component: Analytics,
           meta: {
-            title: 'Histraffic Analytics'
+            title: 'Streettraffic Analytics'
           }
         },
         {
@@ -68,7 +73,7 @@ const router = new Router({
           name: 'RouteLab',
           component: RouteLab,
           meta: {
-            title: 'Histraffic RouteLab'
+            title: 'Streettraffic RouteLab'
           }
         },
         {
@@ -76,7 +81,7 @@ const router = new Router({
           name: 'Polygon',
           component: Polygon,
           meta: {
-            title: 'Histraffic Polygon'
+            title: 'Streettraffic Polygon'
           }
         },
         {
@@ -84,7 +89,7 @@ const router = new Router({
           name: 'CaseStudy',
           component: CaseStudy,
           meta: {
-            title: 'Histraffic CaseStudy'
+            title: 'Streettraffic CaseStudy'
           }
         }
       ]
