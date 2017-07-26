@@ -5,7 +5,7 @@
       p 
         | congrats! You probably have haved register some routes or cities to crawl, now it's
         | time to run the crawler! There are two ways to run the crawler...
-      
+      v-btn(@click.native="runCrawler").ml-0 Run the crawler
 </template>
 
 <script>
