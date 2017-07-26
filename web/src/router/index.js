@@ -7,16 +7,12 @@ Vue.use(Router)
 
 function route (path, name, title) {
   return {
+    name: name,
     path: path + '/' + name,
     meta: { title: title },
-    component: () => import(`@/components/${path}/${name}`)
+    component: () => import(`@/components/${path}${name}`)
   }
 }
-
-const QuickStartRegisterRoute = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/QuickStart/RegisterRoute')
-})
 
 const Home = () => ({
   // The component to load. Should be a Promise
@@ -60,7 +56,8 @@ const router = new Router({
         title: 'Streettraffic Main'
       },
       children: [
-        route('QuickStart', 'RegisterRoute', 'Streettraffic Register a Route'),
+        route('QuickStart/', 'RegisterRoute', 'Streettraffic Register a Route'),
+        route('QuickStart/', 'RunCrawler', 'Streettraffic run the traffic crawler'),
         {
           path: '',
           name: 'Home',

@@ -76,7 +76,8 @@ export default {
           group: 'QuickStart',
           items: [
             { href: '/Main/QuickStart/RegisterRoute', title: 'Register a route' },
-            { href: '/vuetify/sandbox', title: 'Monitor a city' }
+            { href: '/vuetify/sandbox', title: 'Monitor a city' },
+            { href: '/Main/QuickStart/RunCrawler', title: 'Run the crawler' }
           ]
         },
         {
@@ -111,7 +112,7 @@ export default {
             { href: '/motion/transitions', title: 'Transitions' }
           ]
         },
-        { action: 'home', title: 'Home', href: '/#/Main/Analytics' }
+        { action: 'home', title: 'Home', href: '/#/Main' }
       ],
       items2: [
         {
