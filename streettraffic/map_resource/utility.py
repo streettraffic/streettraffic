@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from typing import List, Dict
 import json
+import os
 
 
 # todo: convert quadkeys to tile
@@ -54,7 +55,7 @@ class Utility:
         row = n * (1 - (math.log(math.tan(lat_rad) + 1 /
                                  math.cos(lat_rad)) / math.pi)) / 2  # Row
 
-        return (int(col), int(row))
+        return [int(col), int(row)]
 
     @staticmethod
     def get_quadkeys(col: float, row: float, zoom: int) -> str:
@@ -244,6 +245,47 @@ class Utility:
                         matrix.iloc[row,col] = self.get_traffic_json_resource(location_data = matrix.iloc[row,col], location_type = "colrow", zoom = zoom)
 
         return matrix
+
+    def register_route_tile(self, routing_info: Dict, zoom: int = 14) -> None:
+
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('route_collection.json'):
+            with open('route_collection.json') as f:
+                colrow_collection = json.load(f)
+        else:
+            colrow_collection = []
+        
+        ## second step, add all possible colrow in colrow_collection
+        route = routing_info['routes'][0]
+        leg = route['legs'][0]
+        for step in leg['steps']:
+            for path_item in step['path']:
+                tile = self.get_tile(path_item['lat'], path_item['lng'], zoom)
+                if tile not in colrow_collection:
+                    colrow_collection += [tile]
+        
+        ## third step, save the route_set.json
+        with open('route_collection.json', 'w') as f:
+            json.dump(colrow_collection, f)
+
+
+    def get_route_tile_matrix_url(self) -> pd.DataFrame:
+
+        if os.path.isfile('route_collection.json'):
+            with open('route_collection.json') as f:
+                colrow_collection = json.load(f)
+        else:
+            raise Exception('route_collection.json does not exist, try using server.util.register_route_tile_matrix_url()')
+        ## last step, return a pandas matrix
+        matrix = pd.DataFrame(index = range(1), columns = range(len(colrow_collection)))
+        i = 0
+        for item in colrow_collection:
+            matrix.iloc[0,i] = self.get_traffic_json_resource(location_data = item, location_type = "colrow", zoom = 14)
+            i += 1
+
+        return matrix
+
+
 
     def assemble_matrix_images(self, matrix: pd.DataFrame) -> pd.DataFrame:
         """
