@@ -128,7 +128,7 @@
 </template>
 
 <script>
-import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
+import CaseStudyDirection from '@/assets/case_study_newyork_boston.json'
 
 export default {
   name: 'CaseStudyStepper',

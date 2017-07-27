@@ -27,7 +27,7 @@
         div.mb-5
           | Great! Now you have query your first data, if you want to try a different time range, hit the try again button.
           a#test(:href="datajson" download="scene.json") test
-        v-btn(primary @click.native="current_step = 3" light) Try Again
+        v-btn(primary @click.native="current_step = 1" light) Try Again
 
 
 </template>

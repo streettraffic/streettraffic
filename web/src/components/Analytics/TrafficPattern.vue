@@ -1,7 +1,7 @@
 <template>
   <v-layout row wrap>
     <v-flex xs8 class="my-3">
-      <h6>Histraffic Analytics section</h6>
+      <h6>StreetTraffic Traffic Pattern</h6>
       <p>In this section, you can pick a date at the calendar below and the site will generate a graph of average jamming factor of the city you are monitoring</p>
       <p>Now pick a city that we monitored</p>
       <v-select

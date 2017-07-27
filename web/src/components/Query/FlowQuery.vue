@@ -18,26 +18,6 @@
       @HomeSlider_displayGeoJson="HomeSlider_displayGeoJson"
       @HomeSlider_finishedQueryingData="HomeSlider_finishedQueryingData">
     </HomeSlider>
-
-
-<!--     <v-flex xs12>
-      <v-divider class="my-4"></v-divider>
-      <section>
-        <v-btn dark default @click.native="plotGeoJson(testData)">plot GeoJson(testData)</v-btn>
-        <v-btn dark default @click.native="displayGeoJson">display GeoJson</v-btn>
-        <v-btn dark default @click.native="getHistoric">get Historic</v-btn>
-        <v-btn dark default @click.native="toManhattan">to Manhattan</v-btn>
-        <v-btn dark default @click.native="test">test</v-btn>
-        <v-btn dark default @click.native="loadControls">Load Drawing Tools</v-btn>
-      </section>
-      
-
-      <v-divider class="my-4"></v-divider>
-
-
-      <h6>Select your desired historic traffic:</h6>
-      <HistoricBatch></HistoricBatch>
-    </v-flex> -->
   </v-layout>
 </template>
 
@@ -46,20 +26,13 @@
 // https://github.com/xkjyeah/vue-google-maps/issues/90 about how we use
 // To see how we use the Direction api, refer to
 // https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
-
-import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
-import { mapState } from 'vuex'
-
-// import custom components
-import HomeStepper from './HomeStepper.vue'
-import HomeSlider from './HomeSlider'
-import HistoricBatch from './HistoricBatch'
-import HomeMap from './HomeMap.vue'
+import HomeStepper from './FlowQueryStepper'
+import HomeSlider from '../HomeSlider'
+import HomeMap from '../HomeMap.vue'
 
 export default {
-  name: 'Home',
+  name: 'FlowQuery',
   components: {
-    HistoricBatch,
     HomeStepper,
     HomeMap,
     HomeSlider

@@ -14,31 +14,6 @@ function route (path, name, title) {
   }
 }
 
-const Home = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Home')
-})
-
-const Analytics = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Analytics')
-})
-
-const Polygon = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Polygon')
-})
-
-const RouteLab = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/RouteLab')
-})
-
-const CaseStudy = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/CaseStudy')
-})
-
 const router = new Router({
   routes: [
     {
@@ -58,46 +33,12 @@ const router = new Router({
       children: [
         route('QuickStart/', 'RegisterRoute', 'Streettraffic Register a Route'),
         route('QuickStart/', 'RunCrawler', 'Streettraffic run the traffic crawler'),
-        {
-          path: '',
-          name: 'Home',
-          component: Home,
-          meta: {
-            title: 'Streettraffic Home'
-          }
-        },
-        {
-          path: 'Analytics',
-          name: 'Analytics',
-          component: Analytics,
-          meta: {
-            title: 'Streettraffic Analytics'
-          }
-        },
-        {
-          path: 'RouteLab',
-          name: 'RouteLab',
-          component: RouteLab,
-          meta: {
-            title: 'Streettraffic RouteLab'
-          }
-        },
-        {
-          path: 'Polygon',
-          name: 'Polygon',
-          component: Polygon,
-          meta: {
-            title: 'Streettraffic Polygon'
-          }
-        },
-        {
-          path: 'CaseStudy',
-          name: 'CaseStudy',
-          component: CaseStudy,
-          meta: {
-            title: 'Streettraffic CaseStudy'
-          }
-        }
+        route('QuickStart/', 'Polygon', 'Streettraffic Register a city'),
+        route('Query/', 'FlowQuery', 'Streettraffic traffic flow query'),
+        route('Query/', 'HistoryBatch', 'Streettraffic traffic flow query'),
+        route('Analytics/', 'TrafficPattern', 'Streettraffic traffic pattern analytics'),
+        route('Research/', 'RouteLab', 'Streettraffic Multiple Routes Analysis'),
+        route('Research/', 'CaseStudy', 'Streettraffic Long Distance Route Study')
       ]
     }
   ]
