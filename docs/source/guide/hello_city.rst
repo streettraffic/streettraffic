@@ -1,5 +1,5 @@
-Hello World
-============
+Hello World (Crawl a City)
+===============================
 
 Let's crawl the traffic flow data of San Francisco! We predefined a 
 ``San_Francisco_polygon`` for you. The polygon looks like this:
@@ -43,4 +43,4 @@ Then run ::
     python traffic.py
 
 Now open `<http://localhost:8080>`_ for our RethinkDB Web UI. And it should be crawling data like
-the following graph. When it's done, open `<http://localhost:9000>`_ for our Web UI.
+the following picture. When it's done, open `<http://localhost:9000>`_ for our Web UI.

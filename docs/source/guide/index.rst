@@ -5,4 +5,5 @@ User's Guide
    :maxdepth: 4
 
    install
-   hello
+   hello_route
+   hello_city
