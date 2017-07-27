@@ -1,26 +1,31 @@
 import pickle
+from typing import Any
 
-def dump_data_object(obj: 'any serializable object', path: str) -> None:
-	""" 
-	input: obj: any_serializable_object(something like list, dataframe, dict, ...)
+def dump_data_object(obj: Any, path: str) -> None:
+    """This function serialize ``obj`` and save it to ``path``
 
-	This function serialize a data object and save it to path
+    Args:
+        obj (Any): any serializable object(something like list, dataframe, dict, ...)
 
-	"""
+    Returns:
+        None
+    """
 
-	with open(path, 'wb') as handle:
-		pickle.dump(obj, handle)
+    with open(path, 'wb') as handle:
+        pickle.dump(obj, handle)
 
 
-def load_data_object(path: str) -> 'cooresponding object':
-	"""
-	input: path: str(specify a path)
+def load_data_object(path: str) -> Any:
+    """This function open the file in specified path and
+     return cooresponding data object
 
-	This function open the file in specified path and return cooresponding data object
+    Args:
+        path (path): any
 
-	"""
+    Returns:
+        Any: a python object(something like list, dataframe, dict, ...)
+    """
+    with open(path, 'rb') as handle:
+        data = pickle.load(handle)
 
-	with open(path, 'rb') as handle:
-		data = pickle.load(handle)
-
-	return data
+    return data

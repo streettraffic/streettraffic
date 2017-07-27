@@ -604,6 +604,7 @@ class TrafficData:
         Returns:
             List: a list of object like 
             ::
+
                 {
                     'crawled_timestamp': '2017-06-19T19:29:37.845000+00:00',
                     'id': 'a6f344c6-9941-41b4-aaf7-83e6ecab5ec2'
@@ -629,7 +630,7 @@ class TrafficData:
         return batch_list
 
     def get_crawled_batch_id_between(self, date_start: str, date_end: str) -> r.net.DefaultCursor:
-        """This function will get all the crawled_batch_id between date_start and date_end
+        """This function will get all the crawled_batch_id between ``date_start`` and ``date_end``
 
         Args:
             date_start (str): an ISO 8601 format string indicating the starting date
@@ -639,6 +640,7 @@ class TrafficData:
             r.net.DefaultCursor: a Cursor object of all crawled_batch_id in ``crawled_batch`` table that
             are between ``date_start`` and ``date_end``. You can use ``DefaultCursor.next()`` or 
             ::
+
                 for item in DefaultCursor:
                     print(item)  # do operation with item
 
@@ -683,6 +685,7 @@ class TrafficData:
         Returns:
             List: a list of object that looks like this
             ::
+
                 {
                     "crawled_batch_id": 5e5f9e07-d510-49ea-b19d-25e315e48c59
                     "crawled_batch_id_traffic": object # a geojson object with respect to routing_info
