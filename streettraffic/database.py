@@ -565,15 +565,16 @@ class TrafficData:
                         try:
                             road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
                             road_data_id = road_document['doc']['road_data_id']
-                        except:
-                            print('cant find nearest road once')
 
-                        ## see if road_data_id already exists in our collection
-                        if road_data_id not in road_id_collection:
-                            road_id_collection[road_data_id] = True
-                            geojson_road_id_collection += [road_data_id]
-                        else:
-                            duplicate_road_id += [road_data_id]
+                            ## see if road_data_id already exists in our collection
+                            if road_data_id not in road_id_collection:
+                                road_id_collection[road_data_id] = True
+                                geojson_road_id_collection += [road_data_id]
+                            else:
+                                duplicate_road_id += [road_data_id]
+                        
+                        except Exception as e:
+                            print('get_historic_traffic', e)
 
             route_cached_insertion = {
                 "route_cached_id": route_cached_id,
