@@ -24,11 +24,6 @@ const Analytics = () => ({
   component: import('@/components/Analytics')
 })
 
-const Polygon = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Polygon')
-})
-
 const RouteLab = () => ({
   // The component to load. Should be a Promise
   component: import('@/components/RouteLab')
@@ -58,6 +53,7 @@ const router = new Router({
       children: [
         route('QuickStart/', 'RegisterRoute', 'Streettraffic Register a Route'),
         route('QuickStart/', 'RunCrawler', 'Streettraffic run the traffic crawler'),
+        route('QuickStart/', 'Polygon', 'Streettraffic Register a city'),
         {
           path: '',
           name: 'Home',
@@ -80,14 +76,6 @@ const router = new Router({
           component: RouteLab,
           meta: {
             title: 'Streettraffic RouteLab'
-          }
-        },
-        {
-          path: 'Polygon',
-          name: 'Polygon',
-          component: Polygon,
-          meta: {
-            title: 'Streettraffic Polygon'
           }
         },
         {

@@ -76,7 +76,7 @@ export default {
           group: 'QuickStart',
           items: [
             { href: '/Main/QuickStart/RegisterRoute', title: 'Register a route' },
-            { href: '/vuetify/sandbox', title: 'Monitor a city' },
+            { href: '/Main/QuickStart/Polygon', title: 'Register a city' },
             { href: '/Main/QuickStart/RunCrawler', title: 'Run the crawler' }
           ]
         },
