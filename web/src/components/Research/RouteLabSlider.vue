@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import Chart from './Chart.vue'
+import Chart from '../Chart.vue'
 import vueSlider from 'vue-slider-component'
 
 export default {

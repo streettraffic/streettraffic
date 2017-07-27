@@ -44,19 +44,17 @@
 // To see how we use the Direction api, refer to
 // https://developers.google.com/maps/documentation/javascript/examples/directions-travel-modes
 
-import CaseStudyDirection from '../assets/case_study_newyork_boston.json'
+import CaseStudyDirection from '@/assets/case_study_newyork_boston.json'
 import { mapState } from 'vuex'
 
 // import custom components
 import RouteLabStepper from './RouteLabStepper'
 import RouteLabSlider from './RouteLabSlider'
-import HistoricBatch from './HistoricBatch'
-import HomeMap from './HomeMap.vue'
+import HomeMap from '../HomeMap.vue'
 
 export default {
-  name: 'Home',
+  name: 'RouteLab',
   components: {
-    HistoricBatch,
     RouteLabStepper,
     HomeMap,
     RouteLabSlider

@@ -1,7 +1,7 @@
 <template lang="pug">
   v-layout(row wrap)
     v-flex.my-3(xs8)
-      h6 Histraffic Polygon section
+      h6 StreetTraffic Polygon section
       p
         | In this section, you can draw a polygon in the map to specify an area of which you will download traffic data from. To start, simply click the 
         span(style='font-weight:bold') 'Load Drawing Tools'
@@ -70,12 +70,6 @@ export default {
       this.$refs.mymap.$mapObject.data.setControls(['Polygon'])
     }
   },
-  created() {
-    // pass
-  },
-  mounted() {
-    // pass
-  },
   computed: {
     historic_batch() {
       return this.$store.state.historic_batch
@@ -85,12 +79,11 @@ export default {
 </script>
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
+<style lang="sass" scoped>
 
-.geojson_output {
-  width: 100%;
-}
-  textarea {
-    border-style: solid;
-  }
+.geojson_output 
+  width: 100%
+  
+  textarea 
+    border-style: solid
 </style>

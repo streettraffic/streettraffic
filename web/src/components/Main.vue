@@ -76,40 +76,34 @@ export default {
           group: 'QuickStart',
           items: [
             { href: '/Main/QuickStart/RegisterRoute', title: 'Register a route' },
-            { href: '/Main/QuickStart/Polygon', title: 'Register a city' },
+            { href: '/Main/QuickStart/Polygon', title: 'Register an area' },
             { href: '/Main/QuickStart/RunCrawler', title: 'Run the crawler' }
           ]
         },
         {
           title: 'Query',
           action: 'devices',
-          group: 'layout',
+          group: 'Query',
           items: [
-            { href: '/layout/pre-defined', title: 'Traffic flow for multiple days' },
-            { href: '/layout/grid', title: 'Traffic for ' },
-            { href: '/layout/spacing', title: 'Spacing' },
-            { href: '/layout/alignment', title: 'Alignment' },
-            { href: '/layout/display', title: 'Display' },
-            { href: '/layout/elevation', title: 'Elevation' }
+            { href: '/Main/Query/FlowQuery', title: 'Traffic flow Query' },
+            { href: '/Main/Query/HistoryBatch', title: 'Historical Batch' }
           ]
         },
         {
           title: 'Analytics',
           action: 'insert_chart',
-          group: 'style',
+          group: 'Analytics',
           items: [
-            { href: '/style/colors', title: 'Colors' },
-            { href: '/style/theme', title: 'Theme' },
-            { href: '/style/typography', title: 'Typography' },
-            { href: '/style/content', title: 'Content' }
+            { href: '/Main/Analytics/TrafficPattern', title: 'Traffic Pattern' }
           ]
         },
         {
           title: 'Research',
           action: 'build',
-          group: 'motion',
+          group: 'Research',
           items: [
-            { href: '/motion/transitions', title: 'Transitions' }
+            { href: '/Main/Research/RouteLab', title: 'Route Lab' },
+            { href: '/Main/Research/CaseStudy', title: 'Case Study' }
           ]
         },
         { action: 'home', title: 'Home', href: '/#/Main' }
