@@ -379,7 +379,7 @@ class Utility:
             with open('route_collection.json') as f:
                 colrow_collection = json.load(f)
         else:
-            raise Exception('route_collection.json does not exist, try using server.util.register_route_tile_matrix_url()')
+            raise Exception('route_collection.json does not exist, try using server.util.register_route_tile_matrix_url()') 
         ## last step, return a pandas matrix
         matrix = pd.DataFrame(index = range(1), columns = range(len(colrow_collection)))
         i = 0

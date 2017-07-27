@@ -18,7 +18,7 @@ from .map_resource.utility import Utility
 
 class TrafficServer:
 
-    def __init__(self, settings: Dict, database_name: str = "Traffic", database_ip: str = None):
+    def __init__(self, settings: Dict, database_name: str = "Traffic", database_ip: str = None) -> None:
         """
         self.msg_queue is used to communicate with consumer_handler() and producer_handler()
         """
@@ -162,7 +162,7 @@ class TrafficServer:
             print('crawling finished')
 
             await asyncio.sleep(wait_seconds)
-            
+
 
     def _loop_in_thread(self):
         start_server = websockets.serve(self.handler, '0.0.0.0', 8765)
@@ -181,6 +181,11 @@ class TrafficServer:
         print('to run the crawler, call server.run_crawler()')
 
     def run_crawler(self):
+        try:
+            route_matrix = self.util.get_route_tile_matrix_url()
+            self.traffic_matrix_list = [route_matrix]
+        except Exception as e:
+            print(e)
         self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
 
 
