@@ -1,17 +1,20 @@
-.. StreetTraffic documentation master file, created by
-   sphinx-quickstart on Sat Jul 22 00:34:47 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. title:: StreetTraffic Package
 
-Welcome to StreetTraffic's documentation!
-=========================================
+StreetTraffic Package
+=======================
+
+StreetTraffic is a Python server package that monitors the traffic flow data of
+your favorite routes, cities and more. By using the API provided by  
+`HERE.com <https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html>`_
+, we are able to crawl the traffic data of areas of interest, and visualize
+historical traffic data.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Documentation:
 
-   intro
-   modules
+    guide/index
+    modules
 
-ok let's see
+
 
