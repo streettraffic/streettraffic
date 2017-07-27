@@ -19,19 +19,39 @@ import os
 
 class Utility:
 
-    def __init__(self, settings: Dict):
-        """
-        In order to generate Url Resources, you should get app_id and app_code at developer.HERE.com
-        Specific instructions can be found here:
-        https://developer.here.com/rest-apis/documentation/traffic/common/credentials.html
+    """This class has some utility function for map resources
 
-        Example inputs:
-        settings = {
-            'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
-            'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
-            'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
-            'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
-        }
+    In order to generate Url Resources, you should get app_id and app_code at developer.HERE.com
+    Specific instructions can be found here:
+    https://developer.here.com/rest-apis/documentation/traffic/common/credentials.html
+
+    Attributes:
+        app_id (str): The app id acquired from https://developer.here.com/
+        app_code (str): The app code acquired from https://developer.here.com/
+        map_tile_base_url (str): the base url of the map image tile requests
+            an exmaple can be found here: https://developer.here.com/api-explorer/rest/traffic/traffic-tile
+        json_tile_base_url (str): the base url of the traffic json tile requests
+            an example can be found here: https://developer.here.com/api-explorer/rest/traffic/traffic-flow-quadkey
+
+    Args:
+        settings (Dict): The settings of your app
+
+    Example:
+        >>> settings = {
+                'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+            }
+        >>> util = Utility(settings)
+        >>> util.app_id
+        'F8aPRXcW3MmyUvQ8Z3J9'
+    """
+
+    def __init__(self, settings: Dict) -> None:
+        """
+        Args:
+            settings (Dict): The settings of your app
         """
         self.app_id = settings['app_id']
         self.app_code = settings['app_code']
@@ -39,15 +59,30 @@ class Utility:
         self.json_tile_base_url = settings['json_tile_base_url']
 
     @staticmethod
-    def get_tile(lat: float, lon: float, zoom: int) -> tuple:
-        """
-        inputs: lat:float(latitue), lon:float(longitude), and zoom:int(zoom level)
-
-        The function is used to generate column and row information for HERE API usage. For details, please
+    def get_tile(lat: float, lon: float, zoom: int) -> List:
+        """Given a GPS coordiante and zoom level, generate column and row information for HERE API usage. For details, please
         visit https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/key-concepts.html
-        for reference. 
+        for reference.
 
-        return :tuple(column, row)
+        Args:
+            lat (float): latitue
+            lon (float): longitude
+            zoom (int): the zoom level
+
+        Returns:
+            List: [col, row]
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_tile(52.525439, 13.38727, 12)
+            [2200, 1343]
         """
         lat_rad = lat * math.pi / 180
         n = math.pow(2, zoom)
@@ -58,14 +93,29 @@ class Utility:
         return [int(col), int(row)]
 
     @staticmethod
-    def get_quadkeys(col: float, row: float, zoom: int) -> str:
-        """
-        inputs: col:float(column), row:float, zoom:int
-
-        This function is used to encode (col, row, zoom) as quadkey. For details, refer to 
+    def get_quadkeys(col: int, row: int, zoom: int) -> str:
+        """This function is used to encode (col, row, zoom) as quadkey. For details, refer to
         https://developer.here.com/rest-apis/documentation/traffic/common/map_tile/topics/quadkeys.html
 
-        return :str(quadkey)
+        Args:
+            col (int): column
+            row (int): row
+            zoom (int): the zoom level
+
+        Returns:
+            str: quadkey
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_quadkeys(35210, 21493, 16)
+            "1202102332221212"
         """
         quadkey = ""
         for i in range(zoom, 0, -1):
@@ -80,20 +130,31 @@ class Utility:
         return quadkey
 
     def get_map_tile_resource(self, location_data: tuple, location_type: str, zoom: int, img_size: int) -> str:
-        """
-        inputs: location_data: tuple, zoom:int(zoom level), img_size:int(256 or 512), location_type: str
-
-        The location_type and corresponding location data is as follow
-        location_type = "latlon"; location_data = (latitude, longitude)
-        location_type = "colrow"; location_data = (column, row)
-
-        This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
-        (col, row) and further use them to generate a url to get map_tile. 
+        """This function generates a url to get map_tile.
 
         For map_tile resource details, refer to
         https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/quick-start.html
 
-        return :str(url for map_tile)
+        Args:
+            location_data (tuple): either (latitude, longitude) or (column, row)
+            location_type (str): either "latlon" or "colrow"
+            zoom (int): the zoom level
+            img_size (int): the image size. There are two options: 256 or 512
+
+        Returns:
+            str: the url for requesting a map tile resource
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_map_tile_resource((33.670156, -84.325984),"latlon", 14, 512)
+            'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/14/4354/6562/512/png8?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw'
         """
         # if user did not provide a col, row, we use self.get_tile()
         if location_type == "latlon":
@@ -107,22 +168,30 @@ class Utility:
         return total_url
 
     def get_traffic_json_resource(self, location_data: tuple, location_type: str, zoom: int) -> str:
-        """
-        inputs: location_data: tuple, zoom:int(zoom level)
-        default inputs: col:int = 0, row: int = 0, location_type: str
-
-        The location_type and corresponding location data is as follow
-        location_type = "latlon"; location_data = (latitude, longitude)
-        location_type = "colrow"; location_data = (column, row)
-
-        This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
-        (col, row). Then we use (col, row) to further utilize self.get_quadkeys() to 
-        get a quad key, then generate a url to get traffic_json resource. 
+        """This function generates a url to get traffic_json resource.
 
         For traffic_json resource details, refer to
         https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html
 
-        return :str(url for traffic_tile_json)
+        Args:
+            location_data (tuple): either (latitude, longitude) or (column, row)
+            location_type (str): either "latlon" or "colrow"
+            zoom (int): the zoom level
+
+        Returns:
+            str: the url for requesting a traffic json resource
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_traffic_json_resource((34.9237, -82.4383), "latlon", 14)
+            'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc'
         """
         if location_type == "latlon":
             (col, row) = self.get_tile(*location_data, zoom)
@@ -136,22 +205,23 @@ class Utility:
         return total_url
 
     @staticmethod
-    def produce_polygon(polygon_ordered_coordinates: List, zoom: int, plot_polygon = True) -> Path:
-        """
-        inputs: 
-        polygon_ordered_coordinates: List(an ordered list of points that composes a polygon)
-        plot_polygon = True
-        zoom: int
-        example inputs:
-        [[25.890099, -80.264561], [25.851873, -80.308744], [25.81123, -80.248538], [25.848596, -80.215765]], True
-
-
-        This function use matplotlib.path to create a Path/polygon object. Later we can use
+    def produce_polygon(polygon_ordered_coordinates: List, zoom: int, plot_polygon: bool = False) -> Path:
+        """This function use matplotlib.path to create a Path/polygon object. Later we can use
         this Path/polygon object to invoke Path.contains_point() method. For more details 
         on contains_point(), refer to 
         https://stackoverflow.com/questions/21328854/shapely-and-matplotlib-point-in-polygon-not-accurate-with-geolocation
 
-        If plot_polygon == True, we use matplotlib to plot the polygon
+        Args:
+            polygon_ordered_coordinates (List): an ordered list of points that composes a polygon
+            zoom (int): the zoom level
+            plot_polygon (bool): If plot_polygon == True, we use matplotlib to plot the polygon
+
+        Returns:
+            matplotlib.path.Path: a Path polygon
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> example_polygon_ordered_coordinates = [[25.890099, -80.264561], [25.851873, -80.308744], [25.81123, -80.248538], [25.848596, -80.215765]]
         """
         polygon_tile_points = []
         for item in polygon_ordered_coordinates:
@@ -169,26 +239,31 @@ class Utility:
         return polygon
 
     @staticmethod
-    def get_area_tile_matrix(list_points: List, zoom: int, use_polygon = False) -> pd.DataFrame:
-        """
-        inputs: list_points (GPS coordinates that you want to add)
-                zoom: int(zoom level)
-                use_polygon = None
+    def get_area_tile_matrix(list_points: List, zoom: int, use_polygon: bool = False) -> pd.DataFrame:
+        """This function takes the coordinates from list_points and calculate their tile (col, row),
+        then it generate a matrix of tiles to cover the square area spanned by those coordinates. 
+        If use_polygon == True, however, then we generate a polygon given by self.produce_polygon,
+        and further eliminate any tiles in the matrix that are not **inside** of the polygon
 
-        example inputs: [(33.766764, -84.409533), (33.740003, -84.368978)], 14
+        ::
 
-        This function takes the coordinates from *args and calculate their tile (col, row),
-        then it generate a matrix of tiles to cover the square defined by those coordinates.
+            ###^^^^^^*####  (in this example, two coordinates are denoted as *
+            #  ^^^^^^^   #   and this function should generate tile to cover the
+            #  ^^^^^^^   #   area denoted by ^ and *)
+            ###*^^^^^^####
 
-        If use_polygon == True, then we generate a polygon given by self.produce_polygon,
-        and further return the area_tiles that are **inside**(not including boundry) the polygon
+        Args:
+            list_points (List): list of GPS coordinates that you want to add
+            zoom (int): the zoom level
+            use_polygon (bool): If plot_polygon == True, then we generate a polygon given by self.produce_polygon,
+                and further eliminate any tiles in the matrix that are not **inside** of the polygon
 
-        ###^^^^^^*####  (in this example, two coordinates are denoted as *
-        #  ^^^^^^^   #   and this function should generate tile to cover the
-        #  ^^^^^^^   #   area denoted by ^ and *)
-        ###*^^^^^^####
+        Returns:
+            DataFrame: a matrix filled with tiles number (col, row)
 
-        return :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> example_list_points = [(33.766764, -84.409533), (33.740003, -84.368978)]
         """
         tiles = []
         for point in list_points:
