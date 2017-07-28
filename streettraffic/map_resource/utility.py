@@ -362,7 +362,33 @@ class Utility:
         ## third step, save the route_set.json
         with open('route_collection.json', 'w') as f:
             json.dump(colrow_collection, f)
+    
+    def register_area_polygon(self, area_description: str, geojson_polygon: str) -> None:
+        """
 
+        Args:
+            routing_info (Dict): 
+
+        Returns:
+            None
+        """
+
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('area_collection.json'):
+            with open('area_collection.json') as f:
+                area_collection = json.load(f)
+        else:
+            area_collection = []
+
+        ## second step, add all possible colrow in colrow_collection
+        area_collection += [{
+            'area_description': area_description,
+            'polygon': self.read_geojson_polygon(geojson_polygon)
+        }]
+
+        ## third step, save the route_set.json
+        with open('area_collection.json', 'w') as f:
+            json.dump(area_collection, f)
 
     def get_route_tile_matrix_url(self) -> pd.DataFrame:
         """This function load the ``route_collection.json`` in the your current directory
@@ -389,6 +415,23 @@ class Utility:
 
         return matrix
 
+    def get_area_polygon_collection(self) -> List:
+        """
+
+        Args:
+            routing_info (Dict): 
+
+        Returns:
+            None
+        """
+
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('area_collection.json'):
+            with open('area_collection.json') as f:
+                area_collection = json.load(f)
+            return area_collection
+        else:
+            raise Exception('area_collection.json does not exist, try using server.util.register_area_polygon()')
 
 
     def assemble_matrix_images(self, matrix: pd.DataFrame) -> pd.DataFrame:

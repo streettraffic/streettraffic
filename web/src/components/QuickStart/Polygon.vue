@@ -20,12 +20,14 @@
               .geojson_output
                 textarea(style='width: 100%; height: 300px', v-model='map_geojson')
             v-card-title
-              .headline Geojson Format (uglified)
+              .headline Give a description to the area polygon you just drawed
             v-card-text
-              p
-                | Now, simply copy the following json encoded string, and use map_resource.ultil.read_geojson_polygon() to generate a polygon
-              .geojson_output
-                div '{{map_geojson}}'
+              v-text-field(
+                label="Area description"
+                class="input-group--focused"
+                v-model="area_description"
+              )
+              v-btn(primary @click.native="registerArea();dialog=false" light).ml-0 Register this city
     v-flex.my-3(xs12='')
       v-card
         v-card-row.green.darken-1
@@ -55,24 +57,22 @@ export default {
     return {
       center: {lat: 33.7601, lng: -84.37429}, // {lat: 34.91623, lng: -82.42907}  Furman   {lat: 33.7601, lng: -84.37429} Atlanta
       map_geojson: null,
-      dialog: false
+      dialog: false,
+      area_description: ''
     }
   },
   methods: {
     displayGeoJson() {
-      let results
+      let self = this
       this.$refs.mymap.$mapObject.data.toGeoJson((geojson) => {
-        results = JSON.stringify(geojson, null, 2)
+        self.map_geojson = JSON.stringify(geojson, null, 2)
       })
-      this.map_geojson = results
+    },
+    registerArea() {
+      this.$store.state.ws.send(JSON.stringify(['registerArea', this.area_description, this.map_geojson]))
     },
     loadControls() {
       this.$refs.mymap.$mapObject.data.setControls(['Polygon'])
-    }
-  },
-  computed: {
-    historic_batch() {
-      return this.$store.state.historic_batch
     }
   }
 }

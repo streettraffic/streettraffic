@@ -117,7 +117,12 @@ class TrafficServer:
                 elif message[0] == "registerRoute":
                     print("registerRoute")
                     self.util.register_route_tile(message[1])
-                    print('register finished')
+                    print('registerRoute finished')
+
+                elif message[0] == "registerArea":
+                    print("registerArea")
+                    self.util.register_area_polygon(message[1], message[2])
+                    print('registerArea finished')
 
                 elif message[0] == "runCrawler":
                     print("runCrawler")
@@ -181,12 +186,23 @@ class TrafficServer:
         print('to run the crawler, call server.run_crawler()')
 
     def run_crawler(self):
+        ## try import registered routes
         try:
             route_matrix = self.util.get_route_tile_matrix_url()
-            self.traffic_matrix_list = [route_matrix]
+            self.traffic_matrix_list += [route_matrix]
         except Exception as e:
             print(e)
-        self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
+
+        ## try import registered cities
+        try:
+            area_collection = self.util.get_area_polygon_collection()
+            for area in area_collection:
+                self.traffic_matrix_list += [self.util.get_area_tile_matrix_url("traffic_json", area['polygon'], 14, True)]
+        except Exception as e:
+            print(e)
+
+        print(self.traffic_matrix_list)
+        #self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
 
 
 class NonRootHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):

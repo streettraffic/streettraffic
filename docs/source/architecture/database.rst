@@ -90,7 +90,7 @@ Don't panic, the next section gives more details on how the data is stored and i
 Data Query and Analytics (a higl-level description)
 -------------------------------------------------------
 
-It turned out that given a route, asking the nearest ``road_data` document for each coordiantes
+It turned out that given a route, asking the nearest ``road_data`` document for each coordiantes
 in the route is computationally expensive. Therefore we create a ``route_cached``
 table to remember all the ``road_data_id`` for a given route. 
 
