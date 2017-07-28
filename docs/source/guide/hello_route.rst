@@ -3,7 +3,7 @@ Hello World (Crawl a Route)
 
 Let's let's crawl the traffic flow data of your favorite route.
 
-Copy the following code and store it in ``traffic.py``:: 
+Copy the following code and store it in ``hello_route.py``:: 
 
     # hello_route.py
 
@@ -22,7 +22,7 @@ Copy the following code and store it in ``traffic.py``::
     server = TrafficServer(settings)
     server.start()
 
-Then run ::
+Then run the folloing command in a console at the current directory::
 
     python hello_route.py
 

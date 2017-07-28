@@ -1,24 +1,12 @@
-Hello World (Crawl a City)
+Hello World (Crawl an Area)
 ===============================
 
-Let's crawl the traffic flow data of San Francisco! We predefined a 
-``San_Francisco_polygon`` for you. The polygon looks like this:
+Let's let's crawl the traffic flow data of your favorite city.
 
-.. image:: SanFrancisco.PNG
-    :alt: San_Francisco_polygon
+Copy the following code and store it in ``hello_city.py``:: 
 
-Copy the following code and store it in ``traffic.py``:: 
+    # hello_city.py
 
-    # traffic.py
-
-    ## import system module
-    import json
-    import rethinkdb as r
-    import time
-    import datetime as dt
-    import asyncio
-
-    ## import custom module
     from streettraffic.server import TrafficServer
     from streettraffic.predefined.cities import San_Francisco_polygon
 
@@ -32,15 +20,47 @@ Copy the following code and store it in ``traffic.py``::
 
     ## initialize traffic server
     server = TrafficServer(settings)
-    San_Francisco_matrix = server.util.get_area_tile_matrix_url("traffic_json", San_Francisco_polygon, 14, True)
-    server.traffic_matrix_list = [San_Francisco_matrix]
-
     server.start()
-    conn = server.traffic_data.conn
 
-Then run ::
+Then run the folloing command in a console at the current directory::
 
-    python traffic.py
+    python hello_city.py
 
-Now open `<http://localhost:8080>`_ for our RethinkDB Web UI. And it should be crawling data like
-the following picture. When it's done, open `<http://localhost:9000>`_ for our Web UI.
+Now open `<http://localhost:8080>`_ for our RethinkDB Web UI 
+and open `<http://localhost:9000>`_ for our Web UI. Hit the
+**Enter** button on the main page. Now go to ``Quick Start -- Register an area``
+link on the left menu, you should be seeing this:
+
+.. image:: polygon_tutorial.PNG
+    :alt: polygon_tutorial
+
+Now hit the **1. LOAD DRAWING TOOLS** button, then hit the little polygon
+tool inside of the map, and start drawing. When you are finished, hit 
+**2. FINISHED DRAWING POLYGON** button. Now you should be seeing this:
+
+.. image:: polygon_tutorial2.PNG
+    :alt: polygon_tutorial2
+
+Give the area a name under **Area Description** and hit **REGISTER THIS CITY** button.
+
+If you want to register more than one city, you need to refresh the page and
+start drawing again.
+
+When you are done, click the ``Quick Start -- Run the crawler`` link on the left Menu. Then 
+click **RUN THE CRAWLER** button. Now if you see the console, you should see this:
+
+
+.. image:: polygon_tutorial3.PNG
+    :alt: polygon_tutorial3
+
+You may also open `<http://localhost:8080>`_ to see reads and writes that are going on 
+in your database. It looks like this:
+
+.. image:: rethinkdb.PNG
+    :alt: rethinkdb
+
+When the reads and writes are finished, you may open `<http://localhost:9000>`_ and 
+open the ``Query -- Traffic Flow Query`` link on the left Menu and follow the step to query 
+a route within the area you just registered.
+
+That's it!
