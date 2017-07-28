@@ -4,7 +4,7 @@ crawled_batch (table)
     {
         "crawled_matrix_encoding":
         "crawled_timestamp":                     # secondary timestamp key
-        "crawled_data_id":                       #(primary key)
+        "crawled_batch_id":                       #(primary key)
     }
 
 original_data (table)
