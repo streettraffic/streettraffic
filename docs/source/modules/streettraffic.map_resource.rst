@@ -1,10 +1,8 @@
-streettraffic.map_resource package
+streettraffic.map_resource
 ==================================
 
-Submodules
-----------
 
-streettraffic.map_resource.utility module
+streettraffic.map_resource.utility
 -----------------------------------------
 
 .. automodule:: streettraffic.map_resource.utility
@@ -12,11 +10,3 @@ streettraffic.map_resource.utility module
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: streettraffic.map_resource
-    :members:
-    :undoc-members:
-    :show-inheritance:

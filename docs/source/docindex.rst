@@ -15,7 +15,7 @@ historical traffic data.
 
     guide/index
     architecture/index
-    modules
+    modules/index
 
 
 
