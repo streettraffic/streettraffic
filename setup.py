@@ -31,7 +31,7 @@ class Custom_bdist_wheel(bdist_wheel):
 setup(
     name = 'streettraffic',
     packages = find_packages(), # this must be the same as the name above
-    version = '0.1.6',
+    version = '0.1.7',
     description = 'Monitor the traffic flow of your favorite routes, cities, and more',
     url='https://github.com/vwxyzjn/streettraffic',
     author = 'Costa Huang',
