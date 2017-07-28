@@ -15,8 +15,8 @@ Database schema (Part 1)
 
 Don't panic, the next section gives more details on how the data is stored and interacted.
 
-.. image:: database.png
-    :alt: database
+.. image:: database_part1.png
+    :alt: database_part1
 
 Storing Data (a higl-level description)
 ----------------------------------------------
@@ -61,7 +61,7 @@ and a typical geometry looks like this ::
 We essentailly stored the road geometries in ``road_data`` table and traffic flow data in
 ``flow_data`` table, and link them through ``flow_item_id`` of ``flow_item`` table. 
 
-A Query Example
+A Query Example (high-level description)
 ----------------------------------------------
 
 A typical traffic-related query would ask for the traffic flow at
@@ -77,3 +77,27 @@ Then we find the related ``crawled_batch_id`` with respect to the given time ran
 
 Finally, we can retrieve the traffic flow data at ``flow_data`` table by using
 ``[crawled_batch_id, flow_item_id]`` compound index. 
+
+
+Database schema (Part 2)
+--------------------------
+
+Don't panic, the next section gives more details on how the data is stored and interacted.
+
+.. image:: database_part2.png
+    :alt: database_part2
+
+Data Query and Analytics (a higl-level description)
+-------------------------------------------------------
+
+It turned out that given a route, asking the nearest ``road_data` document for each coordiantes
+in the route is computationally expensive. Therefore we create a ``route_cached``
+table to remember all the ``road_data_id`` for a given route. 
+
+For analytics, we were interested in the traffic pattern of the entire city,
+so we would sample some coordiantes in a given area and store the information
+in ``analytics_monitored_area``. 
+
+Finally, every time we crawl traffic flow data, we can update a 
+``analytics_traffic_pattern`` document, in which we calculate the averageJF
+(average Jamming Factor) for all the ``flow_item`` recorded in ``analytics_monitored_area``
