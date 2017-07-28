@@ -364,10 +364,11 @@ class Utility:
             json.dump(colrow_collection, f)
     
     def register_area_polygon(self, area_description: str, geojson_polygon: str) -> None:
-        """
+        """This function register an area polygon and store it in ``area_collection.json``
 
         Args:
-            routing_info (Dict): 
+            area_description (str): a description of the area
+            geojson_polygon (str): the geojson formatted string polygon
 
         Returns:
             None
@@ -394,9 +395,6 @@ class Utility:
         """This function load the ``route_collection.json`` in the your current directory
         and return a traffic_json url matrix
 
-        Args:
-            None 
-
         Returns:
             DataFrame: a traffic_json url matrix that we can use to crawl data
         """
@@ -416,13 +414,11 @@ class Utility:
         return matrix
 
     def get_area_polygon_collection(self) -> List:
-        """
-
-        Args:
-            routing_info (Dict): 
+        """This function load the ``route_collection.json`` in the your current directory
+        and return the its python equivalent list
 
         Returns:
-            None
+            List: a list of object like ``{'area_description': ..., 'polygon': ...}``
         """
 
         ## first step, try to read colrow set if possible

@@ -36,7 +36,7 @@
             v-spacer
         v-card-text
           v-card-row(height='auto', center='')
-            gmap-map(ref='mymap', :center='center', :zoom='14', style='width: 100%; height: 500px')
+            gmap-map(ref='mymap', :center='center', :zoom='6', style='width: 100%; height: 500px')
 
 </template>
 
