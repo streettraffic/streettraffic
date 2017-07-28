@@ -14,6 +14,7 @@ historical traffic data.
     :caption: Documentation:
 
     guide/index
+    architecture/index
     modules
 
 

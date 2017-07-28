@@ -1,5 +1,5 @@
 StreetTraffic Reference
-=============
+==================================
 
 .. toctree::
    :maxdepth: 4
