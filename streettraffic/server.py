@@ -200,9 +200,8 @@ class TrafficServer:
                 self.traffic_matrix_list += [self.util.get_area_tile_matrix_url("traffic_json", area['polygon'], 14, True)]
         except Exception as e:
             print(e)
-
-        print(self.traffic_matrix_list)
-        #self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
+        
+        self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
 
 
 class NonRootHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):

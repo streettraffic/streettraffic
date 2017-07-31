@@ -1028,6 +1028,7 @@ class TrafficData:
             'analytics_monitored_area_id': analytics_monitored_area_id,
             'average_JF': 0,
             'standard_deviation_JF': 0,
+            'JF_collection': [],
             'flow_item_count':len(flow_item_id_collection)
         }
 
@@ -1042,8 +1043,9 @@ class TrafficData:
                 print("insert_analytics_traffic_pattern", e)
         
         JF_collection_numpy = np.array(JF_collection)
-        analytics_traffic_pattern_insertion['average_JF'] += JF_collection_numpy.mean()
-        analytics_traffic_pattern_insertion['standard_deviation_JF'] += JF_collection_numpy.std()
+        analytics_traffic_pattern_insertion['average_JF'] = JF_collection_numpy.mean()
+        analytics_traffic_pattern_insertion['standard_deviation_JF'] = JF_collection_numpy.std()
+        analytics_traffic_pattern_insertion['JF_collection'] = sorted(JF_collection, reverse=False)
         r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
 
 
