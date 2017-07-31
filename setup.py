@@ -11,9 +11,9 @@ def custom_command():
         ## windows apparently is a little special, we have to install shapely through
         ## http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
         if platform.architecture()[0] == '64bit':
-            call(['pip', 'install', 'https://github.com/vwxyzjn/histraffic/raw/master/Shapely-1.5.17-cp36-cp36m-win_amd64.whl'])
+            call(['pip', 'install', 'https://github.com/streettraffic/streettraffic.github.io/raw/master/assets/Shapely-1.5.17-cp36-cp36m-win_amd64.whl'])
         else:
-            call(['pip', 'install', 'https://github.com/vwxyzjn/histraffic/raw/master/Shapely-1.5.17-cp36-cp36m-win32.whl'])
+            call(['pip', 'install', 'https://github.com/streettraffic/streettraffic.github.io/raw/master/assets/Shapely-1.5.17-cp36-cp36m-win32.whl'])
     else:
         call(['pip', 'install', 'shapely'])
 
@@ -31,7 +31,7 @@ class Custom_bdist_wheel(bdist_wheel):
 setup(
     name = 'streettraffic',
     packages = find_packages(), # this must be the same as the name above
-    version = '0.1.7',
+    version = '0.1.8',
     description = 'Monitor the traffic flow of your favorite routes, cities, and more',
     url='https://github.com/vwxyzjn/streettraffic',
     author = 'Costa Huang',
