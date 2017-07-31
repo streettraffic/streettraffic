@@ -1,43 +1,24 @@
-<template>
-  <v-flex xs12 class="my-3" v-show="trafficInfoSliderShow">
-    <v-card>
-      <v-card-row class="green darken-1">
-        <v-card-title>
-          <span class="white--text">Traffic Info Slider</span>
-          <v-spacer></v-spacer>
-        </v-card-title>
-      </v-card-row>
-      <v-card-text>
-        <v-card-row>
-          This will automatically show the geojson data that has been plotted into the map<br> <br>
-        </v-card-row>
-        <v-card-row height="auto">
-          <div class="historic_slider">
-            <vue-slider @callback="displaySelectedHistoric" :real-time="true" ref="historic_slider_ref" v-bind="historic_slider" v-model="historic_slider.value"></vue-slider>
-            <br>
-            <p>Currently Dsiplayed: {{ historic_slider.value }}</p>
-            <p>Avrage Jamming Factor: {{ averageJammingFacotr }}</p>
-            <div class="jammingFactorChart">
-              <Chart 
-                v-if="chartFinished" 
-                :data="chartData" 
-                :labels="chartLabel" 
-                :chartTitle="'Average Jamming Factor at Each Instant'"
-                chartId="instant">
-              </Chart>
-              <Chart 
-                v-if="chartFinished" 
-                :data="intervalChartData" 
-                :labels="intervalChartLabel" 
-                :chartTitle="'Average Jamming Factor for Each Interval of Travel'"
-                chartId="interval">
-              </Chart>
-            </div>
-          </div>
-        </v-card-row>
-      </v-card-text>
-    </v-card>
-  </v-flex>
+<template lang="pug">
+  v-flex.my-3(xs12 v-show='trafficInfoSliderShow')
+    v-card
+      v-card-row.green.darken-1
+        v-card-title
+          span.white--text Traffic Info Slider
+          v-spacer
+      v-card-text
+        v-card-row
+          | This will automatically show the geojson data that has been plotted into the map
+          br
+          br
+        v-card-row(height='auto')
+          .historic_slider
+            vue-slider(@callback='displaySelectedHistoric' :real-time='true' ref='historic_slider_ref' v-bind='historic_slider' v-model='historic_slider.value')
+            br
+            p Currently Dsiplayed: {{ historic_slider.value }}
+            p Avrage Jamming Factor: {{ averageJammingFacotr }}
+            .jammingFactorChart
+              chart(v-if='chartFinished' :data='chartData' :chartTitle="'Average Jamming Factor at Each Instant'" chartId='instant')
+              chart(v-if='chartFinished' :data='intervalChartData' :chartTitle="'Average Jamming Factor for Each Interval of Travel'" chartId='interval')
 </template>
 
 <script>
@@ -64,10 +45,24 @@ export default {
       geojson_historic_collection: null,
       geojson_historic_collection_indices: {},
       averageJammingFacotr: null,
-      chartLabel: [],
-      chartData: [],
-      intervalChartLabel: [],
-      intervalChartData: [],
+      chartData: {
+        labels: [],
+        datasets: [{
+          label: 'Jamming Factor',
+          data: [],
+          borderColor: '#3498db',
+          fill: false
+        }]
+      },
+      intervalChartData: {
+        labels: [],
+        datasets: [{
+          label: 'Jamming Factor',
+          data: [],
+          borderColor: '#3498db',
+          fill: false
+        }]
+      },
       chartFinished: false
     }
   },
@@ -166,14 +161,13 @@ export default {
       console.log(eachTimeData)
       let total 
       for (let [timePoint, jammingFactorArray] of eachTimeData) {
-        self.chartLabel.push(timePoint)
+        self.chartData['labels'].push(timePoint)
         total = 0
         jammingFactorArray.forEach((JammingFactor) => {
           total += JammingFactor
         })
-        self.chartData.push(total / jammingFactorArray.length)
+        self.chartData['datasets'][0]['data'].push(total / jammingFactorArray.length)
       }
-      console.log(self.chartLabel)
       console.log(self.chartData)
       self.chartFinished = true
       self.$emit('HomeSlider_ChartFinished')
@@ -185,22 +179,21 @@ export default {
       console.log(journey_duration)
       // notice chartLabel are 30 minutes away from each other.
       let index_skip = Math.ceil(journey_duration / (30 * 60))
-      if (index_skip > self.chartLabel.length - 1){
+      if (index_skip > self.chartData['labels'].length - 1){
         // nothing we can do
       }
       else {
         let sum
-        for (let i = 0; i < self.chartLabel.length - index_skip; i++) {
-          self.intervalChartLabel.push(self.chartLabel[i] + ' to ' + self.chartLabel[i + index_skip])
+        for (let i = 0; i < self.chartData['labels'].length - index_skip; i++) {
+          self.intervalChartData['labels'].push(self.chartData['labels'][i] + ' to ' + self.chartData['labels'][i + index_skip])
           sum = 0
-          for (let jammingFactor of self.chartData.slice(i, i + index_skip)) {
+          for (let jammingFactor of self.chartData['datasets'][0]['data'].slice(i, i + index_skip)) {
             sum += jammingFactor
           }
-          self.intervalChartData.push(sum / index_skip)
+          self.intervalChartData['datasets'][0]['data'].push(sum / index_skip)
         }
       }
       console.log('calculateAverageJammingFactorForEachInterval')
-      console.log(self.intervalChartLabel)
       console.log(self.intervalChartData)
     }
   }

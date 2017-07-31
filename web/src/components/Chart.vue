@@ -26,12 +26,9 @@ export default {
     }
   },
   props: {
-    labels: {
-      default: () => ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange']
-    },
     data: {
-      type: Array,
-      default: () => [12, 19, 3, 5, 2, 3]
+      type: Object,
+      default: () => {}
     },
     chartTitle: {
       type: String
@@ -41,22 +38,14 @@ export default {
     }
   },
   methods: {
-    buildChart(labels, data) {
+    buildChart(data) {
       let ctx = document.getElementById(this.chartId).getContext('2d')
       if (this.chart) {
         this.chart.destroy()
       }
       this.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Jamming Factor',
-            data: data,
-            backgroundColor: Array(this.data.length).fill('#3498db'),
-            borderWidth: 1
-          }]
-        },
+        type: 'line',
+        data: data,
         options: {
           maintainAspectRatio: false,
           scales: {
@@ -71,14 +60,17 @@ export default {
     }
   },
   mounted() {
-    this.buildChart(this.labels, this.data)
+    console.log('mounted')
+    this.buildChart(this.data)
+    console.log('finished')
   },
   watch: {
     labels(val) {
-      this.buildChart(this.labels, this.data)
+      this.buildChart(this.data)
     },
     data(val) {
-      this.buildChart(this.labels, this.data)
+      console.log(val)
+      this.buildChart(this.data)
     }
   }
 }

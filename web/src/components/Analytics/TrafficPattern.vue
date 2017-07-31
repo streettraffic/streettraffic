@@ -1,37 +1,35 @@
-<template>
-  <v-layout row wrap>
-    <v-flex xs8 class="my-3">
-      <h6>StreetTraffic Traffic Pattern</h6>
-      <p>In this section, you can pick a date at the calendar below and the site will generate a graph of average jamming factor of the city you are monitoring</p>
-      <p>Now pick a city that we monitored</p>
-      <v-select
-        v-bind:items="analytics_monitored_area_description_collection"
-        v-model="selected_area_description"
-        label="Select"
-        class="input-group--focused"
-      ></v-select>
-    </v-flex>
-    <v-flex xs12 md6>
-      <v-card>
-        <v-card-row class="green darken-1">
-          <v-card-title>
-            <span class="white--text">Analytics</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-        </v-card-row>
-        <v-card-text>
-          <v-card-row height="auto" center>
-            <canvas id="myChart" width="400" height="400"></canvas>
-          </v-card-row>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-    <v-flex xs12 md5 class="ma-3">
-      <h6>Pick a date here to see traffic patterns</h6>
-      <v-date-picker v-model="datePicker"></v-date-picker>
-      <div v-show="true">{{datePicked}}</div>
-    </v-flex>
-  </v-layout>
+<template lang="pug">
+  v-layout(row wrap)
+    v-flex.my-3(xs8)
+      h6 StreetTraffic Traffic Pattern
+      p
+        | In this section, you can pick a date at the calendar below and the site will generate a graph of average jamming factor of the city you are monitoring
+      p Now pick a city that we monitored
+      v-select.input-group--focused(v-bind:items='analytics_monitored_area_description_collection' v-model='selected_area_description' label='Select')
+    v-flex(xs12 md6)
+      v-card
+        v-card-row.green.darken-1
+          v-card-title
+            span.white--text Quartile
+            v-spacer
+        v-card-text
+          v-card-row(height='auto' center)
+            canvas#quartile(width='400' height='400')
+    v-flex.ma-3(xs12 md5)
+      h6 Pick a date here to see traffic patterns
+      v-date-picker(v-model='datePicker')
+      div(v-show='true') {{datePicked}}
+    
+    
+    v-flex(xs12 md6).mt-5
+      v-card
+        v-card-row.green.darken-1
+          v-card-title
+            span.white--text Mean and Standard Deviation
+            v-spacer
+        v-card-text
+          v-card-row(height='auto' center)
+            canvas#std(width='400' height='400')
 </template>
 
 <script>
@@ -74,7 +72,6 @@ export default {
         This funciton will request the traffic pattern of this date from '2017-5-23 0:00' to '2017-5-23 23:59'
         with respect to local time. Then use the traffic pattern data to build a chart
       */
-      console.log('getTrafficPattern')
       let self = this
       let day_start = new Date(this.datePicker + 'T00:00')
       let day_end = new Date(this.datePicker + 'T23:59')
@@ -82,26 +79,42 @@ export default {
       this.$store.state.ws.send(JSON.stringify(['getTrafficPattern', day_start.toISOString(), day_end.toISOString(), this.selected_area_description]))
       this.$store.state.ws.onmessage = function(event) {
         let traffic_pattern = JSON.parse(event.data)
-        let time = null
-        self.buildChart(traffic_pattern.map((item) => { time = new Date(item.crawled_timestamp)
-          return time.getHours() }),
-          traffic_pattern.map((item) => item.average_JF))
+        console.log(traffic_pattern)
+        let labels = traffic_pattern.map((item) => {
+          return new Date(item.crawled_timestamp).toLocaleTimeString()
+        })
+        let data = traffic_pattern.map((item) => item.average_JF)
+        let upper = traffic_pattern.map((item) => item.average_JF + item.standard_deviation_JF)
+        let lower = traffic_pattern.map((item) => item.average_JF - item.standard_deviation_JF)
+        self.buildChart('std', labels, data, upper, lower)
       }
     },
-    buildChart(labels, data) {
-      let ctx = document.getElementById('myChart').getContext('2d')
+    buildChart(id, labels, data, upper, lower) {
+      let ctx = document.getElementById(id).getContext('2d')
       if (this.chart) {
         this.chart.destroy()
       }
       this.chart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: labels,
           datasets: [{
             label: 'Jamming Factor',
             data: data,
-            backgroundColor: Array(data.length).fill('#3498db'),
-            borderWidth: 1
+            borderColor: '#3498db',
+            fill: false
+          },
+          {
+            label: 'Error upper',
+            data: upper,
+            borderColor: '#FF5733',
+            fill: false
+          },
+          {
+            label: 'Error lower',
+            data: lower,
+            borderColor: '#FF5733',
+            fill: false
           }]
         },
         options: {
@@ -128,15 +141,14 @@ export default {
     }
   },
   mounted() {
-    this.buildChart([], [])
-  },
-  created() {
     let self = this
     this.$store.state.ws.send(JSON.stringify(['getAnalyticsMonitoredAreaDescriptionCollection']))
     this.$store.state.ws.onmessage = function (event) {
       self.analytics_monitored_area_description_collection = JSON.parse(event.data)
       console.log(self.analytics_monitored_area_description_collection)
     }
+    this.buildChart('std', [], [])
+    this.buildChart('quartile', [], [])
   }
 }
 </script>
