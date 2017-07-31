@@ -5,6 +5,7 @@ import requests
 from dateutil import parser
 import datetime
 import pandas as pd
+import numpy as np
 import time
 import json
 import asyncio
@@ -996,6 +997,7 @@ class TrafficData:
                 "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
                 "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
                 "average_JF": 0.09392949526813882 ,
+                "standard_deviation_JF": 0.01632949985813882
                 "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
                 "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
                 "flow_item_count": 317
@@ -1025,19 +1027,23 @@ class TrafficData:
             'crawled_timestamp': crawled_batch_doc['crawled_timestamp'],
             'analytics_monitored_area_id': analytics_monitored_area_id,
             'average_JF': 0,
+            'standard_deviation_JF': 0,
             'flow_item_count':len(flow_item_id_collection)
         }
 
         ## third step: start to calculate the traffic_pattern
+        JF_collection = []
         for flow_item_id in flow_item_id_collection:
             try:
                 flow_data_JF = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").get_field('JF').limit(3).run(self.conn).next()
-                analytics_traffic_pattern_insertion['average_JF'] += flow_data_JF
+                JF_collection += [flow_data_JF]
+                
             except Exception as e:
                 print("insert_analytics_traffic_pattern", e)
-
-        analytics_traffic_pattern_insertion['average_JF'] = analytics_traffic_pattern_insertion['average_JF'] / analytics_traffic_pattern_insertion['flow_item_count']  # get average
-
+        
+        JF_collection_numpy = np.array(JF_collection)
+        analytics_traffic_pattern_insertion['average_JF'] += JF_collection_numpy.mean()
+        analytics_traffic_pattern_insertion['standard_deviation_JF'] += JF_collection_numpy.std()
         r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
 
 
