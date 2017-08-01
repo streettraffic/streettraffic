@@ -43,8 +43,8 @@ polygon_collection = [
 
 
 # setup monitoring area
-for polygon_item in polygon_collection:
-    server.traffic_data.set_traffic_patter_monitoring_area(polygon_item[1], description=polygon_item[0], grid_point_distance=1000, testing=True, force=True)
+#for polygon_item in polygon_collection:
+#    server.traffic_data.set_traffic_patter_monitoring_area(polygon_item[1], description=polygon_item[0], grid_point_distance=1000, testing=True, force=True)
 
 date = ["2017-07-13T04:00:00.000Z","2017-07-14T03:00:00.000Z"]
 polygon_name_collection = ['San_Francisco_polygon', 'Boston_polygon', 'Pittsburgh_polygon', 'Greenville_polygon', 'Norfolk_polygon']

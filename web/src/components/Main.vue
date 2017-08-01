@@ -129,7 +129,7 @@ export default {
         { icon: 'build', title: 'CaseStudy', routerAddress: '/Main/CaseStudy' }
       ],
       miniVariant: false,
-      title: 'Histraffic'
+      title: 'StreetTraffic'
     }
   },
   mounted() {
