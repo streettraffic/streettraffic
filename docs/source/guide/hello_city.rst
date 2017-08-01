@@ -3,9 +3,9 @@ Hello World (Crawl an Area)
 
 Let's let's crawl the traffic flow data of your favorite city.
 
-Copy the following code and store it in ``hello_city.py``:: 
+Create a new file ``hello_world.py`` and copy the following code to it:: 
 
-    # hello_city.py
+    # hello_world.py
 
     from streettraffic.server import TrafficServer
     from streettraffic.predefined.cities import San_Francisco_polygon
@@ -24,7 +24,7 @@ Copy the following code and store it in ``hello_city.py``::
 
 Then run the folloing command in a console at the current directory::
 
-    python hello_city.py
+    python hello_world.py
 
 Now open `<http://localhost:8080>`_ for our RethinkDB Web UI 
 and open `<http://localhost:9000>`_ for our Web UI. Hit the

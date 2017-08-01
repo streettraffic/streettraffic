@@ -3,9 +3,9 @@ Hello World (Crawl a Route)
 
 Let's let's crawl the traffic flow data of your favorite route.
 
-Copy the following code and store it in ``hello_route.py``:: 
+Create a new file ``hello_world.py`` and copy the following code to it:: 
 
-    # hello_route.py
+    # hello_world.py
 
     from streettraffic.server import TrafficServer
     from streettraffic.predefined.cities import San_Francisco_polygon
@@ -24,7 +24,7 @@ Copy the following code and store it in ``hello_route.py``::
 
 Then run the folloing command in a console at the current directory::
 
-    python hello_route.py
+    python hello_world.py
 
 Now open `<http://localhost:8080>`_ for our RethinkDB Web UI 
 and open `<http://localhost:9000>`_ for our Web UI. Hit the
@@ -36,7 +36,7 @@ page opened like this:
 
 Enter the starting address and destination address. When you are finished, click
 the **SELECT THEM** button, it will automatically generate a ``route_collection.json``
-in the folder of which you stored ``hello_route.py``. You may hit button **haha** 
+in the folder of which you stored ``hello_world.py``. You may hit button **TRY AGAIN** 
 multiple times to select multiple interested route.
 
 When you are done, click the **Run the crawler** link on the left Menu. Then 
