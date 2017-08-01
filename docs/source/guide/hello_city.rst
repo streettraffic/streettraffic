@@ -1,3 +1,5 @@
+.. _hello_city:
+
 Hello World (Crawl an Area)
 ===============================
 
@@ -22,9 +24,9 @@ Create a new file ``hello_world.py`` and copy the following code to it::
     server = TrafficServer(settings)
     server.start()
 
-Then run the folloing command in a console at the current directory::
+Alternatively, you may download the file at `here <https://raw.githubusercontent.com/streettraffic/streettraffic/develop/examples/hello_world.py>`_
 
-    python hello_world.py
+Then simply double click ``hello_world.py``
 
 Now open `<http://localhost:8080>`_ for our RethinkDB Web UI 
 and open `<http://localhost:9000>`_ for our Web UI. Hit the
@@ -61,6 +63,6 @@ in your database. It looks like this:
 
 When the reads and writes are finished, you may open `<http://localhost:9000>`_ and 
 open the ``Query -- Traffic Flow Query`` link on the left Menu and follow the step to query 
-a route within the area you just registered.
+a route within the area you just registered. See :ref:`query`
 
 That's it!

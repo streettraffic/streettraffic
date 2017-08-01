@@ -7,3 +7,5 @@ User's Guide
    install
    hello_route
    hello_city
+   traffic_pattern
+   query
