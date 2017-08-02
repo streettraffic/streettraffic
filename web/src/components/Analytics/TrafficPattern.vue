@@ -105,9 +105,9 @@ export default {
       }
     },
     createQuantile(traffic_pattern, labels, percentile1, percentile2, percentile3) {
-      let upper = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile1 * traffic_pattern.length)])
-      let middle = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile2 * traffic_pattern.length)])
-      let lower = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile3 * traffic_pattern.length)])
+      let upper = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile1 * item['JF_collection'].length)])
+      let middle = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile2 * item['JF_collection'].length)])
+      let lower = traffic_pattern.map((item) => item['JF_collection'][Math.floor(percentile3 * item['JF_collection'].length)])
       this.quantileData = {
         labels: labels,
         datasets: [{
