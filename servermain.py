@@ -20,7 +20,9 @@ settings = {
 ## initialize traffic server
 server = TrafficServer(settings)
 San_Francisco_matrix = server.util.get_area_tile_matrix_url("traffic_json", San_Francisco_polygon, 14, True)
-server.traffic_matrix_list = [San_Francisco_matrix]
+# server.traffic_matrix_list = [San_Francisco_matrix]
+
+
 
 server.start()
 conn = server.traffic_data.conn

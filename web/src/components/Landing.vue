@@ -1,13 +1,12 @@
-<template>
-  <v-parallax src="https://raw.githubusercontent.com/vuetifyjs/docs/master/static/doc-images/parallax/material.jpg" class="elevation-12">
-    <v-layout column align-center justify-center>
-      <h1 class="white--text">Histraffic.io</h1>
-      <h4 class="white--text">Use historic traffic to plan traveling!</h4>
-      <div class="mt-5">
-        <v-btn dark large router :to="'/Main'" class="green lighten-2">Get Started</v-btn>
-      </div>
-    </v-layout>
-  </v-parallax>
+<template lang="pug">
+  #intro
+    v-layout(column align-center justify-center)
+      h2.white--text StreetTraffic Web UI
+      h6.white--text Monitor the traffic flow of your favorite routes, cities and more!
+      div.mt-5
+        v-btn(large tag="a" href="https://github.com/streettraffic/streettraffic").grey.lighten-2 Github
+        v-btn(large router :to="'/Main/QuickStart/RegisterRoute'").green.lighten-2 Enter
+
 </template>
 
 <script>
@@ -31,3 +30,13 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+#intro
+  height: 100vh
+  background-color: #303030
+  padding-top: 15vh
+
+  .btn
+    width: 150px
+</style>

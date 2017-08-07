@@ -6,40 +6,26 @@ import datetime as dt
 import asyncio
 
 ## import custom module
-from streettraffic.map_resource import ultil
-from streettraffic.database import TrafficData
-from streettraffic import tools
 from streettraffic.server import TrafficServer
+from streettraffic.predefined.cities import San_Francisco_polygon
 
-##
-class TestTrafficServer(TrafficServer):
-
-    async def main_crawler(self):
-        """
-        """
-        self.crawler_running = True
-        while self.crawler_running:
-            print('start crawling')
-            # self.traffic_data.store_matrix_json(self.traffic_matrix_list)
-            # self.traffic_data.insert_analytics_traffic_pattern('[33.880079, 33.648894, -84.485086, -84.311365]')
-
-            # time management, we want to execute script every 30 minutes
-            # in order to do that we need to calculate how many seconds we should sleep
-            current = dt.datetime.utcnow()
-            if current.minute < 30:
-                wait_seconds = 30*60 - current.minute*60 - current.second
-            else:
-                wait_seconds = 60*60 - current.minute*60 - current.second
-
-            print('crawling finished')
-
-            await asyncio.sleep(wait_seconds)
+settings = {
+    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+}
 
 
 ## initialize traffic server
-traffic_server = TestTrafficServer(database_name= "Traffic", database_ip = "localhost")
-traffic_server.start()
-conn = traffic_server.traffic_data.conn
+server = TrafficServer(settings)
+San_Francisco_matrix = server.util.get_area_tile_matrix_url("traffic_json", San_Francisco_polygon, 14, True)
+# server.traffic_matrix_list = [San_Francisco_matrix]
+
+
+
+server.start()
+conn = server.traffic_data.conn
 
 # City Polygon
 San_Francisco_polygon = [[37.837174338616975,-122.48725891113281],[37.83364941345965,-122.48485565185547],[37.83093781796035,-122.4814224243164],[37.82415839321614,-122.48004913330078],[37.8203616433087,-122.47970581054688],[37.81059767530207,-122.47798919677734],[37.806122091729485,-122.47627258300781],[37.79215110146845,-122.48039245605469],[37.78726741375342,-122.48519897460938],[37.78618210598413,-122.49927520751953],[37.78645343442073,-122.50614166259766],[37.779127216982424,-122.51232147216797],[37.772614414082014,-122.51163482666016],[37.76121562849642,-122.51197814941406],[37.75171529845649,-122.51060485839844],[37.74329970164702,-122.50957489013672],[37.735969208590504,-122.50717163085938],[37.73081027834234,-122.50717163085938],[37.72293542866175,-122.50682830810547],[37.715331331027045,-122.50442504882812],[37.714244967649265,-122.49893188476562],[37.71940505182832,-122.50030517578125],[37.724564776604836,-122.5030517578125],[37.729724141962045,-122.50167846679688],[37.7324394530424,-122.49549865722656],[37.72918106779786,-122.49378204345703],[37.729724141962045,-122.48828887939453],[37.72782336496339,-122.4807357788086],[37.73271097867418,-122.37945556640625],[37.74520008134973,-122.37533569335938],[37.74655746554895,-122.39112854003906],[37.75008654795525,-122.3873519897461],[37.754972691904946,-122.38391876220703],[37.76148704857093,-122.38597869873047],[37.769629187677005,-122.3876953125],[37.78265474565738,-122.38872528076172],[37.78781006166096,-122.3880386352539],[37.79594930209237,-122.37911224365234],[37.804358908571395,-122.36984252929688],[37.812767557570204,-122.3605728149414],[37.817649559511125,-122.35130310058594],[37.82009043941308,-122.332763671875],[37.823344820392535,-122.30632781982422],[37.8271414168374,-122.30701446533203],[37.824700770115996,-122.31765747070312],[37.82253123860035,-122.33139038085938],[37.8203616433087,-122.34615325927734],[37.81792077237497,-122.35576629638672],[37.81168262440736,-122.3653793334961],[37.803002585189645,-122.37396240234375],[37.790523241426946,-122.3880386352539],[37.79594930209237,-122.39490509033203],[37.80273131752431,-122.39936828613281],[37.80815648152641,-122.40726470947266],[37.80734273233311,-122.42305755615234],[37.807071480609274,-122.43267059326172],[37.80571520704469,-122.44194030761719],[37.80463017025873,-122.45189666748047],[37.80463017025873,-122.464599609375],[37.807071480609274,-122.47421264648438],[37.815208598896255,-122.47695922851562],[37.82768377181359,-122.47798919677734],[37.835276322922695,-122.48004913330078],[37.837174338616975,-122.48725891113281]]
@@ -57,12 +43,12 @@ polygon_collection = [
 
 
 # setup monitoring area
-for polygon_item in polygon_collection:
-    traffic_server.traffic_data.set_traffic_patter_monitoring_area(polygon_item[1], description=polygon_item[0], grid_point_distance=1000, testing=True, force=True)
+#for polygon_item in polygon_collection:
+#    server.traffic_data.set_traffic_patter_monitoring_area(polygon_item[1], description=polygon_item[0], grid_point_distance=1000, testing=True, force=True)
 
 date = ["2017-07-13T04:00:00.000Z","2017-07-14T03:00:00.000Z"]
 polygon_name_collection = ['San_Francisco_polygon', 'Boston_polygon', 'Pittsburgh_polygon', 'Greenville_polygon', 'Norfolk_polygon']
 for polygon_name in polygon_name_collection:
     analytics_monitored_area_id = r.table('analytics_monitored_area').get_all(polygon_name, index="description").get_field('analytics_monitored_area_id').run(conn).next()
-    traffic_server.traffic_data.insert_analytics_traffic_pattern_between("2017-07-13T04:00:00.000Z", "2017-07-14T04:00:00.000Z", analytics_monitored_area_id)
+    server.traffic_data.insert_analytics_traffic_pattern_between("2017-07-13T04:00:00.000Z", "2017-07-14T04:00:00.000Z", analytics_monitored_area_id)
     

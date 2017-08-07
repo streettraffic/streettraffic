@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from typing import List, Dict
 import json
+import os
 
 
 # todo: convert quadkeys to tile
@@ -18,19 +19,39 @@ import json
 
 class Utility:
 
-    def __init__(self, settings: Dict):
-        """
-        In order to generate Url Resources, you should get app_id and app_code at developer.HERE.com
-        Specific instructions can be found here:
-        https://developer.here.com/rest-apis/documentation/traffic/common/credentials.html
+    """This class has some utility function for map resources
 
-        Example inputs:
-        settings = {
-            'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
-            'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
-            'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
-            'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
-        }
+    In order to generate Url Resources, you should get app_id and app_code at developer.HERE.com
+    Specific instructions can be found here:
+    https://developer.here.com/rest-apis/documentation/traffic/common/credentials.html
+
+    Attributes:
+        app_id (str): The app id acquired from https://developer.here.com/
+        app_code (str): The app code acquired from https://developer.here.com/
+        map_tile_base_url (str): the base url of the map image tile requests
+            an exmaple can be found here: https://developer.here.com/api-explorer/rest/traffic/traffic-tile
+        json_tile_base_url (str): the base url of the traffic json tile requests
+            an example can be found here: https://developer.here.com/api-explorer/rest/traffic/traffic-flow-quadkey
+
+    Args:
+        settings (Dict): The settings of your app
+
+    Example:
+        >>> settings = {
+                'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+            }
+        >>> util = Utility(settings)
+        >>> util.app_id
+        'F8aPRXcW3MmyUvQ8Z3J9'
+    """
+
+    def __init__(self, settings: Dict) -> None:
+        """
+        Args:
+            settings (Dict): The settings of your app
         """
         self.app_id = settings['app_id']
         self.app_code = settings['app_code']
@@ -38,15 +59,30 @@ class Utility:
         self.json_tile_base_url = settings['json_tile_base_url']
 
     @staticmethod
-    def get_tile(lat: float, lon: float, zoom: int) -> tuple:
-        """
-        inputs: lat:float(latitue), lon:float(longitude), and zoom:int(zoom level)
-
-        The function is used to generate column and row information for HERE API usage. For details, please
+    def get_tile(lat: float, lon: float, zoom: int) -> List:
+        """Given a GPS coordiante and zoom level, generate column and row information for HERE API usage. For details, please
         visit https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/key-concepts.html
-        for reference. 
+        for reference.
 
-        return :tuple(column, row)
+        Args:
+            lat (float): latitue
+            lon (float): longitude
+            zoom (int): the zoom level
+
+        Returns:
+            List: [col, row]
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_tile(52.525439, 13.38727, 12)
+            [2200, 1343]
         """
         lat_rad = lat * math.pi / 180
         n = math.pow(2, zoom)
@@ -54,17 +90,32 @@ class Utility:
         row = n * (1 - (math.log(math.tan(lat_rad) + 1 /
                                  math.cos(lat_rad)) / math.pi)) / 2  # Row
 
-        return (int(col), int(row))
+        return [int(col), int(row)]
 
     @staticmethod
-    def get_quadkeys(col: float, row: float, zoom: int) -> str:
-        """
-        inputs: col:float(column), row:float, zoom:int
-
-        This function is used to encode (col, row, zoom) as quadkey. For details, refer to 
+    def get_quadkeys(col: int, row: int, zoom: int) -> str:
+        """This function is used to encode (col, row, zoom) as quadkey. For details, refer to
         https://developer.here.com/rest-apis/documentation/traffic/common/map_tile/topics/quadkeys.html
 
-        return :str(quadkey)
+        Args:
+            col (int): column
+            row (int): row
+            zoom (int): the zoom level
+
+        Returns:
+            str: quadkey
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_quadkeys(35210, 21493, 16)
+            "1202102332221212"
         """
         quadkey = ""
         for i in range(zoom, 0, -1):
@@ -79,20 +130,31 @@ class Utility:
         return quadkey
 
     def get_map_tile_resource(self, location_data: tuple, location_type: str, zoom: int, img_size: int) -> str:
-        """
-        inputs: location_data: tuple, zoom:int(zoom level), img_size:int(256 or 512), location_type: str
-
-        The location_type and corresponding location data is as follow
-        location_type = "latlon"; location_data = (latitude, longitude)
-        location_type = "colrow"; location_data = (column, row)
-
-        This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
-        (col, row) and further use them to generate a url to get map_tile. 
+        """This function generates a url to get map_tile.
 
         For map_tile resource details, refer to
         https://developer.here.com/rest-apis/documentation/enterprise-map-tile/topics/quick-start.html
 
-        return :str(url for map_tile)
+        Args:
+            location_data (tuple): either (latitude, longitude) or (column, row)
+            location_type (str): either "latlon" or "colrow"
+            zoom (int): the zoom level
+            img_size (int): the image size. There are two options: 256 or 512
+
+        Returns:
+            str: the url for requesting a map tile resource
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_map_tile_resource((33.670156, -84.325984),"latlon", 14, 512)
+            'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/14/4354/6562/512/png8?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw'
         """
         # if user did not provide a col, row, we use self.get_tile()
         if location_type == "latlon":
@@ -106,22 +168,30 @@ class Utility:
         return total_url
 
     def get_traffic_json_resource(self, location_data: tuple, location_type: str, zoom: int) -> str:
-        """
-        inputs: location_data: tuple, zoom:int(zoom level)
-        default inputs: col:int = 0, row: int = 0, location_type: str
-
-        The location_type and corresponding location data is as follow
-        location_type = "latlon"; location_data = (latitude, longitude)
-        location_type = "colrow"; location_data = (column, row)
-
-        This function is uses location_data to generate (col, row), if location_type == "colrow", we simply use the provided
-        (col, row). Then we use (col, row) to further utilize self.get_quadkeys() to 
-        get a quad key, then generate a url to get traffic_json resource. 
+        """This function generates a url to get traffic_json resource.
 
         For traffic_json resource details, refer to
         https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html
 
-        return :str(url for traffic_tile_json)
+        Args:
+            location_data (tuple): either (latitude, longitude) or (column, row)
+            location_type (str): either "latlon" or "colrow"
+            zoom (int): the zoom level
+
+        Returns:
+            str: the url for requesting a traffic json resource
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.get_traffic_json_resource((34.9237, -82.4383), "latlon", 14)
+            'https://traffic.cit.api.here.com/traffic/6.2/flow.json?app_id=F8aPRXcW3MmyUvQ8Z3J9&app_code=IVp1_zoGHdLdz0GvD_Eqsw&quadkey=03200303033202&responseattributes=sh,fc'
         """
         if location_type == "latlon":
             (col, row) = self.get_tile(*location_data, zoom)
@@ -135,22 +205,23 @@ class Utility:
         return total_url
 
     @staticmethod
-    def produce_polygon(polygon_ordered_coordinates: List, zoom: int, plot_polygon = True) -> Path:
-        """
-        inputs: 
-        polygon_ordered_coordinates: List(an ordered list of points that composes a polygon)
-        plot_polygon = True
-        zoom: int
-        example inputs:
-        [[25.890099, -80.264561], [25.851873, -80.308744], [25.81123, -80.248538], [25.848596, -80.215765]], True
-
-
-        This function use matplotlib.path to create a Path/polygon object. Later we can use
+    def produce_polygon(polygon_ordered_coordinates: List, zoom: int, plot_polygon: bool = False) -> Path:
+        """This function use matplotlib.path to create a Path/polygon object. Later we can use
         this Path/polygon object to invoke Path.contains_point() method. For more details 
         on contains_point(), refer to 
         https://stackoverflow.com/questions/21328854/shapely-and-matplotlib-point-in-polygon-not-accurate-with-geolocation
 
-        If plot_polygon == True, we use matplotlib to plot the polygon
+        Args:
+            polygon_ordered_coordinates (List): an ordered list of points that composes a polygon
+            zoom (int): the zoom level
+            plot_polygon (bool): If plot_polygon == True, we use matplotlib to plot the polygon
+
+        Returns:
+            matplotlib.path.Path: a Path polygon
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> example_polygon_ordered_coordinates = [[25.890099, -80.264561], [25.851873, -80.308744], [25.81123, -80.248538], [25.848596, -80.215765]]
         """
         polygon_tile_points = []
         for item in polygon_ordered_coordinates:
@@ -168,26 +239,31 @@ class Utility:
         return polygon
 
     @staticmethod
-    def get_area_tile_matrix(list_points: List, zoom: int, use_polygon = False) -> pd.DataFrame:
-        """
-        inputs: list_points (GPS coordinates that you want to add)
-                zoom: int(zoom level)
-                use_polygon = None
+    def get_area_tile_matrix(list_points: List, zoom: int, use_polygon: bool = False) -> pd.DataFrame:
+        """This function takes the coordinates from list_points and calculate their tile (col, row),
+        then it generate a matrix of tiles to cover the square area spanned by those coordinates. 
+        If use_polygon == True, however, then we generate a polygon given by self.produce_polygon,
+        and further eliminate any tiles in the matrix that are not **inside** of the polygon
 
-        example inputs: [(33.766764, -84.409533), (33.740003, -84.368978)], 14
+        ::
 
-        This function takes the coordinates from *args and calculate their tile (col, row),
-        then it generate a matrix of tiles to cover the square defined by those coordinates.
+            ###^^^^^^*####  (in this example, two coordinates are denoted as *
+            #  ^^^^^^^   #   and this function should generate tile to cover the
+            #  ^^^^^^^   #   area denoted by ^ and *)
+            ###*^^^^^^####
 
-        If use_polygon == True, then we generate a polygon given by self.produce_polygon,
-        and further return the area_tiles that are **inside**(not including boundry) the polygon
+        Args:
+            list_points (List): list of GPS coordinates that you want to add
+            zoom (int): the zoom level
+            use_polygon (bool): If plot_polygon == True, then we generate a polygon given by self.produce_polygon,
+                and further eliminate any tiles in the matrix that are not **inside** of the polygon
 
-        ###^^^^^^*####  (in this example, two coordinates are denoted as *
-        #  ^^^^^^^   #   and this function should generate tile to cover the
-        #  ^^^^^^^   #   area denoted by ^ and *)
-        ###*^^^^^^####
+        Returns:
+            DataFrame: a matrix filled with tiles number (col, row)
 
-        return :DataFrame(a matrix of tiles to cover the area spanned by two coordinates)
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> example_list_points = [(33.766764, -84.409533), (33.740003, -84.368978)]
         """
         tiles = []
         for point in list_points:
@@ -213,26 +289,34 @@ class Utility:
         return matrix
 
     def get_area_tile_matrix_url(self, resource_type: str, list_points: List, zoom: int, use_polygon = False) -> pd.DataFrame:
-        """
-        inputs: resource_type: str(a string indicating the resource type)
-                list_points (GPS coordinates that you want to add)
-                zoom: int(zoom level)
-                use_polygon = False
+        """This function takes the coordinates from list_points and calculate their tile (col, row),
+        then it generate a matrix of tiles **URLs** (either map_tile urls or traffic_json urls)
+        to cover the square area spanned by those coordinates.
+        
+        If use_polygon == True, however, then we generate a polygon given by self.produce_polygon,
+        and further eliminate any tiles **URLs** in the matrix that are not **inside** of the polygon
 
-        The resource_type has two options:
-        * map_tile
-        * traffic_json
+        ::
 
-        This function takes two coordinates and calculate their tile (col, row),
-        then it generate a matrix of tiles **URLs** (either map_tile urls or traffic_json urls) 
-        to cover the square defined by those two coordinates.
+            ###^^^^^^*####  (in this example, two coordinates are denoted as *
+            #  ^^^^^^^   #   and this function should generate tile to cover the
+            #  ^^^^^^^   #   area denoted by ^ and *)
+            ###*^^^^^^####
 
-        ###^^^^^^*####  (in this example, two coordinates are denoted as *
-        #  ^^^^^^^   #   and this function should generate tile to cover the
-        #  ^^^^^^^   #   area denoted by ^ and *)
-        ###*^^^^^^####
+        Args:
+            resource_type (str): what types of *URLs* do you want, it can either be
+                ``map_tile`` or ``traffic_json``
+            list_points (List): list of GPS coordinates that you want to add
+            zoom (int): the zoom level
+            use_polygon (bool): If plot_polygon == True, then we generate a polygon given by self.produce_polygon,
+                and further eliminate any tiles in the matrix that are not **inside** of the polygon
 
-        return :DataFrame(a matrix of tiles **URLs** to cover the area spanned by two coordinates)
+        Returns:
+            DataFrame: a matrix filled with tiles number (col, row)
+
+        Example:
+            >>> # or checkout the unittest for this function
+            >>> example_list_points = [(33.766764, -84.409533), (33.740003, -84.368978)]
         """
         matrix = self.get_area_tile_matrix(list_points, zoom, use_polygon)
         for row in range(len(matrix)):
@@ -245,15 +329,116 @@ class Utility:
 
         return matrix
 
-    def assemble_matrix_images(self, matrix: pd.DataFrame) -> pd.DataFrame:
+    def register_route_tile(self, routing_info: Dict, zoom: int = 14) -> None:
+        """This function takes routing_info generated by Google Direction API and
+        store a ``route_collection.json`` in the your current directory (the directory
+        that you used to run a file and call this function)
+
+        Args:
+            routing_info (Dict): The response document generated by Google Direction API
+            zoom (int): the zoom level. Default is set to 14 because it is the 
+                best level for meaningful details and it is also comparitively economical.
+
+        Returns:
+            None
         """
-        input: matrix: pd.DataFrame, 
 
-        This function takes a matrix generated by get_area_tile_matrix_url() and assemble a picture
-        out of it. 
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('route_collection.json'):
+            with open('route_collection.json') as f:
+                colrow_collection = json.load(f)
+        else:
+            colrow_collection = []
 
-        return :pd.DataFrame(a matrix of PIL.Image classes)
+        ## second step, add all possible colrow in colrow_collection
+        route = routing_info['routes'][0]
+        leg = route['legs'][0]
+        for step in leg['steps']:
+            for path_item in step['path']:
+                tile = self.get_tile(path_item['lat'], path_item['lng'], zoom)
+                if tile not in colrow_collection:
+                    colrow_collection += [tile]
 
+        ## third step, save the route_set.json
+        with open('route_collection.json', 'w') as f:
+            json.dump(colrow_collection, f)
+    
+    def register_area_polygon(self, area_description: str, geojson_polygon: str) -> None:
+        """This function register an area polygon and store it in ``area_collection.json``
+
+        Args:
+            area_description (str): a description of the area
+            geojson_polygon (str): the geojson formatted string polygon
+
+        Returns:
+            None
+        """
+
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('area_collection.json'):
+            with open('area_collection.json') as f:
+                area_collection = json.load(f)
+        else:
+            area_collection = []
+
+        ## second step, add all possible colrow in colrow_collection
+        area_collection += [{
+            'area_description': area_description,
+            'polygon': self.read_geojson_polygon(geojson_polygon)
+        }]
+
+        ## third step, save the route_set.json
+        with open('area_collection.json', 'w') as f:
+            json.dump(area_collection, f)
+
+    def get_route_tile_matrix_url(self) -> pd.DataFrame:
+        """This function load the ``route_collection.json`` in the your current directory
+        and return a traffic_json url matrix
+
+        Returns:
+            DataFrame: a traffic_json url matrix that we can use to crawl data
+        """
+
+        if os.path.isfile('route_collection.json'):
+            with open('route_collection.json') as f:
+                colrow_collection = json.load(f)
+        else:
+            raise Exception('route_collection.json does not exist, try using server.util.register_route_tile_matrix_url()') 
+        ## last step, return a pandas matrix
+        matrix = pd.DataFrame(index = range(1), columns = range(len(colrow_collection)))
+        i = 0
+        for item in colrow_collection:
+            matrix.iloc[0,i] = self.get_traffic_json_resource(location_data = item, location_type = "colrow", zoom = 14)
+            i += 1
+
+        return matrix
+
+    def get_area_polygon_collection(self) -> List:
+        """This function load the ``route_collection.json`` in the your current directory
+        and return the its python equivalent list
+
+        Returns:
+            List: a list of object like ``{'area_description': ..., 'polygon': ...}``
+        """
+
+        ## first step, try to read colrow set if possible
+        if os.path.isfile('area_collection.json'):
+            with open('area_collection.json') as f:
+                area_collection = json.load(f)
+            return area_collection
+        else:
+            raise Exception('area_collection.json does not exist, try using server.util.register_area_polygon()')
+
+
+    def assemble_matrix_images(self, matrix: pd.DataFrame) -> pd.DataFrame:
+        """This function load a map_tile url matrix and assemble it as a 
+        image matrix. Also it will print out a image for you to see.
+
+        Args:
+            matrix (pd.DataFrame): a map_tile url matrix
+
+        Returns:
+            DataFrame: matrix of images
         """
         img_matrix = matrix.copy(deep=True)
         for row in range(len(matrix)):
@@ -279,17 +464,23 @@ class Utility:
         return img_matrix
 
     @staticmethod
-    def get_distance(point1: tuple, point2: tuple, location_type:str = "latlon", distance_formula:str = "great_circle", unit:str = "meters") -> float:
-        """
-        inputs: point1: tuple, point2: tuple, location_type:str = "latlon", distance_formula:str = "great_circle", unit:str = "meters"
-        the format should be point1 = (latitude, longitude)
-        currently only supporting location_type = "latlon"
-        distance_formula has two option: "great_circle" and "vincenty"
-        the defualt unit is meters
+    def get_distance(point1: tuple, point2: tuple, location_type: str = "latlon", distance_formula: str = "great_circle", unit:str = "meters") -> float:
+        """This function returns the distance between point1 and poin2 in meters.
 
-        This function is a quick wraper for geopy.
+        Note:
+            this function is a quick wraper for geopy.
 
-        return the distance between point1 and point2
+        Args:
+            point1 (tuple): a GPS coordinates
+            point2 (tuple): a GPS coordinates
+            location_type (str): "latlon" meaning the format is (latitude, longitude)
+                for ``point1`` and ``point2``
+            distance_formula (str): two options for distance formula, either
+                ``'great_circle'`` or ``'vincenty'``
+            unit (str): "meters"
+
+        Returns:
+            float: distance between point1 and point2
         """
         if distance_formula == "great_circle":
             return great_circle(point1, point2).meters
@@ -300,40 +491,55 @@ class Utility:
 
     @staticmethod
     def read_geojson_polygon(geojson_polygon: str) -> List:
-        """
-        inputs: geojson_polygon: str (a json encoding of a geojson polygon)
-        example inputs:
-        '{
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                  [
-                    [
-                      -84.38658714294434,
-                      33.76908761144743
-                    ],
-                    [
-                      -84.37294006347656,
-                      33.766590334877485
-                    ]
-                  ]
-                ]
-              },
-              "properties": {}
-            }
-          ]
-        }'
-        
-        Notice in geojson, the coordinates have the format [Longitude, latitude] while matplotlib.path.Path
-        This function outputs a polygon list that consist of coordiantes that has [latitude, longitude] format.
+        """Given a polygon in geojson string format,
+        this function outputs a polygon list that consist of coordiantes
+        that has [latitude, longitude] format.
 
-        example outputs:
-        [[33.76908761144743, -84.38658714294434],
-         [33.766590334877485, -84.37294006347656]]
+        Args:
+            geojson_polygon (str): a polygon of geojson encoding. 
+
+        Returns:
+            List: a list that consist of coordiantesthat has 
+            [latitude, longitude] format
+
+        Example:
+            >>> checkout the unittest for this function
+            >>> geojson_polygon = '''
+            {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -84.38658714294434,
+                          33.76908761144743
+                        ],
+                        [
+                          -84.37294006347656,
+                          33.766590334877485
+                        ]
+                      ]
+                    ]
+                  },
+                  "properties": {}
+                }
+              ]
+           '''  # notice this should be a string
+            >>> settings = {
+                    'app_id': 'F8aPRXcW3MmyUvQ8Z3J9',
+                    'app_code' : 'IVp1_zoGHdLdz0GvD_Eqsw',
+                    'map_tile_base_url': 'https://1.traffic.maps.cit.api.here.com/maptile/2.1/traffictile/newest/normal.day/',
+                    'json_tile_base_url': 'https://traffic.cit.api.here.com/traffic/6.2/flow.json?'
+                }
+            >>> util = Utility(settings)
+            >>> util.read_geojson_polygon(geojson_polygon)
+            [[33.76908761144743, -84.38658714294434],
+            [33.766590334877485, -84.37294006347656]]
+
         """
         geojson_polygon_dict = json.loads(geojson_polygon)
         polygon_coordinates = geojson_polygon_dict['features'][0]['geometry']['coordinates'][0]

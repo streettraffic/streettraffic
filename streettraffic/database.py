@@ -5,6 +5,7 @@ import requests
 from dateutil import parser
 import datetime
 import pandas as pd
+import numpy as np
 import time
 import json
 import asyncio
@@ -565,15 +566,16 @@ class TrafficData:
                         try:
                             road_document = self.get_nearest_road((path_item['lat'], path_item['lng']), max_dist = 1000)
                             road_data_id = road_document['doc']['road_data_id']
-                        except:
-                            print('cant find nearest road once')
 
-                        ## see if road_data_id already exists in our collection
-                        if road_data_id not in road_id_collection:
-                            road_id_collection[road_data_id] = True
-                            geojson_road_id_collection += [road_data_id]
-                        else:
-                            duplicate_road_id += [road_data_id]
+                            ## see if road_data_id already exists in our collection
+                            if road_data_id not in road_id_collection:
+                                road_id_collection[road_data_id] = True
+                                geojson_road_id_collection += [road_data_id]
+                            else:
+                                duplicate_road_id += [road_data_id]
+                        
+                        except Exception as e:
+                            print('get_historic_traffic', e)
 
             route_cached_insertion = {
                 "route_cached_id": route_cached_id,
@@ -604,6 +606,7 @@ class TrafficData:
         Returns:
             List: a list of object like 
             ::
+
                 {
                     'crawled_timestamp': '2017-06-19T19:29:37.845000+00:00',
                     'id': 'a6f344c6-9941-41b4-aaf7-83e6ecab5ec2'
@@ -629,7 +632,7 @@ class TrafficData:
         return batch_list
 
     def get_crawled_batch_id_between(self, date_start: str, date_end: str) -> r.net.DefaultCursor:
-        """This function will get all the crawled_batch_id between date_start and date_end
+        """This function will get all the crawled_batch_id between ``date_start`` and ``date_end``
 
         Args:
             date_start (str): an ISO 8601 format string indicating the starting date
@@ -639,6 +642,7 @@ class TrafficData:
             r.net.DefaultCursor: a Cursor object of all crawled_batch_id in ``crawled_batch`` table that
             are between ``date_start`` and ``date_end``. You can use ``DefaultCursor.next()`` or 
             ::
+
                 for item in DefaultCursor:
                     print(item)  # do operation with item
 
@@ -683,6 +687,7 @@ class TrafficData:
         Returns:
             List: a list of object that looks like this
             ::
+
                 {
                     "crawled_batch_id": 5e5f9e07-d510-49ea-b19d-25e315e48c59
                     "crawled_batch_id_traffic": object # a geojson object with respect to routing_info
@@ -992,6 +997,7 @@ class TrafficData:
                 "analytics_monitored_area_id":  "[33.880079, 33.648894, -84.485086, -84.311365]" ,
                 "analytics_traffic_pattern_id":  "17e28c2e-bd09-478a-b880-767f2dc84cfa" ,
                 "average_JF": 0.09392949526813882 ,
+                "standard_deviation_JF": 0.01632949985813882
                 "crawled_batch_id":  "25657665-b131-4ae7-bb13-7e26440cf8e0" ,
                 "crawled_timestamp": Tue Jun 27 2017 07:00:00 GMT+00:00 ,
                 "flow_item_count": 317
@@ -1021,19 +1027,25 @@ class TrafficData:
             'crawled_timestamp': crawled_batch_doc['crawled_timestamp'],
             'analytics_monitored_area_id': analytics_monitored_area_id,
             'average_JF': 0,
+            'standard_deviation_JF': 0,
+            'JF_collection': [],
             'flow_item_count':len(flow_item_id_collection)
         }
 
         ## third step: start to calculate the traffic_pattern
+        JF_collection = []
         for flow_item_id in flow_item_id_collection:
             try:
                 flow_data_JF = r.table('flow_data').get_all([flow_item_id, crawled_batch_id], index = "flow_crawled_batch").get_field('JF').limit(3).run(self.conn).next()
-                analytics_traffic_pattern_insertion['average_JF'] += flow_data_JF
+                JF_collection += [flow_data_JF]
+                
             except Exception as e:
                 print("insert_analytics_traffic_pattern", e)
-
-        analytics_traffic_pattern_insertion['average_JF'] = analytics_traffic_pattern_insertion['average_JF'] / analytics_traffic_pattern_insertion['flow_item_count']  # get average
-
+        
+        JF_collection_numpy = np.array(JF_collection)
+        analytics_traffic_pattern_insertion['average_JF'] = JF_collection_numpy.mean()
+        analytics_traffic_pattern_insertion['standard_deviation_JF'] = JF_collection_numpy.std()
+        analytics_traffic_pattern_insertion['JF_collection'] = sorted(JF_collection, reverse=False)
         r.table('analytics_traffic_pattern').insert(analytics_traffic_pattern_insertion).run(self.conn)
 
 

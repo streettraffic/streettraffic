@@ -5,30 +5,14 @@ import Landing from '@/components/Landing'
 
 Vue.use(Router)
 
-const Home = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Home')
-})
-
-const Analytics = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Analytics')
-})
-
-const Polygon = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/Polygon')
-})
-
-const RouteLab = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/RouteLab')
-})
-
-const CaseStudy = () => ({
-  // The component to load. Should be a Promise
-  component: import('@/components/CaseStudy')
-})
+function route (path, name, title) {
+  return {
+    name: name,
+    path: path + '/' + name,
+    meta: { title: title },
+    component: () => import(`@/components/${path}${name}`)
+  }
+}
 
 const router = new Router({
   routes: [
@@ -37,56 +21,24 @@ const router = new Router({
       name: 'Landing',
       component: Landing,
       meta: {
-        title: 'Histraffic Landing'
+        title: 'Streettraffic Landing'
       }
     },
     {
       path: '/Main',
       component: Main,
       meta: {
-        title: 'Histraffic Main'
+        title: 'Streettraffic Main'
       },
       children: [
-        {
-          path: '',
-          name: 'Home',
-          component: Home,
-          meta: {
-            title: 'Histraffic Home'
-          }
-        },
-        {
-          path: 'Analytics',
-          name: 'Analytics',
-          component: Analytics,
-          meta: {
-            title: 'Histraffic Analytics'
-          }
-        },
-        {
-          path: 'RouteLab',
-          name: 'RouteLab',
-          component: RouteLab,
-          meta: {
-            title: 'Histraffic RouteLab'
-          }
-        },
-        {
-          path: 'Polygon',
-          name: 'Polygon',
-          component: Polygon,
-          meta: {
-            title: 'Histraffic Polygon'
-          }
-        },
-        {
-          path: 'CaseStudy',
-          name: 'CaseStudy',
-          component: CaseStudy,
-          meta: {
-            title: 'Histraffic CaseStudy'
-          }
-        }
+        route('QuickStart/', 'RegisterRoute', 'Streettraffic Register a Route'),
+        route('QuickStart/', 'RunCrawler', 'Streettraffic run the traffic crawler'),
+        route('QuickStart/', 'Polygon', 'Streettraffic Register a city'),
+        route('Query/', 'FlowQuery', 'Streettraffic traffic flow query'),
+        route('Query/', 'HistoryBatch', 'Streettraffic traffic flow query'),
+        route('Analytics/', 'TrafficPattern', 'Streettraffic traffic pattern analytics'),
+        route('Research/', 'RouteLab', 'Streettraffic Multiple Routes Analysis'),
+        route('Research/', 'CaseStudy', 'Streettraffic Long Distance Route Study')
       ]
     }
   ]

@@ -9,6 +9,8 @@ import http.server
 import socketserver
 import os
 from typing import Dict, List
+import urllib
+import posixpath
 
 ## import our modules
 from .database import TrafficData
@@ -16,7 +18,7 @@ from .map_resource.utility import Utility
 
 class TrafficServer:
 
-    def __init__(self, settings: Dict, database_name: str = "Traffic", database_ip: str = None):
+    def __init__(self, settings: Dict, database_name: str = "Traffic", database_ip: str = None) -> None:
         """
         self.msg_queue is used to communicate with consumer_handler() and producer_handler()
         """
@@ -33,9 +35,7 @@ class TrafficServer:
         self.http_port = 9000
 
     def init_http_server(self):
-        web_dir = os.path.join(os.path.dirname(__file__), 'webui')
-        os.chdir(web_dir)
-        Handler = http.server.SimpleHTTPRequestHandler
+        Handler = NonRootHTTPRequestHandler
         httpd = socketserver.TCPServer(("", self.http_port), Handler)
         httpd.serve_forever()
     
@@ -113,6 +113,21 @@ class TrafficServer:
                     analytics_monitored_area_description_collection = self.traffic_data.get_analytics_monitored_area_description_collection()
                     await websocket.send(json.dumps(analytics_monitored_area_description_collection))
                     print('sent data')
+
+                elif message[0] == "registerRoute":
+                    print("registerRoute")
+                    self.util.register_route_tile(message[1])
+                    print('registerRoute finished')
+
+                elif message[0] == "registerArea":
+                    print("registerArea")
+                    self.util.register_area_polygon(message[1], message[2])
+                    print('registerArea finished')
+
+                elif message[0] == "runCrawler":
+                    print("runCrawler")
+                    self.run_crawler()
+                    print('runCrawler finished')
             
             except websockets.exceptions.ConnectionClosed:
                 print('a client has disconnected')
@@ -152,21 +167,70 @@ class TrafficServer:
             print('crawling finished')
 
             await asyncio.sleep(wait_seconds)
-            
 
-    def _loop_in_thread(self, loop):
+
+    def _loop_in_thread(self):
         start_server = websockets.serve(self.handler, '0.0.0.0', 8765)
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(start_server)
-        loop.create_task(self.main_crawler())
-        loop.run_forever()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(start_server)
+        self.loop.run_forever()
 
 
     def start(self):
-        t1 = threading.Thread(target=self._loop_in_thread, args=(self.loop,))
+        t1 = threading.Thread(target=self._loop_in_thread)
         t1.start()
         t2 = threading.Thread(target=self.init_http_server)
         t2.start()
-        print('server served at ws://127.0.0.1:8765/')
-        print("Web UI is serving at port", self.http_port)
+        print('websocket served at ws://127.0.0.1:8765')
+        print("Web UI served at  http://127.0.0.1:" + str(self.http_port))
+        print('to run the crawler, call server.run_crawler()')
 
+    def run_crawler(self):
+        ## try import registered routes
+        try:
+            route_matrix = self.util.get_route_tile_matrix_url()
+            self.traffic_matrix_list += [route_matrix]
+        except Exception as e:
+            print(e)
+
+        ## try import registered cities
+        try:
+            area_collection = self.util.get_area_polygon_collection()
+            for area in area_collection:
+                self.traffic_matrix_list += [self.util.get_area_tile_matrix_url("traffic_json", area['polygon'], 14, True)]
+        except Exception as e:
+            print(e)
+        
+        self.loop.call_soon_threadsafe(self.loop.create_task, self.main_crawler())
+
+
+class NonRootHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+
+    """This class is used to host website in the ``webui`` folder.
+    Notice SimpleHTTPRequestHandler only host the files in the 
+    current folder
+
+    """
+
+    def translate_path(self, path):
+        path = path.split('?',1)[0]
+        path = path.split('#',1)[0]
+        trailing_slash = path.rstrip().endswith('/')
+        try:
+            path = urllib.parse.unquote(path, errors='surrogatepass')
+        except UnicodeDecodeError:
+            path = urllib.parse.unquote(path)
+        path = posixpath.normpath(path)
+        words = path.split('/')
+        words = filter(None, words)
+        ## my code to override:
+        web_dir = os.path.join(os.path.dirname(__file__), 'webui')
+        path = web_dir
+        ## my code to override ends.
+        for word in words:
+            if os.path.dirname(word) or word in (os.curdir, os.pardir):
+                continue
+            path = os.path.join(path, word)
+        if trailing_slash:
+            path += '/'
+        return path

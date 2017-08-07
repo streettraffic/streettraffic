@@ -21,3 +21,7 @@ __pycache__
 \.vscode
 
 Profile\.prof
+
+route_collection\.json
+
+area_collection\.json
