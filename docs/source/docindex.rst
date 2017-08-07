@@ -3,11 +3,12 @@
 StreetTraffic Package
 =======================
 
-StreetTraffic is a Python server package that monitors the traffic flow data of
-your favorite routes, cities and more. By using the API provided by  
+StreetTraffic is a Python package that crawls the traffic flow data of
+your favorite routes, cities by using the API provided by  
 `HERE.com <https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html>`_
-, we are able to crawl the traffic data of areas of interest, and visualize
-historical traffic data.
+
+StreetTraffic also provides a front end Web UI to visualize historical traffic data
+by utilizing `Vuejs <https://vuejs.org/>`_ and `Vuetify <https://vuetifyjs.com/>`_
 
 .. note::
     Please notice that if you download data from HERE.com, you need to comply to its 
