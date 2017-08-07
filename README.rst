@@ -11,3 +11,12 @@ historical traffic data.
 
 
 `Read Documentation <https://streettraffic.github.io/docs/docindex.html>`_
+
+Visualize historical traffic flow
+------------------------------------
+
+After crawling data of some regions or routes, you may query the historical
+traffic flow of a given route from the Web UI
+
+.. image:: docs\source\_static\traffic_slider.gif
+    :alt: register_route
