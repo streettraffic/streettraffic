@@ -931,6 +931,14 @@ class TrafficData:
             "list_points": json.dumps(sampling_points),
             "flow_item_id_collection": []
         }
+        
+        ## determine if we are inserting or updating , if it exist, we delete it and insert a new one
+        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(polygon_encoding).run(self.conn)
+        if analytics_monitored_area_doc:
+            if force:
+                r.table('analytics_monitored_area').get(polygon_encoding).delete().run(self.conn)
+            else:
+                raise Exception('monitored_area alerady exist, check your primary key')
 
         if testing:
             flow_item_id_duplicate = 0
@@ -946,16 +954,8 @@ class TrafficData:
             except:
                 print('get_nearest_road fail in set_traffic_patter_monitoring_area')
 
-        ## determine if we are inserting or updating , if it exist, we delete it and insert a new one
-        analytics_monitored_area_doc = r.table('analytics_monitored_area').get(polygon_encoding).run(self.conn)
-        if analytics_monitored_area_doc:
-            if force:
-                r.table('analytics_monitored_area').get(polygon_encoding).delete().run(self.conn)
-                r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
-            else:
-                raise Exception('monitored_area alerady exist, check your primary key')
-        else:
-            r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
+        ## make insertion
+        r.table('analytics_monitored_area').insert(analytics_monitored_area_insertion).run(self.conn)
 
         if testing:
             print('flow_item_id_duplicate', flow_item_id_duplicate)
