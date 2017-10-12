@@ -1,10 +1,13 @@
 .. title:: StreetTraffic Package
 
-.. image:: https://api.codacy.com/project/badge/Grade/adacea14777f4fa2b8df5584b1c44823
-   :target: https://www.codacy.com/app/vwxyzjn/streettraffic?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=streettraffic/streettraffic&amp;utm_campaign=Badge_Grade
-
 StreetTraffic Package
 =======================
+
+.. image:: https://api.codacy.com/project/badge/Grade/adacea14777f4fa2b8df5584b1c44823
+   :target: https://www.codacy.com/app/vwxyzjn/streettraffic?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=streettraffic/streettraffic&amp;utm_campaign=Badge_Grade
+   
+.. image:: https://badge.fury.io/py/streettraffic.svg
+    :target: https://badge.fury.io/py/streettraffic
 
 StreetTraffic is a Python package that crawls the traffic flow data of
 your favorite routes, cities by using the API provided by  
