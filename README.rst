@@ -9,6 +9,9 @@ StreetTraffic Package
 .. image:: https://badge.fury.io/py/streettraffic.svg
     :target: https://badge.fury.io/py/streettraffic
 
+.. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+    
+
 StreetTraffic is a Python package that crawls the traffic flow data of
 your favorite routes, cities by using the API provided by  
 `HERE.com <https://developer.here.com/rest-apis/documentation/traffic/topics/quick-start.html>`_
