@@ -8,7 +8,9 @@ StreetTraffic Package
    
 .. image:: https://badge.fury.io/py/streettraffic.svg
     :target: https://badge.fury.io/py/streettraffic
+
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+    :alt: mit license
     
 
 StreetTraffic is a Python package that crawls the traffic flow data of
