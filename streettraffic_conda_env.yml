@@ -1,0 +1,43 @@
+name: streettraffic
+channels:
+- defaults
+dependencies:
+- ca-certificates=2017.08.26=h1d4fec5_0
+- certifi=2017.11.5=py36hf29ccca_0
+- libedit=3.1=heed3624_0
+- libffi=3.2.1=hd88cf55_4
+- libgcc-ng=7.2.0=h7cc24e2_2
+- libstdcxx-ng=7.2.0=h7a57d05_2
+- ncurses=6.0=h9df7e31_2
+- openssl=1.0.2n=hb7f436b_0
+- pip=9.0.1=py36h6c6f9ce_4
+- python=3.6.4=hc3d631a_0
+- readline=7.0=ha6073c6_4
+- setuptools=36.5.0=py36he42e2e1_0
+- sqlite=3.20.1=hb898158_2
+- tk=8.6.7=hc745277_3
+- wheel=0.30.0=py36hfd4bba0_1
+- xz=5.2.3=h55aa19d_2
+- zlib=1.2.11=ha838bed_2
+- pip:
+  - chardet==3.0.4
+  - cycler==0.10.0
+  - geopy==1.11.0
+  - idna==2.6
+  - matplotlib==2.1.1
+  - numpy==1.14.0
+  - pandas==0.22.0
+  - pillow==5.0.0
+  - pockets==0.5.1
+  - pyparsing==2.2.0
+  - python-dateutil==2.6.1
+  - pytz==2017.3
+  - requests==2.18.4
+  - rethinkdb==2.3.0.post6
+  - shapely==1.6.3
+  - six==1.11.0
+  - sphinxcontrib-napoleon==0.6.1
+  - urllib3==1.22
+  - websockets==3.3
+prefix: /home/vwxyzjn/anaconda3/envs/streettraffic
+
