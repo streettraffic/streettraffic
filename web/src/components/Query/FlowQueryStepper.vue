@@ -127,18 +127,18 @@ export default {
     return {
       current_step: 0,
       // data related to selecting desired routes
-      starting_address: '',
-      destination: '',
-      starting_address_obj: {},
-      destination_obj: {},
+      starting_address: 'Sweet Auburn Market, Edgewood Avenue',
+      destination: 'The Fox Theatre',
+      starting_address_obj: {'lat': 33.7544084, 'lng': -84.3799879},
+      destination_obj: {'lat': 33.7725845, 'lng': -84.38560280000002},
       // data related to selecting time
-      dateStartPicker: null,
+      dateStartPicker: '2017-06-24',
       dateStartPickerMenu: false,
-      dateEndPicker: null,
+      dateEndPicker: '2017-06-25',
       dateEndPickerMenu: false,
-      timeStartPicer: null,
+      timeStartPicer: '16:00',
       timeStartPicerMenu: false,
-      timeEndPicer: null,
+      timeEndPicer: '20:00',
       timeEndPicerMenu: false,
       retrieving_dialog: false
     }
