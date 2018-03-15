@@ -166,8 +166,10 @@ export default {
     */
     /* eslint-disable */
     setTimeout(() => {
+      this.time_to_load = true
+    }, 200)
+    setTimeout(() => {
       let self = this
-      self.time_to_load = true
       let starting_address_input = document.getElementById('starting_address')
       let starting_address_autocomplete = new google.maps.places.Autocomplete(starting_address_input)
       starting_address_autocomplete.addListener('place_changed', function() {
@@ -187,7 +189,7 @@ export default {
           lng: place.geometry.location.lng()
         }
       });
-    }, 300)
+    }, 500)
     
     /* eslint-enable */
   }
