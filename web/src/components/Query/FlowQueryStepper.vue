@@ -1,6 +1,6 @@
 <template lang="pug">
   v-flex(xs12 md6)
-    v-stepper(v-model="current_step" vertical)
+    v-stepper(v-model="current_step" vertical v-if="time_to_load")
       v-stepper-step(step="1" v-bind:complete="current_step > 1" editable) Introduction
       v-stepper-content(step="1")
         div.mb-5 
@@ -125,6 +125,7 @@ export default {
   name: 'HomeStepper',
   data () {
     return {
+      time_to_load: false,
       current_step: 0,
       // data related to selecting desired routes
       starting_address: 'Sweet Auburn Market, Edgewood Avenue',
@@ -164,26 +165,30 @@ export default {
     The following code add address autocompletion feature to the input boxes.
     */
     /* eslint-disable */
-    let self = this
-    let starting_address_input = document.getElementById('starting_address')
-    let starting_address_autocomplete = new google.maps.places.Autocomplete(starting_address_input)
-    starting_address_autocomplete.addListener('place_changed', function() {
-      let place = starting_address_autocomplete.getPlace();
-      self.starting_address_obj = {
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng()
-      }
-    });
+    setTimeout(() => {
+      let self = this
+      self.time_to_load = true
+      let starting_address_input = document.getElementById('starting_address')
+      let starting_address_autocomplete = new google.maps.places.Autocomplete(starting_address_input)
+      starting_address_autocomplete.addListener('place_changed', function() {
+        let place = starting_address_autocomplete.getPlace();
+        self.starting_address_obj = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        }
+      });
 
-    let destination_input = document.getElementById('destination')
-    let destination_autocomplete = new google.maps.places.Autocomplete(destination_input)
-    destination_autocomplete.addListener('place_changed', function() {
-      let place = destination_autocomplete.getPlace();
-      self.destination_obj = {
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng()
-      }
-    });
+      let destination_input = document.getElementById('destination')
+      let destination_autocomplete = new google.maps.places.Autocomplete(destination_input)
+      destination_autocomplete.addListener('place_changed', function() {
+        let place = destination_autocomplete.getPlace();
+        self.destination_obj = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        }
+      });
+    }, 300)
+    
     /* eslint-enable */
   }
 }
