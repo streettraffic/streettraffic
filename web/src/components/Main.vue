@@ -1,52 +1,7 @@
 <template lang="pug">
   v-app
-    v-navigation-drawer(
-      persistent
-      v-model="drawer"
-      enable-resize-watcher
-      dark
-      :mini-variant.sync="mini"
-    )
-
-      v-list(dense)
-        template(v-for="item in items")
-          v-list-group(v-if="item.items" v-bind:group="item.group")
-            v-list-tile(slot="item" ripple)
-              v-list-tile-action
-                v-icon(light) {{ item.action }}
-              v-list-tile-content
-                v-list-tile-title {{ item.title }}
-              v-list-tile-action
-                v-icon(light) keyboard_arrow_down
-            v-list-tile(
-              v-for="subItem in item.items" v-bind:key="subItem.title"
-              router
-              v-bind="{ \
-                to: !subItem.target ? subItem.href : null, \
-                href: subItem.target && subItem.href \
-              }"
-              ripple
-              v-bind:disabled="subItem.disabled"
-              v-bind:target="subItem.target"
-            )
-              v-list-tile-content
-                v-list-tile-title {{ subItem.title }}
-              v-list-tile-action(v-if="subItem.action")
-                v-icon(light :class="[subItem.actionClass || 'success--text']") {{ subItem.action }}
-          v-subheader(v-else-if="item.header" light) {{ item.header }}
-          v-divider(v-else-if="item.divider")
-          v-list-tile(:to="item.href" ripple v-bind:disabled="item.disabled" v-else)
-            v-list-tile-action
-              v-icon(light) {{ item.action }}
-            v-list-tile-content
-              v-list-tile-title {{ item.title }}
-            v-list-tile-action(v-if="item.subAction")
-              v-icon(light class="success--text") {{ item.subAction }}
-
-
     
     v-toolbar(light)
-      v-toolbar-side-icon(@click.native.stop="drawer = !drawer" light)
       v-toolbar-title(v-text="title")
       v-spacer
 
@@ -129,7 +84,7 @@ export default {
         { icon: 'build', title: 'CaseStudy', routerAddress: '/Main/CaseStudy' }
       ],
       miniVariant: false,
-      title: 'StreetTraffic'
+      title: 'StreetTraffic Demo'
     }
   },
   mounted() {

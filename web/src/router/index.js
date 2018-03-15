@@ -18,27 +18,17 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      name: 'Landing',
-      component: Landing,
-      meta: {
-        title: 'Streettraffic Landing'
-      }
-    },
-    {
-      path: '/Main',
       component: Main,
       meta: {
         title: 'Streettraffic Main'
       },
       children: [
-        route('QuickStart/', 'RegisterRoute', 'Streettraffic Register a Route'),
-        route('QuickStart/', 'RunCrawler', 'Streettraffic run the traffic crawler'),
-        route('QuickStart/', 'Polygon', 'Streettraffic Register a city'),
-        route('Query/', 'FlowQuery', 'Streettraffic traffic flow query'),
-        route('Query/', 'HistoryBatch', 'Streettraffic traffic flow query'),
-        route('Analytics/', 'TrafficPattern', 'Streettraffic traffic pattern analytics'),
-        route('Research/', 'RouteLab', 'Streettraffic Multiple Routes Analysis'),
-        route('Research/', 'CaseStudy', 'Streettraffic Long Distance Route Study')
+        {
+          name: 'demo',
+          path: '/',
+          meta: { title: 'Streettraffic Demo' },
+          component: () => import(`@/components/Query/FlowQuery`)
+        }
       ]
     }
   ]

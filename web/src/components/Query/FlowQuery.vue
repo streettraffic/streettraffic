@@ -1,5 +1,32 @@
 <template>
   <v-layout row wrap>
+    <v-flex xs12>
+      <v-card>
+        <v-card-row class="blue ">
+          <v-card-title>
+            <span class="white--text">Note</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+        </v-card-row>
+        <v-card-text>
+          <v-card-row height="auto" center>
+            <div>
+              This is a simple demo of StreetTraffic querying feature, which querys the backend server, written in Python, to fetch the related traffic flow data. You are not encouraged
+              to try a different route, date interval, or time interval because we haven't crawl traffic flow data for a while.
+            </div>
+          </v-card-row>
+          <v-card-row height="auto" center>
+            <div>
+              For more features such as registering routes and visualizing traffic pattern, please watch the tutorials and set up your own StreetTraffic server (please  visit 
+              <a href="http://streettraffic.github.io">StreetTraffic</a>)
+            </div>
+          </v-card-row>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+    <v-flex xs12 class="my-2"> 
+      
+    </v-flex>
     <HomeStepper 
       ref="HomeStepper"
       @HomeStepper_select_routes="HomeStepper_select_routes" 
